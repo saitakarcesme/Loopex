@@ -67,3 +67,18 @@ test('wildcard approval details stay explicit without inventing a command or fil
   assert.match(html, /<pre class="pending-detail">\*<\/pre>/)
   assert.match(html, /No specific target was provided/)
 })
+
+
+test('historical multiline command summaries stay compact while expanded details retain the exact command', async () => {
+  const { activityPresentation } = await import('../src/components/activityPresentation')
+  const command = "python3 - <<'PY'\nprint('exact source')\nPY"
+  const presentation = activityPresentation({ kind: 'command', title: command, detail: 'Exit code: 0' })
+  assert.equal(presentation.title, "python3 - <<'PY'…")
+  assert.equal(presentation.detail, `Command:\n${command}\n\nExit code: 0`)
+  const html = renderToStaticMarkup(<ActivityRow activity={{ id: 'command', kind: 'command', title: command, detail: 'Exit code: 0', status: 'completed', startedAt: 1 }} onOpenFile={noop} onError={noop} />)
+  assert.doesNotMatch(html, /exact source/)
+  assert.match(html, /aria-expanded="false"/)
+  const unicode = activityPresentation({ kind: 'command', title: '😀'.repeat(140), detail: 'Command: exact source already recorded' })
+  assert.equal([...unicode.title].length, 100)
+  assert.equal(unicode.detail, 'Command: exact source already recorded')
+})

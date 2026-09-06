@@ -1,3 +1,4 @@
+import { CommandDetails } from './command-summary'
 import type { Activity, HostTools, ProviderAdapter, ProviderInfo, RunHandle, RunRequest } from '../../shared/contracts'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
@@ -6,7 +7,7 @@ import { contextReceipt, JsonProcess, abortError, capture, deferred, drainAll, e
 interface ActiveRun {
   request: RunRequest; emit: Emit; threadId: string; turnId?: string; interrupted: boolean
   finished: ReturnType<typeof deferred<void>>; activities: Map<string, Activity>; items: Map<string, Json>
-  finalText: string; requests: Map<string, Json>; controller: AbortController
+  commands: CommandDetails; finalText: string; requests: Map<string, Json>; controller: AbortController
   usage: { inputTokens: number; outputTokens: number }; lastUsageTotal?: Json; hostCalls: Set<Promise<unknown>>
   connection?: JsonProcess; cleanup?: () => Promise<void>
 }
@@ -77,7 +78,7 @@ export class CodexProvider implements ProviderAdapter {
     let settled = false
     // Attach a rejection observer immediately: startup may reject before callers await done.
     void finished.promise.catch(() => {})
-    const run: ActiveRun = { request, emit, threadId: '', interrupted: false, finished, activities: new Map(), items: new Map(), finalText: '', requests: new Map(), controller: new AbortController(), usage: { inputTokens: 0, outputTokens: 0 }, hostCalls: new Set() }
+    const run: ActiveRun = { request, emit, threadId: '', interrupted: false, finished, activities: new Map(), items: new Map(), commands: new CommandDetails(), finalText: '', requests: new Map(), controller: new AbortController(), usage: { inputTokens: 0, outputTokens: 0 }, hostCalls: new Set() }
     this.active.add(run)
     const start = (async () => {
       const rpc = await this.connect()
@@ -157,7 +158,7 @@ export class CodexProvider implements ProviderAdapter {
     }
     if (message.method === 'item/commandExecution/outputDelta') {
       const existing = run.activities.get(p.itemId)
-      if (existing) this.activity(run, { ...existing, detail: ((existing.detail || '') + p.delta).slice(-100_000) })
+      if (existing) this.activity(run, { ...existing, ...run.commands.update(p.itemId, undefined, p.delta, true) })
     }
     if (message.method === 'turn/plan/updated') this.activity(run, { id: `plan-${p.turnId}`, kind: 'plan', title: p.explanation || 'Plan', detail: (p.plan || []).map((s: Json) => `${s.status === 'completed' ? '✓' : s.status === 'inProgress' ? '→' : '○'} ${s.step}`).join('\n'), status: p.plan?.every((s: Json) => s.status === 'completed') ? 'completed' : 'running', startedAt: Date.now() })
     if (message.method === 'thread/tokenUsage/updated') {
@@ -188,7 +189,7 @@ export class CodexProvider implements ProviderAdapter {
         if (item.phase === 'commentary') this.activity(run, { ...base, kind: 'commentary', title: 'Update', detail: item.text })
         else if (completed) run.finalText = item.text
         break
-      case 'commandExecution': this.activity(run, { ...base, kind: 'command', title: item.command, detail: item.aggregatedOutput || previous?.detail }); break
+      case 'commandExecution': this.activity(run, { ...base, kind: 'command', ...run.commands.update(item.id, item.command, item.aggregatedOutput) }); break
       case 'fileChange': this.activity(run, { ...base, kind: 'file', title: (item.changes || []).map((c: Json) => c.path).join(', ') || 'File changes', detail: (item.changes || []).map((c: Json) => c.diff || '').join('\n'), filePath: item.changes?.[0]?.path }); break
       case 'mcpToolCall': case 'dynamicToolCall': this.activity(run, { ...base, kind: 'tool', title: item.server ? `${item.server} · ${item.tool}` : item.tool, detail: JSON.stringify(completed ? item.result || item.contentItems || item.error : item.arguments, null, 2)?.slice(0, 100_000) }); break
       case 'plan': this.activity(run, { ...base, kind: 'plan', title: 'Plan', detail: item.text }); break

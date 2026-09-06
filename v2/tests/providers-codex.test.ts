@@ -27,6 +27,7 @@ if(m.method==='thread/resume'){thread=p.threadId;return out({id:m.id,result:{thr
 if(m.method==='turn/start'){prompt=p.input[0].text;turn='turn-'+(++counter);out({id:m.id,result:{turn:{id:turn}}});event('turn/started',{turn:{id:turn}});
 out({method:'item/agentMessage/delta',params:{threadId:'other-thread',turnId:turn,itemId:'wrong',delta:'LEAK'}});
 if(prompt==='crash')return process.exit(9);
+if(prompt==='command-display'){event('item/started',{item:{id:'command',type:'commandExecution',command:'echo exact-command'}});event('item/commandExecution/outputDelta',{itemId:'command',delta:'streamed'});event('item/completed',{item:{id:'command',type:'commandExecution',status:'completed',aggregatedOutput:'final output'}});return final('done')}
 if(prompt==='tool')return out({id:'tool-server',method:'item/tool/call',params:{threadId:thread,turnId:turn,tool:'files_read',arguments:{path:'test.txt'}}});
 if(prompt==='approval')return out({id:'approval-server',method:'item/commandExecution/requestApproval',params:{threadId:thread,turnId:turn,command:'echo test'}});
 if(['wait','delayed-stop','ack-only'].includes(prompt)){event('item/agentMessage/delta',{itemId:'answer',delta:'partial'});return}
@@ -148,3 +149,12 @@ test('Codex receipts match accepted native session instructions and are absent o
   await assert.rejects(provider.run({ ...request('hello'), systemContext: 'reject-context' }, event => rejected.push(event)).done, /synthetic rejected context/)
   assert.equal(rejected.some(event => event.type === 'context'), false)
 })
+
+test('Codex command input survives output deltas and completion without repeating output', async t => {
+  const { provider, request } = await setup(t), events: ProviderEvent[] = [];
+  await provider.run(request('command-display'), event => events.push(event)).done;
+  const activities = events.filter(event => event.type === 'activity').map(event => event.activity);
+  assert.equal(activities[0].title, 'echo exact-command');
+  assert.match(activities[1].detail!, /Command:\necho exact-command\n\nOutput:\nstreamed/);
+  assert.equal(activities.at(-1)?.detail, 'Command:\necho exact-command\n\nOutput:\nfinal output');
+});

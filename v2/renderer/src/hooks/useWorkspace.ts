@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AppEvent, AppSnapshot, Message, PendingRequest, Task, TaskDetail } from '../../../shared/contracts'
+import { useTaskNavigation } from './useTaskNavigation'
 import { mergeTaskRead } from './taskReadState'
 import { api, errorText, persist, remember } from '../api'
 
 export function useWorkspace() {
   const [snapshot, setSnapshot] = useState<AppSnapshot | null>(null)
   const [details, setDetails] = useState<Record<string, TaskDetail>>({})
-  const [selectedId, setSelectedId] = useState<string | null>(() => remember('selectedTask', null))
+  const navigation = useTaskNavigation(() => remember('selectedTask', null))
+  const { selectedId, selectTask: setSelectedId } = navigation
   const selectedRef = useRef(selectedId)
   selectedRef.current = selectedId
   const [error, setError] = useState<string | null>(null)
@@ -84,7 +86,7 @@ export function useWorkspace() {
         setSelectedId(null)
     }
     return next
-  }, [])
+  }, [setSelectedId])
   useEffect(() => {
     void refresh().catch((error) => setError(errorText(error)))
     if (!window.akorith) return
@@ -158,7 +160,7 @@ export function useWorkspace() {
       setSelectedId(task.id)
       return task
     },
-    [updateTask],
+    [updateTask, setSelectedId],
   )
   const respond = useCallback(async (taskId: string, requestId: string, response: unknown) => {
     await api('task:respond', { taskId, requestId, response })
@@ -185,6 +187,7 @@ export function useWorkspace() {
     detail: selectedId ? details[selectedId] : undefined,
     selectedId,
     selectTask: setSelectedId,
+    navigation,
     loadingTask,
     error,
     notices,

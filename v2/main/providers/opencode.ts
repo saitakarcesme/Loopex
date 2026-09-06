@@ -1,3 +1,4 @@
+import { CommandDetails } from './command-summary'
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
@@ -102,6 +103,7 @@ export class OpenCodeProvider implements ProviderAdapter {
     void finished.promise.catch(() => {})
     const bridge = new HostMcpBridge(this.hostTools, { taskId: request.task.id, turnId: request.turnId, cwd: request.cwd, mode: request.task.mode }, controller.signal)
     let server: OpenCodeServer | undefined, sessionId = '', cancelled = false, startedTurn = false, seenBusy = false, finishing = false, settled = false
+    const commands = new CommandDetails()
     const messages = new Map<string, string>(), parts = new Map<string, Json>(), activities = new Map<string, Activity>(), pending = new Map<string, Json>()
     const startTime = Date.now()
     const finish = async () => {
@@ -132,7 +134,7 @@ export class OpenCodeProvider implements ProviderAdapter {
         parts.set(part.id, part)
         if (part.type === 'tool') {
           const state = part.state || {}, old = activities.get(part.id)
-          const activity: Activity = { id: part.id, kind: part.tool === 'bash' ? 'command' : ['edit', 'write', 'apply_patch'].includes(part.tool) ? 'file' : 'tool', title: state.title || (part.tool === 'bash' ? state.input?.command : part.tool) || 'Tool', detail: (state.output || state.error || JSON.stringify(state.input || {}, null, 2)).slice(0, 100_000), status: state.status === 'completed' ? 'completed' : state.status === 'error' ? 'failed' : 'running', startedAt: old?.startedAt || state.time?.start || Date.now(), endedAt: state.time?.end, filePath: state.input?.filePath }
+          const activity: Activity = { id: part.id, kind: part.tool === 'bash' ? 'command' : ['edit', 'write', 'apply_patch'].includes(part.tool) ? 'file' : 'tool', ...(part.tool === 'bash' ? commands.update(part.id, state.input?.command, state.output ?? state.error) : { title: state.title || part.tool || 'Tool', detail: (state.output || state.error || JSON.stringify(state.input || {}, null, 2)).slice(0, 100_000) }), status: state.status === 'completed' ? 'completed' : state.status === 'error' ? 'failed' : 'running', startedAt: old?.startedAt || state.time?.start || Date.now(), endedAt: state.time?.end, filePath: state.input?.filePath }
           activities.set(part.id, activity); emit({ type: 'activity', activity })
         }
       }

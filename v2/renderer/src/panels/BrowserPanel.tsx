@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, ExternalLink, Globe2, Play, Plus, RefreshCw, X } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { BrowserState } from '../../../shared/contracts'
+import { browserAttachments } from './browserAttachmentQueue'
 import { api, persist, remember } from '../api'
 import { EmptyState, IconButton, Spinner } from '../components/Primitives'
 
@@ -24,6 +25,9 @@ export function BrowserPanel({
   const [selected, setSelected] = useState<string | null>(null)
   const [address, setAddress] = useState('')
   const [previewBusy, setPreviewBusy] = useState(false)
+  const attachmentQueued = useRef(false)
+  const attachmentDirty = useRef(false)
+  const disposedRef = useRef(false)
   const surface = useRef<HTMLDivElement>(null)
   const tabsRef = useRef(tabs)
   tabsRef.current = tabs
@@ -36,6 +40,7 @@ export function BrowserPanel({
   handleErrorRef.current = onError
   useEffect(() => {
     let disposed = false
+    disposedRef.current = false
     const unsubscribe = window.akorith.onHostEvent((event) => {
       if (event.type === 'browser:closed' && event.taskId === taskId) {
         setTabs((current) => {
@@ -68,43 +73,52 @@ export function BrowserPanel({
     return () => {
       disposed = true
       unsubscribe()
-      for (const tab of tabsRef.current)
-        void api('browser:attach', {
-          taskId,
-          id: tab.id,
-          visible: false,
-          bounds: { x: 0, y: 0, width: 1, height: 1 },
+      disposedRef.current = true
+      const closingTabs = tabsRef.current
+      void browserAttachments.enqueue(async () => {
+        for (const tab of closingTabs) await api('browser:attach', {
+          taskId, id: tab.id, visible: false, bounds: { x: 0, y: 0, width: 1, height: 1 },
         }).catch(() => {})
+      })
     }
   }, [taskId])
   useEffect(() => {
     setAddress(state?.url === 'about:blank' ? '' : state?.url || '')
     persist(`browserTab.${taskId}`, selected)
   }, [state?.url, selected, taskId])
-  const attach = useCallback(() => {
-    const bounds = surface.current?.getBoundingClientRect()
-    for (const tab of tabsRef.current) {
-      const show =
-        tab.id === selectedRef.current &&
-        visibleRef.current &&
-        !!bounds &&
-        bounds.width > 0 &&
-        bounds.height > 0 &&
-        tab.url !== 'about:blank'
-      void api('browser:attach', {
-        taskId,
-        id: tab.id,
-        visible: show,
-        bounds: bounds
-          ? {
-              x: Math.round(bounds.x),
-              y: Math.round(bounds.y),
-              width: Math.max(1, Math.round(bounds.width)),
-              height: Math.max(1, Math.round(bounds.height)),
-            }
-          : { x: 0, y: 0, width: 1, height: 1 },
-      }).catch(() => {})
-    }
+  const attach = useCallback((): void => {
+    if (disposedRef.current) return
+    if (attachmentQueued.current) { attachmentDirty.current = true; return }
+    attachmentQueued.current = true
+    void browserAttachments.enqueue(async () => {
+      if (disposedRef.current) return
+      const bounds = surface.current?.getBoundingClientRect()
+      for (const tab of tabsRef.current) {
+        const show =
+          tab.id === selectedRef.current &&
+          visibleRef.current &&
+          !!bounds &&
+          bounds.width > 0 &&
+          bounds.height > 0 &&
+          tab.url !== 'about:blank'
+        await api('browser:attach', {
+          taskId,
+          id: tab.id,
+          visible: show,
+          bounds: bounds
+            ? {
+                x: Math.round(bounds.x),
+                y: Math.round(bounds.y),
+                width: Math.max(1, Math.round(bounds.width)),
+                height: Math.max(1, Math.round(bounds.height)),
+              }
+            : { x: 0, y: 0, width: 1, height: 1 },
+        }).catch(() => {})
+      }
+    }).finally(() => {
+      attachmentQueued.current = false
+      if (attachmentDirty.current) { attachmentDirty.current = false; attach() }
+    }).catch(() => {})
   }, [taskId])
   useLayoutEffect(() => {
     attach()

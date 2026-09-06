@@ -1,3 +1,4 @@
+import { CommandDetails } from './command-summary'
 import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -58,7 +59,7 @@ export class ClaudeProvider implements ProviderAdapter {
     const result = deferred<void>(), controller = new AbortController()
     void result.promise.catch(() => {})
     let connection: ClaudeConnection | undefined, cancelled = false, completed = false, settled = false, streamed = '', finalText = ''
-    const approvals = new Map<string, Json>(), activities = new Map<string, Activity>()
+    const approvals = new Map<string, Json>(), activities = new Map<string, Activity>(), commands = new CommandDetails()
     const bridge = new HostMcpBridge(this.hostTools, { taskId: request.task.id, turnId: request.turnId, cwd: request.cwd, mode: request.task.mode }, controller.signal)
     const toolActivity = (activity: Activity) => { activities.set(activity.id, activity); emit({ type: 'activity', activity }) }
     const start = (async () => {
@@ -94,11 +95,11 @@ export class ClaudeProvider implements ProviderAdapter {
           const blocks = message.message?.content || []
           const text = blocks.filter((b: Json) => b.type === 'text').map((b: Json) => b.text).join('\n')
           if (text) { finalText = text; if (!streamed) emit({ type: 'delta', text }); streamed = '' }
-          for (const block of blocks.filter((b: Json) => b.type === 'tool_use')) toolActivity({ id: block.id, kind: block.name === 'Bash' ? 'command' : ['Edit', 'Write'].includes(block.name) ? 'file' : 'tool', title: block.name === 'Bash' ? block.input?.command || 'Shell command' : block.name, detail: JSON.stringify(block.input, null, 2), status: 'running', startedAt: Date.now(), filePath: block.input?.file_path })
+          for (const block of blocks.filter((b: Json) => b.type === 'tool_use')) toolActivity({ id: block.id, kind: block.name === 'Bash' ? 'command' : ['Edit', 'Write'].includes(block.name) ? 'file' : 'tool', ...(block.name === 'Bash' ? commands.update(block.id, block.input?.command) : { title: block.name, detail: JSON.stringify(block.input, null, 2) }), status: 'running', startedAt: Date.now(), filePath: block.input?.file_path })
         }
         if (message.type === 'user' && Array.isArray(message.message?.content)) for (const block of message.message.content.filter((b: Json) => b.type === 'tool_result')) {
           const previous = activities.get(block.tool_use_id)
-          if (previous) toolActivity({ ...previous, status: block.is_error ? 'failed' : 'completed', detail: (typeof block.content === 'string' ? block.content : JSON.stringify(block.content)).slice(0, 100_000), endedAt: Date.now() })
+          if (previous) toolActivity({ ...previous, status: block.is_error ? 'failed' : 'completed', ...(previous.kind === 'command' ? commands.update(block.tool_use_id, undefined, typeof block.content === 'string' ? block.content : JSON.stringify(block.content)) : { detail: (typeof block.content === 'string' ? block.content : JSON.stringify(block.content)).slice(0, 100_000) }), endedAt: Date.now() })
         }
         if (message.type === 'result') {
           completed = true

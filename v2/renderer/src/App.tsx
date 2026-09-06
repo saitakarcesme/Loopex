@@ -1,4 +1,6 @@
 import {
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   CircleAlert,
   Code2,
@@ -25,6 +27,8 @@ import { SearchDialog } from './components/SearchDialog'
 import { SettingsDialog } from './components/SettingsDialog'
 import { Sidebar } from './components/Sidebar'
 import { Transcript } from './components/Transcript'
+import { useWorkspaceLayout } from './hooks/useWorkspaceLayout'
+import { navigationIndex, navigationShortcut } from './hooks/taskNavigationState'
 import { useWorkspace } from './hooks/useWorkspace'
 import { WorkspacePanel, type PanelTab } from './panels/WorkspacePanel'
 
@@ -55,8 +59,8 @@ function Notice({
 export function App() {
   const workspace = useWorkspace()
   const { snapshot, detail, selectedId, reportError, notify } = workspace
-  const [sidebarOpen, setSidebarOpen] = useState(() => remember('sidebarOpen', true))
-  const [panelOpen, setPanelOpen] = useState(() => remember('panelOpen', false))
+  const shellRef = useRef<HTMLDivElement>(null)
+  const { sidebarOpen, panelOpen, setSidebarOpen, setPanelOpen, changing: layoutChanging } = useWorkspaceLayout(selectedId, shellRef, reportError)
   const [panelTab, setPanelTab] = useState<PanelTab>(() => remember('panelTab', 'files'))
   const [sidebarWidth, setSidebarWidth] = useState(() => remember('sidebarWidth', 246))
   const [panelWidth, setPanelWidth] = useState(() => remember('panelWidth', 520))
@@ -65,6 +69,7 @@ export function App() {
   const [selectionRevision, setSelectionRevision] = useState(0)
   const [sidebarOverlay, setSidebarOverlay] = useState(false)
   const [reviewOverlay, setReviewOverlay] = useState(false)
+  const [modelOverlay, setModelOverlay] = useState(false)
   const [artifactOverlay, setArtifactOverlay] = useState(false)
   const [contextTarget, setContextTarget] = useState<{ taskId: string; turnId?: string } | null>(null)
   const [filePath, setFilePath] = useState<string | undefined>(undefined)
@@ -74,12 +79,16 @@ export function App() {
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>(() =>
     matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   )
+  const navigationFocus = useRef<string | null>(null)
   const creating = useRef(false)
   const initialized = useRef(false)
   const task = detail?.task || snapshot?.tasks.find((task) => task.id === selectedId)
+  const availableTasks = new Set(snapshot?.tasks.map(task => task.id) || [])
+  const canGoBack = navigationIndex(workspace.navigation.history, -1, availableTasks) !== workspace.navigation.history.index
+  const canGoForward = navigationIndex(workspace.navigation.history, 1, availableTasks) !== workspace.navigation.history.index
   const project = snapshot?.projects.find((project) => project.id === task?.projectId)
   const contextOpen = !!contextTarget && contextTarget.taskId === selectedId
-  const overlay = !!settingsTab || searchOpen || sidebarOverlay || reviewOverlay || artifactOverlay || contextOpen
+  const overlay = !!settingsTab || searchOpen || sidebarOverlay || reviewOverlay || artifactOverlay || modelOverlay || contextOpen
   const newTask = useCallback(
     async (projectId?: string | null) => {
       if (creating.current) return
@@ -166,6 +175,16 @@ export function App() {
     },
     [workspace.selectTask],
   )
+  const navigateTask = useCallback((direction: -1 | 1) => {
+    const id = workspace.navigation.navigate(direction, new Set(snapshot?.tasks.map(task => task.id) || []))
+    if (id) { navigationFocus.current = id; setSelectionRevision(value => value + 1) }
+  }, [workspace.navigation.navigate, snapshot?.tasks])
+  useEffect(() => {
+    if (selectedId && navigationFocus.current === selectedId && detail?.task.id === selectedId) {
+      document.getElementById('workspace-navigation-heading')?.focus({ preventScroll: true })
+      navigationFocus.current = null
+    }
+  }, [selectedId, detail?.task.id])
   const newSidebarTask = useCallback(
     (projectId?: string | null) => {
       void newTask(projectId)
@@ -178,10 +197,20 @@ export function App() {
   const openSearch = useCallback(() => setSearchOpen(true), [])
   const inspectContext = useCallback((taskId: string, turnId?: string) => setContextTarget({ taskId, turnId }), [])
   const openSettings = useCallback(() => setSettingsTab('general'), [])
-  const collapseSidebar = useCallback(() => setSidebarOpen(false), [])
+  const collapseSidebar = useCallback(() => {
+    document.getElementById('workspace-navigation-heading')?.focus({ preventScroll: true })
+    setSidebarOpen(false)
+  }, [])
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (artifactOverlay) return
+      if (artifactOverlay || modelOverlay) return
+      const editable = event.target instanceof Element && !!event.target.closest('input, textarea, [contenteditable="true"], .xterm')
+      const direction = navigationShortcut(event, editable)
+      if (direction && !overlay) {
+        event.preventDefault()
+        navigateTask(direction)
+        return
+      }
       if (!(event.metaKey || event.ctrlKey)) return
       const key = event.key.toLowerCase()
       if (key === 'n') {
@@ -202,18 +231,22 @@ export function App() {
         setSettingsTab((value) => (value ? null : 'general'))
       } else if (key === 'b' && !overlay) {
         event.preventDefault()
+        if (sidebarOpen && event.target instanceof Element && event.target.closest('.sidebar-container'))
+          document.getElementById('workspace-navigation-heading')?.focus({ preventScroll: true })
         if (window.innerWidth <= 1080 && panelOpen) {
           setPanelOpen(false)
           setSidebarOpen(true)
         } else setSidebarOpen((value) => !value)
       } else if (key === 'j' && !overlay) {
         event.preventDefault()
+        if (panelOpen && event.target instanceof Element && event.target.closest('.panel-container'))
+          document.getElementById('workspace-panel-toggle')?.focus({ preventScroll: true })
         setPanelOpen((value) => !value)
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [newTask, task?.projectId, overlay, panelOpen, artifactOverlay])
+  }, [newTask, task?.projectId, overlay, panelOpen, sidebarOpen, artifactOverlay, modelOverlay, navigateTask])
   useEffect(() => {
     if (!window.akorith) return
     return window.akorith.onHostEvent((event) => {
@@ -226,6 +259,7 @@ export function App() {
   const resize = (side: 'sidebar' | 'panel', event: React.PointerEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
+    if (shellRef.current) shellRef.current.dataset.resizing = 'true'
     const start = event.clientX,
       initial = side === 'sidebar' ? sidebarWidth : panelWidth
     let width = initial
@@ -246,6 +280,7 @@ export function App() {
       else setPanelWidth(width)
     }
     const finish = () => {
+      if (shellRef.current) delete shellRef.current.dataset.resizing
       element.removeEventListener('pointermove', move)
       element.removeEventListener('pointerup', finish)
       element.removeEventListener('pointercancel', finish)
@@ -282,6 +317,7 @@ export function App() {
     )
   return (
     <div
+      ref={shellRef}
       className={`app-shell ${sidebarOpen ? 'sidebar-is-open' : ''} ${panelOpen ? 'panel-is-open' : ''}`}
       style={
         {
@@ -290,8 +326,7 @@ export function App() {
         } as CSSProperties
       }
     >
-      {sidebarOpen ? (
-        <>
+      <div className={`sidebar-container ${sidebarOpen ? 'open' : ''}`} inert={!sidebarOpen || undefined}>
           <Sidebar
             tasks={snapshot.tasks}
             projects={snapshot.projects}
@@ -315,8 +350,7 @@ export function App() {
             className="resize-handle sidebar-resize"
             onPointerDown={(event) => resize('sidebar', event)}
           />
-        </>
-      ) : null}
+      </div>
       <TaskSurfaceContext.Provider value={task?.id || null}>
         <ArtifactPreviewProvider
           key={`artifacts:${task?.id || 'empty'}`}
@@ -327,7 +361,7 @@ export function App() {
             <header
               className={`workspace-header titlebar-drag ${!sidebarOpen ? 'sidebar-hidden' : ''}`}
             >
-              <div className="header-context">
+              <div className="header-context" id="workspace-navigation-heading" tabIndex={-1} aria-label={task?.title || 'Workspace'}>
                 {!sidebarOpen ? (
                   <IconButton
                     label="Show sidebar (⌘B)"
@@ -347,6 +381,10 @@ export function App() {
                     <PanelLeftOpen size={17} />
                   </IconButton>
                 )}
+                <div className="task-history-controls" aria-label="Task navigation">
+                  <IconButton label="Previous task (⌘[)" disabled={!canGoBack} onClick={() => navigateTask(-1)}><ArrowLeft size={15} /></IconButton>
+                  <IconButton label="Next task (⌘])" disabled={!canGoForward} onClick={() => navigateTask(1)}><ArrowRight size={15} /></IconButton>
+                </div>
                 <span className="header-project" title={project?.path}>
                   {project ? <Folder size={14} /> : null}
                   {project?.name || 'Workspace'}
@@ -354,7 +392,7 @@ export function App() {
                 {task ? (
                   <>
                     <span className="header-divider">/</span>
-                    <span className="header-task" title={task.title}>
+                    <span id="active-task-heading" tabIndex={-1} className="header-task" title={task.title}>
                       {task.title}
                     </span>
                   </>
@@ -385,6 +423,7 @@ export function App() {
                   <GitCompareArrows size={16} />
                 </IconButton>
                 <IconButton
+                  id="workspace-panel-toggle"
                   label={panelOpen ? 'Hide workspace panel (⌘J)' : 'Show workspace panel (⌘J)'}
                   className={panelOpen ? 'active' : ''}
                   onClick={() => setPanelOpen((value) => !value)}
@@ -480,6 +519,7 @@ export function App() {
                   }}
                   onError={reportError}
                   onConnections={() => setSettingsTab('connections')}
+                  onModelOverlay={setModelOverlay}
                   suggestion={suggestion}
                 />
               </div>
@@ -492,7 +532,7 @@ export function App() {
           </main>
         </ArtifactPreviewProvider>
       </TaskSurfaceContext.Provider>
-      {task && (panelOpen || openedPanels.has(task.id)) ? (
+      {task ? (
         <div
           className={`panel-container ${panelOpen ? 'open' : ''}`}
           inert={!panelOpen || undefined}
@@ -504,19 +544,22 @@ export function App() {
             className="resize-handle panel-resize"
             onPointerDown={(event) => resize('panel', event)}
           />
-          <WorkspacePanel
+          {(panelOpen || openedPanels.has(task.id)) ? <WorkspacePanel
             key={task.id}
             task={task}
             open={panelOpen}
             active={panelTab}
             onTab={openPanel}
-            onClose={() => setPanelOpen(false)}
-            overlay={overlay}
+            onClose={() => {
+              document.getElementById('workspace-panel-toggle')?.focus({ preventScroll: true })
+              setPanelOpen(false)
+            }}
+            overlay={overlay || layoutChanging}
             theme={resolvedTheme}
             requestedPath={filePath}
             requestVersion={fileVersion}
             onError={reportError}
-          />
+          /> : null}
         </div>
       ) : null}
       {searchOpen ? (

@@ -22,6 +22,7 @@ require('node:fs').writeFileSync(require('node:path').join(__dirname,'received-c
 send({type:'system',subtype:'init',session_id:'session-claude'});
 if(m.message.content[0].text==='tool')return send({type:'control_request',request_id:'mcp-call',request:{subtype:'mcp_message',server_name:'akorith',message:{jsonrpc:'2.0',id:9,method:'tools/call',params:{name:'files_read',arguments:{path:'proof.txt'}}}}});
 if(m.message.content[0].text==='permission')return send({type:'control_request',request_id:'permission',request:{subtype:'can_use_tool',tool_name:'Bash',input:{command:'echo ok'}}});
+if(m.message.content[0].text==='command-display'){send({type:'assistant',message:{content:[{type:'tool_use',id:'command',name:'Bash',input:{command:'echo exact-command'}}]}});send({type:'user',message:{content:[{type:'tool_result',tool_use_id:'command',content:'final output'}]}});return result('done')}
 if(m.message.content[0].text==='wait'){send({type:'stream_event',event:{type:'content_block_delta',delta:{type:'text_delta',text:'partial'}}});return}
 send({type:'stream_event',event:{type:'content_block_delta',delta:{type:'text_delta',text:'hello'}}});send({type:'assistant',message:{content:[{type:'text',text:'hello'}]}});return result('hello')}
 if(m.type==='control_response'){if(m.response.request_id==='mcp-call')return result(m.response.response.mcp_response.result.content[0].text);if(m.response.request_id==='permission')return result(m.response.response.behavior)}
@@ -76,3 +77,11 @@ test('Claude records only submission for the actual append-system-prompt CLI arg
   assert.equal(receipt?.systemSha256, createHash('sha256').update(received.system).digest('hex'))
   assert.equal(events.some(event => event.type === 'context' && event.receipt.stage === 'accepted'), false)
 })
+
+test('Claude command input survives the terminal tool result', async t => {
+  const { provider, request } = await setup(t), events: ProviderEvent[] = [];
+  await provider.run(request('command-display'), event => events.push(event)).done;
+  const activities = events.filter(event => event.type === 'activity').map(event => event.activity);
+  assert.equal(activities.at(-1)?.title, 'echo exact-command');
+  assert.equal(activities.at(-1)?.detail, 'Command:\necho exact-command\n\nOutput:\nfinal output');
+});

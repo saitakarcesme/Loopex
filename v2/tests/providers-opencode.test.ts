@@ -26,7 +26,7 @@ send('permission.asked',{id:'matched',permission:'files_read',patterns:['*'],too
 send('permission.asked',{id:'unmatched',permission:'files_read',patterns:['*'],tool:{messageID:'other-message',callID:'same-call'}});
 send('permission.asked',{id:'metadata',permission:'bash',patterns:['npm *'],metadata:{command:'npm test'}});
 });return}
-text=body.parts[0].text==='wait'?'partial':'synthetic final';created=Date.now();json({});setImmediate(()=>{send('session.status',{status:{type:'busy'}});send('message.updated',{info:{id:'assistant',role:'assistant',sessionID:session}});send('message.part.updated',{part:{id:'part',messageID:'assistant',sessionID:session,type:'text',text}});if(body.parts[0].text!=='wait')send('session.status',{status:{type:'idle'}})});return}
+text=body.parts[0].text==='wait'?'partial':'synthetic final';created=Date.now();json({});setImmediate(()=>{send('session.status',{status:{type:'busy'}});if(body.parts[0].text==='command-display'){send('message.part.updated',{part:{id:'command',sessionID:session,type:'tool',tool:'bash',state:{status:'running',input:{command:'echo exact-command'}}}});send('message.part.updated',{part:{id:'command',sessionID:session,type:'tool',tool:'bash',state:{status:'completed',title:'Long misleading provider title',output:'final output'}}})}send('message.updated',{info:{id:'assistant',role:'assistant',sessionID:session}});send('message.part.updated',{part:{id:'part',messageID:'assistant',sessionID:session,type:'text',text}});if(body.parts[0].text!=='wait')send('session.status',{status:{type:'idle'}})});return}
 if(path.endsWith('/abort'))return json({});
 if(path==='/session'||path==='/session/'+session)return json({id:session});
 res.writeHead(404).end();
@@ -126,3 +126,11 @@ test('OpenCode approval details preserve broad native scope and match only the r
   assert.match(metadata, /npm \*/); assert.match(metadata, /npm test/)
   await handle.interrupt(); await stopped
 })
+
+test('OpenCode retains command input when a completed part contains only output and a new title', async t => {
+  const { provider, request } = await setup(t), events: ProviderEvent[] = [];
+  await provider.run(request('display', 'command-display'), event => events.push(event)).done;
+  const activities = events.filter(event => event.type === 'activity').map(event => event.activity);
+  assert.equal(activities.at(-1)?.title, 'echo exact-command');
+  assert.equal(activities.at(-1)?.detail, 'Command:\necho exact-command\n\nOutput:\nfinal output');
+});

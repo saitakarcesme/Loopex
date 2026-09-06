@@ -6,14 +6,9 @@ import { useComposerDraft } from '../hooks/useComposerDraft'
 import { AttachmentLink } from './ArtifactPreview'
 import { acknowledgeComposerSubmission, beginComposerSubmission } from './composerDraftState'
 import { IconButton, Spinner } from './Primitives'
+import { ModelPicker } from './ModelPicker'
+import { modelSelectionPatch } from './modelPickerState'
 import { Queue } from './Queue'
-
-const preferredEffort = (efforts?: string[]) =>
-  efforts?.includes('high') ? 'high' : efforts?.includes('medium') ? 'medium' : efforts?.[0] || ''
-const preferredModel = (provider: ProviderInfo) =>
-  provider.id === 'codex'
-    ? provider.models.find((model) => model.id === 'gpt-6-astra') || provider.models[0]
-    : provider.models[0]
 
 interface ComposerProps {
   task: Task
@@ -22,6 +17,7 @@ interface ComposerProps {
   onSent: () => void
   onError: (error: unknown) => void
   onConnections: () => void
+  onModelOverlay: (open: boolean) => void
   suggestion?: { id: string; text: string } | null
 }
 export function Composer({
@@ -31,6 +27,7 @@ export function Composer({
   onSent,
   onError,
   onConnections,
+  onModelOverlay,
   suggestion,
 }: ComposerProps) {
   const { draft: localDraft, update: updateLocalDraft } = useComposerDraft(
@@ -39,6 +36,8 @@ export function Composer({
     onError,
   )
   const { text: draft, attachments } = localDraft
+  const [selectingModel, setSelectingModel] = useState(false)
+  const selectingModelRef = useRef(false)
   const [sending, setSending] = useState(false)
   const [attaching, setAttaching] = useState(false)
   const [stopping, setStopping] = useState(false)
@@ -49,15 +48,12 @@ export function Composer({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const lastSaved = useRef(task.draft)
   const sendingRef = useRef(false)
-  const initializedModel = useRef<string | null>(null)
-  const patchRef = useRef(onPatch)
-  patchRef.current = onPatch
   const errorRef = useRef(onError)
   errorRef.current = onError
   const active = isActive(task.status)
   const provider = providers.find((item) => item.id === task.providerId)
   const model = provider?.models.find((item) => item.id === task.model)
-  const available = !!provider?.available && provider.authenticated !== false
+  const available = !!provider?.available && provider.authenticated !== false && !!model
   const allowSteer = !!provider?.capabilities.steer
   const update = (patch: Partial<Task>) => void onPatch(patch).catch(onError)
   useEffect(() => {
@@ -67,21 +63,6 @@ export function Composer({
       textarea.current?.focus()
     }
   }, [suggestion, updateLocalDraft])
-  useEffect(() => {
-    if (
-      task.model ||
-      task.status !== 'idle' ||
-      !provider?.models.length ||
-      initializedModel.current === provider.id
-    )
-      return
-    const model = preferredModel(provider)
-    initializedModel.current = provider.id
-    void patchRef
-      .current({ model: model.id, effort: task.effort || preferredEffort(model.efforts) })
-      .catch(errorRef.current)
-  }, [task.model, task.status, task.effort, provider])
-
   useEffect(() => {
     clearTimeout(saveTimer.current)
     if (draft === lastSaved.current) return
@@ -144,6 +125,7 @@ export function Composer({
     if (
       !draftRef.current.trim() ||
       sendingRef.current ||
+      selectingModelRef.current ||
       !available ||
       localDraft.pending?.kind === 'steer'
     )
@@ -295,72 +277,20 @@ export function Composer({
             >
               {attaching ? <Spinner /> : <Paperclip size={17} />}
             </IconButton>
-            <label
-              className="compact-select provider-select"
-              title={active ? 'Connection is fixed while this task is running' : 'Connection'}
-            >
-              <span className={`provider-dot ${provider?.available ? '' : 'unavailable'}`} />
-              <select
-                aria-label="Provider"
-                value={task.providerId}
-                disabled={active || sending}
-                onChange={(event) => {
-                  const next = providers.find((item) => item.id === event.target.value)
-                  if (next) {
-                    const model = preferredModel(next)
-                    update({
-                      providerId: next.id,
-                      model: model?.id || '',
-                      effort: preferredEffort(model?.efforts),
-                    })
-                  }
-                }}
-              >
-                {providers.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                    {!item.available
-                      ? ' · unavailable'
-                      : item.authenticated === false
-                        ? ' · sign in'
-                        : ''}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={11} />
-            </label>
-            <label className="compact-select model-select" title={model?.description || 'Model'}>
-              <select
-                aria-label="Model"
-                value={task.model}
-                disabled={active || sending || !provider?.models.length}
-                onChange={(event) => {
-                  const next = provider?.models.find((item) => item.id === event.target.value)
-                  update({
-                    model: event.target.value,
-                    effort: next?.efforts?.includes(task.effort)
-                      ? task.effort
-                      : preferredEffort(next?.efforts),
-                  })
-                }}
-              >
-                {!provider?.models.some((item) => item.id === task.model) ? (
-                  <option value={task.model}>{task.model || 'Default model'}</option>
-                ) : null}
-                {provider?.models.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={11} />
-            </label>
+            <ModelPicker task={task} providers={providers} disabled={active || sending} onConnections={onConnections} onOverlay={onModelOverlay} onError={onError} onChoose={async (providerId, modelId) => {
+              if (selectingModelRef.current || active || sendingRef.current) return
+              const patch = modelSelectionPatch(providers, providerId, modelId, task.effort)
+              selectingModelRef.current = true
+              setSelectingModel(true)
+              try { await onPatch(patch) }
+              finally { selectingModelRef.current = false; setSelectingModel(false) }
+            }} />
             {model?.efforts?.length ? (
               <label className="compact-select effort-select" title="Reasoning effort">
                 <select
                   aria-label="Reasoning effort"
                   value={task.effort}
-                  disabled={active || sending}
+                  disabled={active || sending || selectingModel}
                   onChange={(event) => update({ effort: event.target.value })}
                 >
                   {!model.efforts.includes(task.effort) ? (
@@ -399,7 +329,7 @@ export function Composer({
               }
               className="send-button"
               disabled={
-                !draft.trim() || sending || !available || localDraft.pending?.kind === 'steer'
+                !draft.trim() || sending || selectingModel || !available || localDraft.pending?.kind === 'steer'
               }
               onClick={() => void submit()}
             >
@@ -416,7 +346,7 @@ export function Composer({
           <ShieldCheck size={12} />
           <select
             aria-label="Permission mode"
-            disabled={active || sending}
+            disabled={active || sending || selectingModel}
             value={task.mode}
             onChange={(event) => update({ mode: event.target.value as PermissionMode })}
           >
@@ -426,11 +356,15 @@ export function Composer({
           </select>
           <ChevronDown size={10} />
         </label>
-        {!available ? (
+        {provider?.available && provider.authenticated !== false && !model ? (
+          <span className="connection-warning">Choose a model above</span>
+        ) : !available ? (
           <button className="connection-warning" onClick={onConnections}>
             {provider?.authenticated === false
               ? 'Sign in to this connection'
-              : 'Set up your connection'}
+              : provider?.available && !model
+                ? 'Choose an available model'
+                : 'Set up your connection'}
             <ChevronDown size={11} />
           </button>
         ) : active ? (

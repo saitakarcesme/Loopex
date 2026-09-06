@@ -1,7 +1,7 @@
 {
   "name": "akorith-next",
   "productName": "Akorith Next",
-  "version": "2.0.0-alpha.5",
+  "version": "2.0.0-alpha.6",
   "private": true,
   "description": "A focused desktop workspace for your coding agents and local models",
   "author": "Akorith",

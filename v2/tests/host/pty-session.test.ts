@@ -46,7 +46,11 @@ test('actual macOS PTY foreground and background job groups are gone before clos
     const quote = (value: string) => "'" + value.replace(/'/g, "'\\''") + "'"
     terminal.write(context, id, `${quote(process.execPath)} job.cjs background &\n${quote(process.execPath)} job.cjs foreground\n`)
     for (let attempt = 0; attempt < 150; attempt++) {
-      if (await fs.access(path.join(cwd, 'foreground.ready')).then(() => true, () => false)) break
+      // Independent process startup order is nondeterministic under load. The
+      // foreground marker does not establish that the background job is ready.
+      const ready = await Promise.all(['foreground', 'background'].map(name =>
+        fs.access(path.join(cwd, `${name}.ready`)).then(() => true, () => false)))
+      if (ready.every(Boolean)) break
       await new Promise(resolve => setTimeout(resolve, 20))
     }
     await fs.access(path.join(cwd, 'foreground.ready')); await fs.access(path.join(cwd, 'background.ready'))

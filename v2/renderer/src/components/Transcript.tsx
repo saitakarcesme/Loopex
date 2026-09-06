@@ -16,6 +16,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Activity, Message, PendingRequest, Task } from '../../../shared/contracts'
 import { compactNumber, isActive, statusLabel } from '../api'
 import { CheckpointReview } from './CheckpointReview'
+import { activityPresentation } from './activityPresentation'
 import { AttachmentLink } from './ArtifactPreview'
 import { Markdown } from './Markdown'
 import { IconButton, Spinner } from './Primitives'
@@ -31,6 +32,7 @@ export function ActivityRow({
   onError: (error: unknown) => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const presentation = activityPresentation(activity)
   const unverified = activity.status === 'interrupted' || activity.status === 'unknown'
   if (activity.kind === 'commentary')
     return (
@@ -63,7 +65,7 @@ export function ActivityRow({
         onClick={() => setExpanded((value) => !value)}
       >
         {activity.status === 'running' ? <Spinner size={13} /> : <Icon size={14} />}
-        <span>{activity.title}</span>
+        <span>{presentation.title}</span>
         {activity.status === 'failed' ? <span className="activity-failed">Failed</span> : null}
         {unverified ? (
           <span className="activity-unverified" title={activity.importProvenance?.originalStatus
@@ -72,14 +74,14 @@ export function ActivityRow({
             {activity.importProvenance || activity.status === 'unknown' ? 'Outcome not recorded' : 'Interrupted'}
           </span>
         ) : null}
-        {activity.detail ? <ChevronRight className={expanded ? 'rotated' : ''} size={13} /> : null}
+        {presentation.detail ? <ChevronRight className={expanded ? 'rotated' : ''} size={13} /> : null}
       </button>
-      {expanded && activity.detail ? (
+      {expanded && presentation.detail ? (
         <div className="activity-detail">
           {activity.kind === 'plan' ? (
-            <Markdown text={activity.detail} onOpenFile={onOpenFile} onError={onError} />
+            <Markdown text={presentation.detail} onOpenFile={onOpenFile} onError={onError} />
           ) : (
-            <pre>{activity.detail}</pre>
+            <pre>{presentation.detail}</pre>
           )}
           {activity.filePath ? (
             <button className="text-button" onClick={() => onOpenFile(activity.filePath!)}>
