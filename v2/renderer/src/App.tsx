@@ -30,6 +30,7 @@ import { SearchDialog } from './components/SearchDialog'
 import { SettingsDialog } from './components/SettingsDialog'
 import { Sidebar } from './components/Sidebar'
 import { Transcript } from './components/Transcript'
+import { startResizeDrag } from './hooks/resizeDrag'
 import { useWorkspaceLayout } from './hooks/useWorkspaceLayout'
 import { navigationIndex, navigationShortcut } from './hooks/taskNavigationState'
 import { useWorkspace } from './hooks/useWorkspace'
@@ -76,6 +77,8 @@ export function App() {
   const shellRef = useRef<HTMLDivElement>(null)
   const { sidebarOpen, panelOpen, setSidebarOpen, setPanelOpen, changing: layoutChanging } = useWorkspaceLayout(selectedId, shellRef, reportError)
   const [panelTab, setPanelTab] = useState<PanelTab>(() => remember('panelTab', 'files'))
+  const resizeCleanup = useRef<(() => void) | null>(null)
+  useEffect(() => () => { resizeCleanup.current?.(); resizeCleanup.current = null }, [])
   const [sidebarWidth, setSidebarWidth] = useState(() => remember('sidebarWidth', 265))
   const [panelWidth, setPanelWidth] = useState(() => remember('panelWidth', 520))
   const [settingsTab, setSettingsTab] = useState<'general' | 'connections' | null>(null)
@@ -273,41 +276,32 @@ export function App() {
   const saveSettings = (settings: Settings) =>
     workspace.setSnapshot((current) => (current ? { ...current, settings } : current))
   const resize = (side: 'sidebar' | 'panel', event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || event.isPrimary === false) return
     event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
-    if (shellRef.current) shellRef.current.dataset.resizing = 'true'
-    const start = event.clientX,
-      initial = side === 'sidebar' ? sidebarWidth : panelWidth
-    let width = initial
-    const element = event.currentTarget
-    const move = (moveEvent: PointerEvent) => {
-      width = Math.round(
-        Math.min(
-          side === 'sidebar'
-            ? 340
-            : Math.max(380, window.innerWidth - (sidebarOpen ? sidebarWidth : 0) - 400),
-          Math.max(
-            side === 'sidebar' ? 200 : 360,
-            initial + (moveEvent.clientX - start) * (side === 'sidebar' ? 1 : -1),
-          ),
-        ),
-      )
-      if (side === 'sidebar') setSidebarWidth(width)
-      else setPanelWidth(width)
-    }
-    const finish = () => {
-      if (shellRef.current) delete shellRef.current.dataset.resizing
-      element.removeEventListener('pointermove', move)
-      element.removeEventListener('pointerup', finish)
-      element.removeEventListener('pointercancel', finish)
-      persist(side === 'sidebar' ? 'sidebarWidth' : 'panelWidth', width)
-      void api('settings:update', {
-        patch: side === 'sidebar' ? { sidebarWidth: width } : { panelWidth: width },
-      }).catch(reportError)
-    }
-    element.addEventListener('pointermove', move)
-    element.addEventListener('pointerup', finish)
-    element.addEventListener('pointercancel', finish)
+    resizeCleanup.current?.()
+    const shell = shellRef.current
+    if (shell) shell.dataset.resizing = 'true'
+    const start = event.clientX
+    const initial = side === 'sidebar' ? sidebarWidth : panelWidth
+    resizeCleanup.current = startResizeDrag({
+      target: event.currentTarget,
+      windowTarget: window,
+      pointerId: event.pointerId,
+      initialWidth: initial,
+      widthAt: clientX => Math.round(Math.min(
+        side === 'sidebar' ? 340 : Math.max(380, window.innerWidth - (sidebarOpen ? sidebarWidth : 0) - 400),
+        Math.max(side === 'sidebar' ? 200 : 360, initial + (clientX - start) * (side === 'sidebar' ? 1 : -1)),
+      )),
+      onWidth: width => { if (side === 'sidebar') setSidebarWidth(width); else setPanelWidth(width) },
+      onFinish: width => {
+        if (shell) delete shell.dataset.resizing
+        resizeCleanup.current = null
+        persist(side === 'sidebar' ? 'sidebarWidth' : 'panelWidth', width)
+        void api('settings:update', {
+          patch: side === 'sidebar' ? { sidebarWidth: width } : { panelWidth: width },
+        }).catch(reportError)
+      },
+    })
   }
   if (workspace.error)
     return (

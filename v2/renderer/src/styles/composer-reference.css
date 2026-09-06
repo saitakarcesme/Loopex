@@ -119,3 +119,7 @@
 :root[data-theme='dark'] .composer-reference .composer-project-strip { background: #1e1e1e; }
 
 :root[data-theme='dark'] .composer-reference .composer { background: #2b2b2b; }
+
+/* Keep the composer anchored during execution; follow-up mode shares the existing context strip. */
+.composer-reference { position: relative; }
+.composer-reference .composer-meta:has(.queue-select) { position: absolute; top: 9px; right: 30px; padding: 0; }

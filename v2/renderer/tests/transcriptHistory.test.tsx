@@ -82,3 +82,19 @@ test('historical multiline command summaries stay compact while expanded details
   assert.equal([...unicode.title].length, 100)
   assert.equal(unicode.detail, 'Command: exact source already recorded')
 })
+
+
+test('exact host tool labels describe actions while preserving failure details and unknown identifiers', async () => {
+  const { activityPresentation } = await import('../src/components/activityPresentation')
+  const detail = 'Error: access denied\n/path/from/output/must-not-be-inferred.txt\n{"path":"another.txt"}'
+  for (const [name, label] of [['files_read', 'Read file'], ['akorith_files_read', 'Read file'], ['files_write', 'Write file'], ['files_search', 'Search files'], ['akorith_browser_open', 'Open browser']]) {
+    assert.deepEqual(activityPresentation({ kind: 'tool', title: name, detail }), { title: label, detail })
+  }
+  for (const title of ['plugin_files_read', 'akorith_files_read_extra', 'akorith_akorith_files_read', 'files_read /tmp/a', 'constructor', '__proto__']) {
+    assert.deepEqual(activityPresentation({ kind: 'tool', title, detail }), { title, detail })
+  }
+  const html = renderToStaticMarkup(<ActivityRow activity={{ id: 'failed-read', kind: 'tool', title: 'akorith_files_read', detail, status: 'failed', startedAt: 1 }} onOpenFile={noop} onError={noop} />)
+  assert.match(html, /Read file/)
+  assert.doesNotMatch(html, /Read file:|Read successfully|another\.txt/)
+  assert.deepEqual(activityPresentation({ kind: 'command', title: 'files_read', detail }), { title: 'files_read', detail })
+})
