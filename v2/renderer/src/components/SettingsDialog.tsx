@@ -1,15 +1,17 @@
-import { BookOpen, Cable, Layers3, Settings2 } from 'lucide-react'
+import { BookOpen, Cable, Layers3, Package, Settings2 } from 'lucide-react'
 import { useState } from 'react'
 import { Dialog } from './Primitives'
 import { ConnectionsSettings } from './settings/ConnectionsSettings'
 import { GeneralSettings } from './settings/GeneralSettings'
 import { McpSettings } from './settings/McpSettings'
+import { PluginsSettings } from './settings/PluginsSettings'
 import { SkillsSettings } from './settings/SkillsSettings'
 import type { SettingsSectionProps } from './settings/types'
-type SettingsTab = 'general' | 'connections' | 'skills' | 'mcp'
+type SettingsTab = 'general' | 'connections' | 'skills' | 'mcp' | 'plugins'
 const tabs = [
   { id: 'general', name: 'General', icon: Settings2 },
   { id: 'connections', name: 'Connections', icon: Cable },
+  { id: 'plugins', name: 'Plugins', icon: Package },
   { id: 'skills', name: 'Skills', icon: BookOpen },
   { id: 'mcp', name: 'MCP servers', icon: Layers3 },
 ] as const
@@ -45,9 +47,11 @@ export function SettingsDialog({
           ) : tab === 'connections' ? (
             <ConnectionsSettings {...props} />
           ) : tab === 'skills' ? (
-            <SkillsSettings {...props} />
+            <SkillsSettings {...props} onManagePlugins={() => setTab('plugins')} />
+          ) : tab === 'plugins' ? (
+            <PluginsSettings {...props} />
           ) : (
-            <McpSettings {...props} />
+            <McpSettings {...props} onManagePlugins={() => setTab('plugins')} />
           )}
         </div>
       </div>

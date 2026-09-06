@@ -25,6 +25,9 @@ import { Engine } from "./engine";
 import { ShutdownCoordinator } from "./shutdown";
 import { CommandOperations } from "./operations";
 import { Extensions } from "./extensions";
+import { PluginManager } from "./plugins";
+import { extensionCommand, assertManualMcp } from "./extension-commands";
+import { quiesceExtensions } from "./extension-shutdown";
 import { importLegacy } from "./migration";
 import { CheckpointManager } from "./checkpoints";
 import { createProviders } from "./providers";
@@ -66,6 +69,7 @@ let window: BrowserWindow | null = null;
 let store: Store,
   engine: Engine,
   extensions: Extensions,
+  plugins: PluginManager,
   host: ReturnType<typeof createHostTools>;
 let checkpoints: CheckpointManager;
 let providers: ReturnType<typeof createProviders> = [];
@@ -73,10 +77,12 @@ let providerInfo: ProviderInfo[] = [];
 let refresh: Promise<ProviderInfo[]> | undefined;
 const commandOperations = new CommandOperations();
 const shutdown = new ShutdownCoordinator([
-  { name: "engine", run: () => engine?.shutdown() },
-  { name: "host", run: () => host?.dispose() },
-  { name: "extensions", run: () => extensions?.dispose() },
-  { name: "accepted commands", run: () => commandOperations.drain() },
+  { name: "runtime and extensions", run: () => quiesceExtensions({
+    engine: () => engine?.shutdown(),
+    host: () => host?.dispose(),
+    commands: () => commandOperations.drain(),
+    extensions: () => extensions?.dispose(),
+  }) },
   { name: "discovery", run: async () => {
     try { await refresh; } finally { await drainCapturedProcesses(); }
   } },
@@ -197,6 +203,15 @@ async function command(name: string, payload: unknown) {
     const readOnly = name === "app:snapshot" || name === "task:read" || name === "task:submissionStatus";
     if (!store?.db.open || (!draftOnly && !readOnly))
       throw new Error("Akorith is closing. Your saved work is retained. Choose Quit again if cleanup needs a retry.");
+  }
+  if (name === "mcp:list" || /^(plugins|context):/.test(name)) {
+    return extensionCommand(name, p, { store, plugins, extensions,
+      changed: () => send({ type: "changed" }),
+      pickLocal: async () => {
+        const result = await dialog.showOpenDialog(window!, { properties: ["openDirectory"], title: "Choose a local plugin" });
+        return result.canceled ? null : { path: result.filePaths[0] };
+      },
+    });
   }
   switch (name) {
     case "app:diagnostics":
@@ -456,6 +471,7 @@ async function command(name: string, payload: unknown) {
     }
     case "mcp:save": {
       const input = requireObject(p.server);
+      if (input.plugin !== undefined) throw new Error("Plugin MCP servers are managed through their plugin.");
       const server: McpServer = {
         id: input.id ? id(input.id) : randomUUID(),
         name: string(input.name, "server name", 100),
@@ -464,7 +480,11 @@ async function command(name: string, payload: unknown) {
           ? input.args.map((a) => string(a, "server argument", 4000))
           : [],
         enabled: input.enabled === true,
+        projectId: input.projectId == null ? undefined : id(input.projectId),
       };
+      assertManualMcp(store, server);
+      const existing = store.settings().mcpServers.find(item => item.id === server.id);
+      if (existing) assertManualMcp(store, existing, false);
       if (!server.name.trim() || !server.command.trim())
         throw new Error("Name and command are required.");
       const servers = store
@@ -478,6 +498,7 @@ async function command(name: string, payload: unknown) {
     case "mcp:probe": {
       const server = store.settings().mcpServers.find((s) => s.id === id(p.id));
       if (!server) throw new Error("Server not found.");
+      assertManualMcp(store, server);
       const result = await extensions.probe(server);
       store.saveSettings({
         mcpServers: store
@@ -488,6 +509,9 @@ async function command(name: string, payload: unknown) {
       return result;
     }
     case "mcp:remove": {
+      const serverId = id(p.id);
+      const existing = store.settings().mcpServers.find(item => item.id === serverId);
+      if (existing) assertManualMcp(store, existing, false);
       const servers = store
         .settings()
         .mcpServers.filter((s) => s.id !== id(p.id));
@@ -580,12 +604,15 @@ app
   .then(async () => {
     mkdirSync(userData, { recursive: true });
     store = new Store(join(userData, "workspace.sqlite"));
-    extensions = new Extensions(store);
+    // Native sessions can retain MCP assets beyond a turn. Without a complete
+    // ownership proof, cleanup reports usage_unknown and preserves those copies.
+    plugins = new PluginManager({ db: store.db, userData });
+    extensions = new Extensions(store, { plugins });
     checkpoints = new CheckpointManager(userData);
     nativeTheme.themeSource = store.settings().theme;
     host = createHostTools({
       getContext,
-      getReadRoots: (taskId) => extensions.readRoots(taskId),
+      getReadRoots: async (taskId, turnId) => engine?.contextRoots(taskId, turnId) ?? [],
       getWindow: () => window,
       emit: (event) => {
         if (window && !window.isDestroyed())
@@ -622,7 +649,10 @@ app
       store,
       providers,
       cwd,
-      (task) => extensions.context(task),
+      (task, turnId, signal) => {
+        if (!turnId) throw new Error("Turn context requires an accepted turn ID.");
+        return extensions.prepare(task, turnId, signal);
+      },
       send,
       {
         beforeRun:async(task,turnId,path)=>{await checkpoints.begin(task.id,turnId,path)},

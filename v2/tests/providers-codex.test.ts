@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, chmod, rm } from 'node:fs/promises'
+import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { CodexProvider, codexResponse } from '../main/providers/codex'
@@ -20,6 +21,7 @@ if(m.id==='approval-server'){return final(m.result.decision)}
 if(m.method==='initialize')return out({id:m.id,result:{}});
 if(m.method==='model/list')return out({id:m.id,result:{data:[{model:'test-model',displayName:'Test model',supportedReasoningEfforts:[{reasoningEffort:'high'}]}]}});
 if(m.method==='account/read')return out({id:m.id,result:{account:{type:'chatgpt'}}});
+if(['thread/start','thread/resume'].includes(m.method)){require('node:fs').writeFileSync(require('node:path').join(__dirname,'received-session.json'),JSON.stringify(p));if(p.developerInstructions==='reject-context')return out({id:m.id,error:{message:'synthetic rejected context'}})}
 if(m.method==='thread/start'){if(p.ephemeral!==false)return out({id:m.id,error:{message:'must persist'}});if(p.config['skills.include_instructions']!==false)return out({id:m.id,error:{message:'must use host-selected skills'}});return out({id:m.id,result:{thread:{id:thread}}})}
 if(m.method==='thread/resume'){thread=p.threadId;return out({id:m.id,result:{thread:{id:thread}}})}
 if(m.method==='turn/start'){prompt=p.input[0].text;turn='turn-'+(++counter);out({id:m.id,result:{turn:{id:turn}}});event('turn/started',{turn:{id:turn}});
@@ -56,7 +58,7 @@ test('Codex discovers real protocol data and separates commentary from final tok
 test('Codex dynamic host tool executes once in the correct task scope', async t => {
   const { provider, request, calls, dir } = await setup(t), events: ProviderEvent[] = []
   await provider.run(request('tool'), e => events.push(e)).done
-  assert.deepEqual(calls, [{ name: 'files_read', args: { path: 'test.txt' }, context: { taskId: 'task-a', cwd: dir, mode: 'work' } }])
+  assert.deepEqual(calls, [{ name: 'files_read', args: { path: 'test.txt' }, context: { taskId: 'task-a', turnId: 'app-turn', cwd: dir, mode: 'work' } }])
   assert.equal(events.find(e => e.type === 'final')?.text, 'observed proof')
 })
 test('Codex native approvals accept the renderer choice and reject stale answers', async t => {
@@ -127,4 +129,22 @@ test('Native handoff includes intervening provider context before the current us
   assert.match(text, /changed the accent to green/)
   assert(text.indexOf('changed the accent to green') < text.indexOf('Current user request:'))
   assert(text.endsWith('Continue with the new design'))
+})
+
+test('Codex receipts match accepted native session instructions and are absent on configuration rejection', async t => {
+  const { provider, request, dir } = await setup(t)
+  for (const nativeSessions of [{}, { codex: 'thread-test' }]) {
+    const input = { ...request('hello', nativeSessions), systemContext: 'Selected context Türkçe 🧪', contextManifestId: 'fixture-context' }
+    const events: ProviderEvent[] = []
+    await provider.run(input, event => events.push(event)).done
+    const received = JSON.parse(await readFile(join(dir, 'received-session.json'), 'utf8'))
+    assert.equal(received.developerInstructions, input.systemContext)
+    const receipt = events.find(event => event.type === 'context')?.receipt
+    assert.equal(receipt?.stage, 'accepted'); assert.equal(receipt?.channel, 'native-session')
+    assert.equal(receipt?.systemSha256, createHash('sha256').update(received.developerInstructions).digest('hex'))
+    assert.equal(receipt?.systemBytes, Buffer.byteLength(received.developerInstructions))
+  }
+  const rejected: ProviderEvent[] = []
+  await assert.rejects(provider.run({ ...request('hello'), systemContext: 'reject-context' }, event => rejected.push(event)).done, /synthetic rejected context/)
+  assert.equal(rejected.some(event => event.type === 'context'), false)
 })

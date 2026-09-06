@@ -325,7 +325,7 @@ export class Store {
     if (!t) throw new Error("Turn not found.");
     return t;
   }
-  setTurnSession(id: string, nativeSessionId: string) {
+  setTurnSession(id: string, nativeSessionId: string | undefined) {
     const t = { ...this.turn(id), nativeSessionId };
     this.db
       .prepare("UPDATE turns SET data=? WHERE id=?")

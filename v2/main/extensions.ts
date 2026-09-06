@@ -229,7 +229,7 @@ export class Extensions {
       const release = () => {
         if (released) return Promise.resolve();
         if (releasing) return releasing;
-        releasing = (async () => { if (pinned) await this.options.plugins!.releaseTurn(turnId); released = true; this.bundles.delete(turnId); })();
+        releasing = (async () => { if (pinned) await this.options.plugins!.releaseTurn(turnId); released = true; if (this.bundles.get(turnId) === release) this.bundles.delete(turnId); })();
         releasing.catch(() => { releasing = undefined; });
         return releasing;
       };
@@ -310,7 +310,11 @@ export class Extensions {
         server.args.some((a) => a.includes("\0"))
       )
         throw new Error("Invalid MCP command.");
+      const project = server.projectId ? this.store.project(server.projectId) : null;
+      if (server.projectId && !project)
+        throw new Error("The MCP server's project no longer exists. Select an existing project before probing it.");
       const owner = this.spawnProcess(server.command, server.args, {
+        cwd: project?.path,
         env: { ...process.env },
         shell: false,
       });

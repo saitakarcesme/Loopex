@@ -369,3 +369,25 @@ test("in-flight context reads drain before disposal and cannot read Store afterw
     "the late context result must not query its project",
   );
 });
+
+test("project MCP probes use their project cwd and orphan scopes never spawn", async () => {
+  const fake = processFixture(), { store } = fakeStore();
+  const project = { id: "project-scope", path: "/synthetic/project-workspace" };
+  store.project = ((id: string) => id === project.id ? project : null) as Store["project"];
+  const optionsSeen: Array<Parameters<typeof spawnOwnedProcess>[2]> = [];
+  const extensions = new Extensions(store, {
+    skillRoots: () => [],
+    spawnProcess: (file, args, options) => {
+      assert.equal(file, "./tools/mcp-server");
+      assert.deepEqual(args, ["relative-config.json"]);
+      optionsSeen.push(options);
+      return fake.spawnProcess(file, args, options);
+    },
+  });
+  const configured = { ...server, projectId: project.id, command: "./tools/mcp-server", args: ["relative-config.json"] };
+  assert.equal((await extensions.probe(configured)).status, "ready");
+  assert.equal(optionsSeen[0]?.cwd, project.path);
+  await assert.rejects(extensions.probe({ ...configured, projectId: "deleted-project" }), /project no longer exists/);
+  assert.equal(optionsSeen.length, 1, "orphan project cannot fall back to the application cwd");
+  await extensions.dispose();
+});

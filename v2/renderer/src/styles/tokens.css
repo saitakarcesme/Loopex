@@ -1,26 +1,32 @@
 :root {
   color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --bg: #fbfbf9;
-  --sidebar: #f2f3ef;
+  --bg: #fafafa;
+  --sidebar: #f3f3f3;
   --surface: #fff;
   --surface-raised: #fff;
-  --surface-soft: #f5f5f1;
-  --hover: #e9ebe5;
-  --selected: #e4e7df;
-  --text: #272b25;
-  --text-secondary: #62695b;
-  --text-tertiary: #707668;
-  --border: #e8eae3;
-  --border-strong: #d6dacf;
-  --accent: #566b44;
-  --accent-soft: #eef2e7;
+  --surface-soft: #f4f4f4;
+  --hover: #ebebeb;
+  --selected: #e5e5e5;
+  --text: #242424;
+  --text-secondary: #606060;
+  --text-tertiary: #737373;
+  --border: #e7e7e7;
+  --border-strong: #d5d5d5;
+  --accent: #292929;
+  --accent-soft: #ededed;
   --on-accent: #fff;
   --danger: #b4473f;
   --danger-soft: #fbefed;
   --success: #568445;
-  --shadow: 0 14px 60px #28331c12, 0 2px 8px #28331c0a;
+  --shadow: 0 14px 60px #00000012, 0 2px 8px #0000000a;
   --radius: 10px;
+  --motion-fast: 120ms;
+  --motion-standard: 180ms;
+  --motion-panel: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-pulse: 1.8s;
+  --motion-spin: 800ms;
   --mono: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,21 +34,21 @@
 }
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #1c1d1b;
-  --sidebar: #171816;
-  --surface: #242622;
-  --surface-raised: #2b2d28;
-  --surface-soft: #21231f;
-  --hover: #2b2e27;
-  --selected: #30352b;
-  --text: #e6e9df;
-  --text-secondary: #a6ad9b;
-  --text-tertiary: #909985;
-  --border: #30342b;
-  --border-strong: #444b3d;
-  --accent: #b7c5a4;
-  --accent-soft: #303c26;
-  --on-accent: #20271b;
+  --bg: #1c1c1c;
+  --sidebar: #181818;
+  --surface: #242424;
+  --surface-raised: #2b2b2b;
+  --surface-soft: #212121;
+  --hover: #2d2d2d;
+  --selected: #333333;
+  --text: #ededed;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #999999;
+  --border: #323232;
+  --border-strong: #484848;
+  --accent: #ededed;
+  --accent-soft: #343434;
+  --on-accent: #202020;
   --danger: #e69a90;
   --danger-soft: #382621;
   --success: #a5c68e;
@@ -101,9 +107,9 @@ a {
 button:not(:disabled),
 a {
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    opacity 120ms ease;
+    background-color var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease),
+    opacity var(--motion-fast) var(--motion-ease);
 }
 button:focus-visible,
 a:focus-visible,
@@ -283,7 +289,7 @@ a:hover {
   border: 1.5px solid currentColor;
   border-right-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--motion-spin) linear infinite;
   flex-shrink: 0;
 }
 .local-dot,
@@ -329,7 +335,7 @@ kbd {
   background: #fff;
   display: block;
   box-shadow: 0 1px 3px #0002;
-  transition: transform 140ms ease;
+  transition: transform var(--motion-fast) var(--motion-ease);
 }
 .toggle.on {
   background: var(--accent);
@@ -367,6 +373,7 @@ kbd {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
 }

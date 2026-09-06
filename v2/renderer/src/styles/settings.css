@@ -1,3 +1,4 @@
+@import './context-plugins.css';
 .settings-dialog {
   width: 840px;
   height: min(760px, 86vh);

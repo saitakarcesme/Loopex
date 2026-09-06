@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, chmod, rm } from 'node:fs/promises'
+import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { ClaudeProvider, claudePermissionResponse } from '../main/providers/claude'
@@ -17,6 +18,7 @@ if(m.type==='control_request'){
 send({type:'control_response',response:{request_id:m.request_id,subtype:'success',response:m.request.subtype==='initialize'?{models:[{value:'actual-model',displayName:'Actual model',supportedEffortLevels:['high']}]}:{}}});
 return}
 if(m.type==='user'){
+require('node:fs').writeFileSync(require('node:path').join(__dirname,'received-context.json'),JSON.stringify({system:args[args.indexOf('--append-system-prompt')+1],message:m}));
 send({type:'system',subtype:'init',session_id:'session-claude'});
 if(m.message.content[0].text==='tool')return send({type:'control_request',request_id:'mcp-call',request:{subtype:'mcp_message',server_name:'akorith',message:{jsonrpc:'2.0',id:9,method:'tools/call',params:{name:'files_read',arguments:{path:'proof.txt'}}}}});
 if(m.message.content[0].text==='permission')return send({type:'control_request',request_id:'permission',request:{subtype:'can_use_tool',tool_name:'Bash',input:{command:'echo ok'}}});
@@ -33,7 +35,7 @@ async function setup(t: any) {
   const provider = new ClaudeProvider(host, executable)
   t.after(async () => { await provider.dispose(); await rm(dir, { recursive: true, force: true }) })
   const request = (prompt: string): RunRequest => ({ task: { id: 'test', projectId: null, title: 'Test', providerId: 'claude', model: 'actual-model', effort: 'high', mode: 'work', status: 'running', pinned: false, archived: false, draft: '', createdAt: 1, updatedAt: 1, nativeSessions: {} }, cwd: dir, turnId: 'turn-1', prompt, history: [], attachments: [], mcpServers: [], ollamaUrl: '' })
-  return { provider, request, calls: () => calls }
+  return { provider, request, dir, calls: () => calls }
 }
 test('Claude discovers supported control catalog and does not duplicate streamed text', async t => {
   const { provider, request } = await setup(t), events: ProviderEvent[] = []
@@ -58,4 +60,19 @@ test('Claude permission answers and interruption settle the active run', async t
 })
 test('Claude questions preserve native question names while accepting renderer IDs', () => {
   assert.deepEqual(claudePermissionResponse({ tool_name: 'AskUserQuestion', input: { questions: [{ question: 'Which color?' }] } }, { answers: { '0': 'Blue' } }), { behavior: 'allow', updatedInput: { questions: [{ question: 'Which color?' }], answers: { 'Which color?': 'Blue' } } })
+})
+
+test('Claude records only submission for the actual append-system-prompt CLI argument', async t => {
+  const { provider, request, dir } = await setup(t)
+  const input = { ...request('hello'), systemContext: 'Claude selected Türkçe 🧪' }
+  const events: ProviderEvent[] = []
+  await provider.run(input, event => events.push(event)).done
+  const received = JSON.parse(await readFile(join(dir, 'received-context.json'), 'utf8'))
+  assert.equal(received.system, input.systemContext)
+  assert.equal(received.message.message.content[0].text, input.prompt)
+  const receipt = events.find(event => event.type === 'context')?.receipt
+  assert.equal(receipt?.stage, 'submitted')
+  assert.equal(receipt?.channel, 'native-prompt')
+  assert.equal(receipt?.systemSha256, createHash('sha256').update(received.system).digest('hex'))
+  assert.equal(events.some(event => event.type === 'context' && event.receipt.stage === 'accepted'), false)
 })

@@ -6,6 +6,24 @@ import type { Activity, HostTools, ProviderAdapter, ProviderInfo, RunHandle, Run
 import { contextReceipt, abortError, capture, deferred, drainAll, errorText, findExecutable, finishWithCleanup, interruptAndWait, nativePrompt, providerEnv, retryableCleanup, spawnProviderProcess, stopProcess, type Emit, type Json } from './common'
 import { HostMcpBridge } from './mcp-bridge'
 
+/** Native permission scope is authoritative; tool inputs only explain the triggering action. */
+function permissionDetail(permission: Json, parts: Map<string, Json>, sessionId: string): string {
+  const patterns = Array.isArray(permission.patterns) ? permission.patterns : []
+  const scope = patterns.length ? patterns.map((pattern: unknown) => typeof pattern === 'string' ? pattern : JSON.stringify(pattern)).join('\n') : 'No permission patterns supplied.'
+  const sections = [`Requested permission: ${permission.permission || 'Unspecified'}\nPermission scope supplied by OpenCode:\n${scope}`]
+  if (patterns.some((pattern: unknown) => typeof pattern === 'string' && pattern.includes('*'))) sections.push('This scope contains a wildcard. The tool details below do not narrow the requested permission.')
+  const reference = permission.tool
+  const matched = reference && typeof reference.callID === 'string' && typeof reference.messageID === 'string'
+    ? [...parts.values()].find(part => part.type === 'tool' && part.sessionID === sessionId && part.messageID === reference.messageID && part.callID === reference.callID)
+    : undefined
+  const formatDetails = (value: unknown) => { const text = JSON.stringify(value, null, 2); return text.length > 16000 ? text.slice(0, 16000) + '\n[Additional tool details truncated]' : text }
+  const metadata = permission.metadata && typeof permission.metadata === 'object' && Object.keys(permission.metadata).length ? permission.metadata : undefined
+  if (matched) sections.push(`Triggering tool: ${matched.tool || 'Unnamed tool'}\nTool input:\n${formatDetails(matched.state?.input ?? {})}`)
+  if (metadata) sections.push(`Details supplied with this permission request:\n${formatDetails(metadata)}`)
+  if (!matched && !metadata) sections.push('No additional tool details were supplied for this permission request.')
+  return sections.join('\n\n')
+}
+
 class OpenCodeServer {
   private child?: ChildProcessWithoutNullStreams
   private url = ''
@@ -118,7 +136,7 @@ export class OpenCodeProvider implements ProviderAdapter {
           activities.set(part.id, activity); emit({ type: 'activity', activity })
         }
       }
-      if (event.type === 'permission.asked') { pending.set(p.id, { ...p, kind: 'approval' }); emit({ type: 'pending', request: { id: p.id, kind: 'approval', title: `Allow ${p.permission}?`, detail: (p.patterns || []).join('\n'), choices: ['Allow once', 'Deny'] } }) }
+      if (event.type === 'permission.asked') { pending.set(p.id, { ...p, kind: 'approval' }); emit({ type: 'pending', request: { id: p.id, kind: 'approval', title: `Allow ${p.permission}?`, detail: permissionDetail(p, parts, sessionId), choices: ['Allow once', 'Deny'] } }) }
       if (event.type === 'question.asked') { pending.set(p.id, { ...p, kind: 'question' }); emit({ type: 'pending', request: { id: p.id, kind: 'question', title: 'OpenCode needs your input', questions: (p.questions || []).map((q: Json, i: number) => ({ id: String(i), question: q.question, options: q.options })) } }) }
       if (event.type === 'session.error') finished.reject(new Error(p.error?.data?.message || p.error?.name || JSON.stringify(p.error)))
       if (event.type === 'session.status' && p.status?.type === 'busy') seenBusy = true

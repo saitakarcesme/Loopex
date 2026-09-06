@@ -53,7 +53,7 @@ function requiredString(args: Record<string, unknown>, key: string): string {
   return args[key] as string
 }
 function optionalString(args: Record<string, unknown>, key: string): string | undefined { return args[key] == null ? undefined : requiredString(args, key) }
-export function createHostTools(options: { getContext(taskId: string): HostContext; getReadRoots?(taskId: string): Promise<string[]>; getWindow(): BrowserWindow | null; emit(event: Record<string, unknown>): void; userData: string }): HostTools & { invoke(command: string, payload: any): Promise<any> } {
+export function createHostTools(options: { getContext(taskId: string): HostContext; getReadRoots?(taskId: string, turnId?: string): Promise<string[]>; getWindow(): BrowserWindow | null; emit(event: Record<string, unknown>): void; userData: string }): HostTools & { invoke(command: string, payload: any): Promise<any> } {
   const terminals = new TerminalManager(options.emit)
   const previews = new PreviewManager(options.emit)
   const browsers = new BrowserManager(options.getWindow, options.emit)
@@ -75,7 +75,7 @@ export function createHostTools(options: { getContext(taskId: string): HostConte
         await containedPath(path.join(options.userData, 'attachments'), context.taskId)
         roots.push(attachments)
       } catch {}
-      roots.push(...await options.getReadRoots?.(context.taskId) ?? [])
+      roots.push(...await options.getReadRoots?.(context.taskId, context.turnId) ?? [])
       for (const root of roots) {
         let target: string
         try { target = await containedPath(root, input) } catch { continue }

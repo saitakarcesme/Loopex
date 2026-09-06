@@ -54,3 +54,16 @@ test('message attribution comes from its recorded provider and escapes unfamilia
   assert.match(unknown, /Unknown provider \(&lt;unknown&gt;\)/)
   assert.doesNotMatch(unknown, /Claude|<unknown>/)
 })
+
+test('empty and failed assistant turns retain context inspection without a fake response', () => {
+  const html = render({ ...response, content: '', status: 'failed', importProvenance: undefined })
+  assert.match(html, /aria-label="Inspect turn context"/)
+  assert.doesNotMatch(html, /Copy response/)
+})
+
+test('wildcard approval details stay explicit without inventing a command or file target', async () => {
+  const { PendingCard } = await import('../src/components/Transcript')
+  const html = renderToStaticMarkup(<PendingCard request={{ id: 'approval', taskId: 'task', turnId: 'turn', kind: 'approval', title: 'Files read', detail: '*' }} onRespond={async () => {}} onError={noop} />)
+  assert.match(html, /<pre class="pending-detail">\*<\/pre>/)
+  assert.match(html, /No specific target was provided/)
+})

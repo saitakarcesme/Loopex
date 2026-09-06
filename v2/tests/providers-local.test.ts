@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { createServer } from 'node:http'
 import { OllamaProvider, readJsonLines } from '../main/providers/ollama'
 import { readSse } from '../main/providers/opencode'
@@ -122,4 +123,26 @@ test('MCP HTTP bridge requires run bearer, scopes host calls, and sends screensh
   const response = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${bridge.token}` }, body })
   const payload: any = await response.json()
   assert.deepEqual(contextSeen, context); assert.deepEqual(payload.result.content, [{ type: 'text', text: '{"width":1,"height":1}' }, { type: 'image', mimeType: 'image/png', data: 'aGVsbG8=' }])
+})
+
+test('Ollama receipt matches the actual clipped loopback request and rejects HTTP failures without acceptance', async t => {
+  let accepted = true
+  const { provider, request, requests } = await setup(t, (_, res) => {
+    if (!accepted) { res.statusCode = 503; res.end('synthetic unavailable'); return }
+    res.end(JSON.stringify({ message: { content: 'done' }, done: true }) + '\n')
+  })
+  request.systemContext = 'Türkçe 🧪 context '.repeat(9000)
+  const events: ProviderEvent[] = []
+  await provider.run(request, event => events.push(event)).done
+  const sent = requests.find(item => item.path === '/api/chat').body.messages[0].content
+  const receipt = events.find(event => event.type === 'context')?.receipt
+  assert.equal(receipt?.systemSha256, createHash('sha256').update(sent).digest('hex'))
+  assert.equal(receipt?.systemBytes, Buffer.byteLength(sent))
+  assert.equal(receipt?.contextTrimmed, true)
+  assert.equal(receipt?.stage, 'accepted')
+  assert.notEqual(sent, request.systemContext)
+  accepted = false
+  const rejected: ProviderEvent[] = []
+  await assert.rejects(provider.run(request, event => rejected.push(event)).done, /503/)
+  assert.equal(rejected.some(event => event.type === 'context'), false)
 })

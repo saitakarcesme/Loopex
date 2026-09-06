@@ -64,3 +64,9 @@ After ordinary source access returned on September 5, the reviewed quiescence ap
 - [Claude streaming input](https://code.claude.com/docs/en/agent-sdk/streaming-vs-single-mode) and [official Python SDK control transport](https://github.com/anthropics/claude-agent-sdk-python/blob/main/src/claude_agent_sdk/_internal/query.py).
 - [OpenCode server](https://opencode.ai/docs/server/), [MCP servers](https://opencode.ai/docs/mcp-servers/) and [official generated SDK types](https://github.com/anomalyco/opencode/blob/dev/packages/sdk/js/src/v2/gen/types.gen.ts).
 - [Ollama chat](https://docs.ollama.com/api/chat) and [tool calling](https://docs.ollama.com/capabilities/tool-calling).
+
+## Turn context transport verification — September 6, 2026
+
+Per-turn preparation captures settings before asynchronous discovery and pins managed plugin versions until explicit release. Cancellation during preparation releases the acquired pin; cancellation after preparation does not imply provider quiescence. Shutdown must drain the engine before disposing Extensions. Duplicate preparation cannot remove the original bundle's cleanup registration.
+
+Synthetic context/plugin/lifecycle tests passed 28/28 and provider protocol tests passed 30/30 in the Developer checkout. Each adapter's receipt is checked against what its fixture actually received: Codex session instructions (start and resume), OpenCode HTTP system text, Claude CLI append-system-prompt, and Ollama's actual packed system message including clipping. Rejected Codex/OpenCode/Ollama requests produce no accepted receipt; Claude records submission only. These receipts do not prove model compliance, discovery or use of every configured MCP tool, or native inherited instructions. The tests use temporary projects, controlled executables and loopback servers; they do not scan personal skill roots or certify a new packaged app.

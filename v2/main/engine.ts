@@ -345,6 +345,9 @@ export class Engine {
         prepared.manifest.session = freshSession ? 'renewed-for-context' : nativeId ? 'resumed' : 'new';
         this.store.saveContext(prepared.manifest);
         if (freshSession) {
+          // Acceptance inherited the previous native ID. This new context is not
+          // associated with that session: only a provider session event may bind it.
+          this.store.setTurnSession(run.turn.id, undefined);
           task = { ...task, nativeSessions: { ...task.nativeSessions, [task.providerId]: undefined } };
           run.message.activities.push({ id: `context:${run.turn.id}`, kind: 'status', title: 'Context changed; using a fresh provider session', detail: 'The conversation is preserved in the handoff. Earlier instructions may still appear in conversation history.', status: 'completed', startedAt: Date.now() });
         }
@@ -462,7 +465,9 @@ export class Engine {
         });
       }
     } finally {
-      run.contextController.abort();
+      // Preparation may be cancelled immediately before a provider exists.
+      // Once it does, its context must remain valid through the ownership barrier.
+      if (!run.handle) run.contextController.abort();
       if (run.handle && !run.quiescent) {
         // An engine/storage/UI failure can happen before awaiting handle.done.
         // It must never skip the adapter's ownership barrier.
@@ -474,6 +479,7 @@ export class Engine {
           run.cleanupPending = false;
         }
       }
+      run.contextController.abort();
       if (checkpointStarted && this.lifecycle.afterRun) await tracking(this.lifecycle.afterRun);
       if (run.context) {
         try { await run.context.release(); }

@@ -47,10 +47,10 @@ export function WorkspacePanel({
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            id={`panel-tab-${tab.id}`}
+            id={`panel-tab-${task.id}-${tab.id}`}
             role="tab"
             aria-selected={active === tab.id}
-            aria-controls={`panel-${tab.id}`}
+            aria-controls={`panel-${task.id}-${tab.id}`}
             tabIndex={active === tab.id ? 0 : -1}
             className={active === tab.id ? 'selected' : ''}
             title={tab.label}
@@ -62,7 +62,7 @@ export function WorkspacePanel({
                 const next =
                   tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]
                 onTab(next.id)
-                document.getElementById(`panel-tab-${next.id}`)?.focus()
+                document.getElementById(`panel-tab-${task.id}-${next.id}`)?.focus()
               }
             }}
           >
@@ -78,9 +78,9 @@ export function WorkspacePanel({
         visited.has(tab.id) ? (
           <div
             key={tab.id}
-            id={`panel-${tab.id}`}
+            id={`panel-${task.id}-${tab.id}`}
             role="tabpanel"
-            aria-labelledby={`panel-tab-${tab.id}`}
+            aria-labelledby={`panel-tab-${task.id}-${tab.id}`}
             className="panel-tab-content"
             hidden={active !== tab.id}
           >

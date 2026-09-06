@@ -248,7 +248,7 @@ export const MessageView = memo(function MessageView({
   )
 })
 
-function PendingCard({
+export function PendingCard({
   request,
   onRespond,
   onError,
@@ -279,6 +279,9 @@ function PendingCard({
         <h3>{request.title}</h3>
       </div>
       {request.detail ? <pre className="pending-detail">{request.detail}</pre> : null}
+      {request.kind === 'approval' && (!request.detail?.trim() || request.detail.trim() === '*') ? <p className="settings-description">
+        {request.detail?.trim() === '*' ? 'The provider supplied only “*” as the request detail. No specific target was provided.' : 'The provider did not supply command or target details for this request.'}
+      </p> : null}
       {request.kind === 'approval' ? (
         <div className="pending-actions">
           {(request.choices?.length ? request.choices : ['approve', 'reject']).map(
@@ -417,7 +420,7 @@ export function Transcript({
   const jump = () => {
     pinned.current = true
     setShowJump(false)
-    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })
+    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   }
   return (
     <div className="transcript-region">

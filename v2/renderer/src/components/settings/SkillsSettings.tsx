@@ -6,11 +6,9 @@ import { EmptyState, IconButton, Spinner, Toggle } from '../Primitives'
 import type { SettingsSectionProps } from './types'
 export function SkillsSettings({
   snapshot,
-  onSettings,
-  onRefresh,
   onError,
-  notify,
-}: SettingsSectionProps) {
+  onManagePlugins,
+}: SettingsSectionProps & { onManagePlugins: () => void }) {
   const [skills, setSkills] = useState<SkillInfo[]>([])
   const [skillQuery, setSkillQuery] = useState('')
   const [skillLimit, setSkillLimit] = useState(80)
@@ -84,6 +82,8 @@ export function SkillsSettings({
             <div className="skill-info">
               <h4>{skill.name}</h4>
               <p>{skill.description || 'No description provided.'}</p>
+              {skill.plugin ? <p className="settings-description">Managed by {skill.plugin.pluginId} · {skill.plugin.version}. <button className="text-button" onClick={onManagePlugins}>Manage plugin</button></p> : null}
+              <p className="settings-description">{skill.projectId ? snapshot.projects.find(project => project.id === skill.projectId)?.name || `Unavailable project (${skill.projectId})` : 'All projects'}</p>
               <details>
                 <summary>{skill.source}</summary>
                 <code>{skill.path}</code>
@@ -91,7 +91,7 @@ export function SkillsSettings({
             </div>
             <Toggle
               checked={skill.enabled}
-              disabled={busySkills.includes(skill.id)}
+              disabled={!!skill.plugin || busySkills.includes(skill.id)}
               label={`Enable ${skill.name}`}
               onChange={(enabled) => void toggleSkill(skill.id, enabled)}
             />

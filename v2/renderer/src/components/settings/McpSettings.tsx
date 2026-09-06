@@ -1,23 +1,52 @@
 import { Check, Layers3, Plus, RefreshCw, Trash2, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { McpServer } from '../../../../shared/contracts'
-import { api } from '../../api'
+import { api, errorText } from '../../api'
 import { EmptyState, IconButton, Spinner, Toggle } from '../Primitives'
 import type { SettingsSectionProps } from './types'
+export function mcpScopeLabel(server: Pick<McpServer, 'projectId'>, projects: Array<{ id: string; name: string }>): string {
+  if (!server.projectId) return 'All projects'
+  return projects.find(project => project.id === server.projectId)?.name || `Unavailable project (${server.projectId})`
+}
 export function McpSettings({
   snapshot,
-  onSettings,
   onRefresh,
   onError,
   notify,
-}: SettingsSectionProps) {
+  onManagePlugins,
+}: SettingsSectionProps & { onManagePlugins: () => void }) {
   const [servers, setServers] = useState(snapshot.settings.mcpServers)
   const [serverForm, setServerForm] = useState<McpServer | null>(null)
   const [serverArgs, setServerArgs] = useState('')
   const [savingServer, setSavingServer] = useState(false)
   const [probing, setProbing] = useState<string | null>(null)
+  const busy = savingServer || !!probing
+  const mutation = useRef(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const loadGeneration = useRef(0)
+  const loadServers = async () => {
+    const generation = ++loadGeneration.current
+    const next = await api<McpServer[]>('mcp:list')
+    if (generation === loadGeneration.current) { setServers(next); setLoadError(null) }
+  }
+  useEffect(() => {
+    void loadServers().catch(error => setLoadError(errorText(error)))
+    return () => { loadGeneration.current++ }
+  }, [snapshot.settings.mcpServers])
+  const mutate = async (command: 'mcp:save' | 'mcp:remove', payload: object) => {
+    if (mutation.current) return
+    mutation.current = true
+    setSavingServer(true)
+    try {
+      await api<McpServer[]>(command, payload)
+      await loadServers()
+      await onRefresh()
+    } catch (error) { onError(error) }
+    finally { mutation.current = false; setSavingServer(false) }
+  }
   const saveServer = async () => {
-    if (!serverForm) return
+    if (!serverForm || mutation.current || serverForm.plugin) return
+    mutation.current = true
     setSavingServer(true)
     try {
       const next = await api<McpServer[]>('mcp:save', {
@@ -31,16 +60,19 @@ export function McpSettings({
             .filter(Boolean),
         },
       })
-      setServers(next)
       setServerForm(null)
+      await loadServers()
       await onRefresh()
     } catch (error) {
       onError(error)
     } finally {
+      mutation.current = false
       setSavingServer(false)
     }
   }
   const probe = async (id: string) => {
+    if (mutation.current) return
+    mutation.current = true
     setProbing(id)
     try {
       const server = await api<McpServer>('mcp:probe', { id })
@@ -49,6 +81,7 @@ export function McpSettings({
     } catch (error) {
       onError(error)
     } finally {
+      mutation.current = false
       setProbing(null)
     }
   }
@@ -62,6 +95,7 @@ export function McpSettings({
         </div>
         <button
           className="secondary-button"
+          disabled={busy}
           onClick={() => {
             setServerForm({
               id: crypto.randomUUID(),
@@ -77,6 +111,7 @@ export function McpSettings({
           Add server
         </button>
       </div>
+      {loadError ? <p className="panel-error" role="alert">{loadError}</p> : null}
       {serverForm ? (
         <form
           className="mcp-form"
@@ -103,6 +138,12 @@ export function McpSettings({
             value={serverForm.name}
             onChange={(event) => setServerForm({ ...serverForm, name: event.target.value })}
           />
+          <label className="field-label" htmlFor="mcp-scope">Available in</label>
+          <select id="mcp-scope" value={serverForm.projectId || ''} onChange={event => setServerForm({ ...serverForm, projectId: event.target.value || undefined })}>
+            <option value="">All projects</option>
+            {serverForm.projectId && !snapshot.projects.some(project => project.id === serverForm.projectId) ? <option value={serverForm.projectId}>Unavailable project ({serverForm.projectId})</option> : null}
+            {snapshot.projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}
+          </select>
           <label className="field-label" htmlFor="mcp-command">
             Executable
           </label>
@@ -132,7 +173,7 @@ export function McpSettings({
             </button>
             <button
               className="primary-button"
-              disabled={savingServer || !serverForm.name.trim() || !serverForm.command.trim()}
+              disabled={busy || !serverForm.name.trim() || !serverForm.command.trim()}
             >
               {savingServer ? <Spinner /> : <Check size={14} />}Save server
             </button>
@@ -146,19 +187,13 @@ export function McpSettings({
               <Layers3 size={18} />
               <div>
                 <h4>{server.name}</h4>
-                <p>{server.status || 'Not tested'}</p>
+                <p>{server.status || 'Not tested'} · {mcpScopeLabel(server, snapshot.projects)}</p>
               </div>
               <Toggle
                 label={`Enable ${server.name}`}
                 checked={server.enabled}
-                onChange={(enabled) =>
-                  void api<McpServer[]>('mcp:save', { server: { ...server, enabled } })
-                    .then(async (next) => {
-                      setServers(next)
-                      await onRefresh()
-                    })
-                    .catch(onError)
-                }
+                disabled={busy || !!server.plugin}
+                onChange={(enabled) => void mutate('mcp:save', { server: { ...server, enabled } })}
               />
             </div>
             <code className="mcp-command">{[server.command, ...server.args].join(' ')}</code>
@@ -174,13 +209,15 @@ export function McpSettings({
             <div className="mcp-actions">
               <button
                 className="small-button"
-                disabled={probing === server.id}
+                disabled={busy || !!server.plugin}
                 onClick={() => void probe(server.id)}
               >
                 {probing === server.id ? <Spinner size={12} /> : <RefreshCw size={12} />}
                 Test connection
               </button>
+              {server.plugin ? <button className="text-button" onClick={onManagePlugins}>Manage plugin · {server.plugin.version}</button> : <>
               <button
+                disabled={busy}
                 className="text-button"
                 onClick={() => {
                   setServerForm(server)
@@ -191,17 +228,12 @@ export function McpSettings({
               </button>
               <IconButton
                 label={`Remove ${server.name}`}
-                onClick={() =>
-                  void api<McpServer[]>('mcp:remove', { id: server.id })
-                    .then(async (next) => {
-                      setServers(next)
-                      await onRefresh()
-                    })
-                    .catch(onError)
-                }
+                disabled={busy}
+                onClick={() => void mutate('mcp:remove', { id: server.id })}
               >
                 <Trash2 size={14} />
               </IconButton>
+              </>}
             </div>
           </section>
         ))}

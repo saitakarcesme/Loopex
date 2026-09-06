@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AppEvent, AppSnapshot, Message, Task, TaskDetail } from '../../../shared/contracts'
+import type { AppEvent, AppSnapshot, Message, PendingRequest, Task, TaskDetail } from '../../../shared/contracts'
+import { mergeTaskRead } from './taskReadState'
 import { api, errorText, persist, remember } from '../api'
 
 export function useWorkspace() {
@@ -13,6 +14,9 @@ export function useWorkspace() {
   const [loadingTask, setLoadingTask] = useState(false)
   const initialLoaded = useRef(false)
   const revisions = useRef(new Map<string, number>())
+  const answered = useRef(new Map<string, Set<string>>())
+  const pendingEvents = useRef(new Map<string, Map<string, { revision: number; request: PendingRequest }>>())
+  const reread = useRef(new Set<string>())
   const pendingReads = useRef(new Map<string, Promise<TaskDetail>>())
 
   const notify = useCallback((text: string) => {
@@ -48,47 +52,28 @@ export function useWorkspace() {
       return { ...current, [message.taskId]: { ...detail, messages } }
     })
   }, [])
-  const readTask = useCallback(async (taskId: string) => {
+  const readTask = useCallback(async (taskId: string): Promise<TaskDetail> => {
     const pending = pendingReads.current.get(taskId)
-    if (pending) return pending
+    if (pending) { reread.current.add(taskId); return pending }
     const revision = revisions.current.get(taskId) || 0
     const promise = api<TaskDetail>('task:read', { taskId })
     pendingReads.current.set(taskId, promise)
     try {
       const incoming = await promise
       setDetails((current) => {
-        // A full read started before a stream update must not replace newer output.
-        const existing = current[taskId]
-        if (existing && revision !== (revisions.current.get(taskId) || 0)) {
-          const latest = new Map(existing.messages.map((message) => [message.id, message]))
-          const messages = incoming.messages.map((message) => latest.get(message.id) || message)
-          for (const message of existing.messages)
-            if (!messages.some((item) => item.id === message.id)) messages.push(message)
-          return {
-            ...current,
-            [taskId]: {
-              ...incoming,
-              task:
-                existing.task.updatedAt >= incoming.task.updatedAt ? existing.task : incoming.task,
-              messages,
-              pending: [
-                ...new Map(
-                  [...incoming.pending, ...existing.pending].map((request) => [
-                    request.id,
-                    request,
-                  ]),
-                ).values(),
-              ],
-            },
-          }
-        }
-        return { ...current, [taskId]: incoming }
+        return { ...current, [taskId]: mergeTaskRead(
+          current[taskId], incoming, revision !== (revisions.current.get(taskId) || 0),
+          [...(pendingEvents.current.get(taskId)?.values() || [])]
+            .filter(event => event.revision > revision).map(event => event.request),
+          answered.current.get(taskId) || new Set(),
+        ) }
       })
       return incoming
     } finally {
       pendingReads.current.delete(taskId)
+      if (reread.current.delete(taskId)) void readTask(taskId).catch(reportError)
     }
-  }, [])
+  }, [reportError])
   const refresh = useCallback(async () => {
     const next = await api<AppSnapshot>('app:snapshot')
     setSnapshot(next)
@@ -108,10 +93,14 @@ export function useWorkspace() {
       if (event.type === 'task') updateTask(event.task)
       else if (event.type === 'message') updateMessage(event.message)
       else if (event.type === 'pending') {
+        if (answered.current.get(event.request.taskId)?.has(event.request.id)) return
         revisions.current.set(
           event.request.taskId,
           (revisions.current.get(event.request.taskId) || 0) + 1,
         )
+        let events = pendingEvents.current.get(event.request.taskId)
+        if (!events) { events = new Map(); pendingEvents.current.set(event.request.taskId, events) }
+        events.set(event.request.id, { revision: revisions.current.get(event.request.taskId)!, request: event.request })
         setDetails((current) => {
           const detail = current[event.request.taskId]
           return detail
@@ -173,6 +162,11 @@ export function useWorkspace() {
   )
   const respond = useCallback(async (taskId: string, requestId: string, response: unknown) => {
     await api('task:respond', { taskId, requestId, response })
+    let resolved = answered.current.get(taskId)
+    if (!resolved) { resolved = new Set(); answered.current.set(taskId, resolved) }
+    resolved.add(requestId)
+    pendingEvents.current.get(taskId)?.delete(requestId)
+    revisions.current.set(taskId, (revisions.current.get(taskId) || 0) + 1)
     setDetails((current) =>
       current[taskId]
         ? {

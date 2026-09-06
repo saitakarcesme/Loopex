@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Store } from "../main/storage";
 import { Engine } from "../main/engine";
+import type { PreparedTurnContext } from "../shared/context-contracts";
 import type {
   AppEvent,
   ProviderAdapter,
@@ -22,7 +23,7 @@ async function until(check: () => boolean, description = "condition") {
 }
 function fixture(
   options: {
-    context?: () => Promise<string>;
+    context?: ConstructorParameters<typeof Engine>[3];
     syncPending?: boolean;
     hangOnInterrupt?: boolean;
   } = {},
@@ -409,4 +410,114 @@ test("native continuity includes intervening provider work and persists its wate
     store.close();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+function preparedContext(task: RunRequest['task'], turnId: string, fingerprint: string, release: () => Promise<void>): PreparedTurnContext {
+  return {
+    manifest: {
+      id: `context:${turnId}`, taskId: task.id, turnId, providerId: task.providerId,
+      resolvedAt: Date.now(), selectionTiming: 'turn-start', fingerprint,
+      sources: [], systemBytes: 12, systemSha256: fingerprint, mcpServers: [],
+      nativeInheritance: 'unknown', notes: [],
+    },
+    systemContext: 'Instructions', mcpServers: [], readRoots: ['/synthetic/plugin/version-1'],
+    ollamaUrl: 'http://127.0.0.1:11434', release,
+  };
+}
+
+test('unchanged prepared context resumes a native session; changed context renews it with conversation handoff', async () => {
+  let fingerprint = 'version-1', released = 0;
+  const f = fixture({ context: async (task, turnId) => preparedContext(task, turnId!, fingerprint, async () => { released++; }) });
+  try {
+    const task = f.store.createTask();
+    const first = await f.engine.send(task.id, 'context-first', 'First request');
+    await until(() => f.runs.length === 1);
+    f.runs[0].emit({ type: 'session', id: 'native-original' });
+    f.runs[0].emit({ type: 'delta', text: 'Original answer' });
+    f.runs[0].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    assert.equal(f.store.contextRecord(task.id, first.turnId)?.manifest.session, 'new');
+    const second = await f.engine.send(task.id, 'context-second', 'Follow up');
+    await until(() => f.runs.length === 2);
+    assert.equal(f.runs[1].request.task.nativeSessions.codex, 'native-original');
+    assert.equal(f.store.contextRecord(task.id, second.turnId)?.manifest.session, 'resumed');
+    f.runs[1].emit({ type: 'delta', text: 'Follow up answer' });
+    f.runs[1].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    fingerprint = 'version-2';
+    const third = await f.engine.send(task.id, 'context-third', 'Use changed skill');
+    await until(() => f.runs.length === 3);
+    assert.equal(f.runs[2].request.task.nativeSessions.codex, undefined);
+    assert.equal(f.store.contextRecord(task.id, third.turnId)?.manifest.session, 'renewed-for-context');
+    assert.match(f.runs[2].request.handoffContext!, /Original answer/);
+    assert.match(f.runs[2].request.handoffContext!, /Follow up answer/);
+    assert.equal(f.store.contextRecord(task.id, first.turnId)?.manifest.fingerprint, 'version-1');
+    assert.deepEqual(f.engine.contextRoots(task.id, second.turnId), []);
+    assert.deepEqual(f.engine.contextRoots(task.id, third.turnId), ['/synthetic/plugin/version-1']);
+    f.runs[2].emit({ type: 'delta', text: 'New context answer' });
+    f.runs[2].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    assert.equal(released, 3);
+    assert.deepEqual(f.engine.contextRoots(task.id, third.turnId), []);
+  } finally { await f.close(); }
+});
+
+test('storage failure after provider launch keeps context alive until the provider is quiescent', async () => {
+  let signal: AbortSignal | undefined, released = 0;
+  const f = fixture({ hangOnInterrupt: true, context: async (task, turnId, incomingSignal) => {
+    signal = incomingSignal;
+    return preparedContext(task, turnId!, 'fixed', async () => { released++; });
+  } });
+  const original = f.store.setTurnStatus.bind(f.store);
+  let injected = false;
+  f.store.setTurnStatus = (id, status) => {
+    if (status === 'running' && !injected) { injected = true; throw new Error('Synthetic storage failure'); }
+    return original(id, status);
+  };
+  try {
+    const task = f.store.createTask();
+    const turn = await f.engine.send(task.id, 'context-storage-failure', 'Start tool');
+    await until(() => !!f.runs[0]?.interrupted);
+    assert.equal(signal?.aborted, false, 'context must remain usable while a native tool is stopping');
+    assert.equal(released, 0);
+    assert.deepEqual(f.engine.contextRoots(task.id, turn.turnId), ['/synthetic/plugin/version-1']);
+    f.runs[0].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    assert.equal(signal?.aborted, true);
+    assert.equal(released, 1);
+    assert.equal(f.store.task(task.id).status, 'failed');
+  } finally {
+    f.runs[0]?.finish();
+    await f.close();
+  }
+});
+
+test('failed fresh-session setup cannot associate new instructions with the old native session', async () => {
+  let fingerprint = 'old';
+  const f = fixture({ context: async (task, turnId) => preparedContext(task, turnId!, fingerprint, async () => {}) });
+  try {
+    const task = f.store.createTask();
+    await f.engine.send(task.id, 'old-session', 'Original');
+    await until(() => f.runs.length === 1);
+    f.runs[0].emit({ type: 'session', id: 'old-native' });
+    f.runs[0].emit({ type: 'delta', text: 'Original result' });
+    f.runs[0].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    fingerprint = 'new';
+    const failed = await f.engine.send(task.id, 'failed-new-session', 'New instructions');
+    await until(() => f.runs.length === 2);
+    f.runs[1].fail(new Error('Provider rejected session creation'));
+    await until(() => f.engine.diagnostics().active.length === 0);
+    assert.equal(f.store.turn(failed.turnId).nativeSessionId, undefined);
+    assert.equal(f.store.nativeContext(task.id, 'codex', 'old-native')?.fingerprint, 'old');
+    const retry = await f.engine.send(task.id, 'retry-new-session', 'Retry new instructions');
+    await until(() => f.runs.length === 3);
+    assert.equal(f.runs[2].request.task.nativeSessions.codex, undefined);
+    assert.equal(f.store.contextRecord(task.id, retry.turnId)?.manifest.session, 'renewed-for-context');
+    f.runs[2].emit({ type: 'session', id: 'new-native' });
+    f.runs[2].emit({ type: 'delta', text: 'New result' });
+    f.runs[2].finish();
+    await until(() => f.engine.diagnostics().active.length === 0);
+    assert.equal(f.store.nativeContext(task.id, 'codex', 'new-native')?.fingerprint, 'new');
+  } finally { await f.close(); }
 });

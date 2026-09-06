@@ -173,3 +173,27 @@ test('missing session-helper preflight rejects before loading node-pty or creati
   assert.deepEqual(terminal.list('test'), [])
   await terminal.dispose()
 })
+
+test('extra read roots receive the immutable tool turn identity and never widen writes', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'akorith-turn-roots-'));
+  const workspace = path.join(root, 'workspace'), skill = path.join(root, 'skill');
+  await fs.mkdir(workspace); await fs.mkdir(skill);
+  const file = path.join(skill, 'SKILL.md'); await fs.writeFile(file, 'Frozen instruction');
+  const calls: Array<[string, string | undefined]> = [];
+  const host = createHostTools({
+    getContext: taskId => ({ taskId, cwd: workspace, mode: 'work' }),
+    getReadRoots: async (taskId, turnId) => { calls.push([taskId, turnId]); return taskId === 'owner' && turnId === 'accepted-turn' ? [skill] : []; },
+    getWindow: () => null, emit: () => {}, userData: root,
+  });
+  try {
+    const context = { taskId: 'owner', turnId: 'accepted-turn', cwd: workspace, mode: 'work' as const };
+    const content = await host.execute('files_read', { path: file }, context);
+    assert.match(JSON.stringify(content), /Frozen instruction/);
+    assert.deepEqual(calls, [['owner', 'accepted-turn']]);
+    await assert.rejects(host.execute('files_read', { path: file }, { ...context, turnId: 'other-turn' }));
+    await assert.rejects(host.execute('files_read', { path: file }, { ...context, taskId: 'other-task' }));
+    await assert.rejects(host.execute('files_read', { path: file }, { ...context, turnId: undefined }));
+    await assert.rejects(host.execute('files_write', { path: file, content: 'Bad' }, context));
+    assert.equal(await fs.readFile(file, 'utf8'), 'Frozen instruction');
+  } finally { await host.dispose(); await fs.rm(root, { recursive: true, force: true }); }
+});

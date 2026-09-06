@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, chmod, rm } from 'node:fs/promises'
+import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { OpenCodeProvider } from '../main/providers/opencode'
@@ -17,7 +18,15 @@ const json=value=>{res.writeHead(200,{'Content-Type':'application/json'});res.en
 if(path==='/event'){events=res;res.writeHead(200,{'Content-Type':'text/event-stream'});res.flushHeaders();return}
 if(path==='/provider')return json({connected:['synthetic'],all:[{id:'synthetic',name:'Synthetic',models:{model:{id:'model',name:'Synthetic model'}}}]});
 if(path.endsWith('/message'))return json([{info:{role:'assistant',time:{created},tokens:{input:5,output:3},cost:0},parts:[{type:'text',text}]}]);
-if(path.endsWith('/prompt_async')){text=body.parts[0].text==='wait'?'partial':'synthetic final';created=Date.now();json({});setImmediate(()=>{send('session.status',{status:{type:'busy'}});send('message.updated',{info:{id:'assistant',role:'assistant',sessionID:session}});send('message.part.updated',{part:{id:'part',messageID:'assistant',sessionID:session,type:'text',text}});if(body.parts[0].text!=='wait')send('session.status',{status:{type:'idle'}})});return}
+if(path.endsWith('/prompt_async')){require('node:fs').writeFileSync(require('node:path').join(__dirname,'received-prompt.json'),JSON.stringify(body));if(body.system==='reject-context'){res.writeHead(503).end('synthetic rejection');return}if(body.parts[0].text==='approval-fixture'){json({});setImmediate(()=>{
+send('session.status',{status:{type:'busy'}});
+send('message.part.updated',{part:{id:'foreign',type:'tool',sessionID:'other-session',messageID:'other-message',callID:'same-call',tool:'files_read',state:{input:{path:'FOREIGN-SECRET.txt'}}}});
+send('message.part.updated',{part:{id:'current',type:'tool',sessionID:session,messageID:'current-message',callID:'same-call',tool:'files_read',state:{input:{path:'actual-target.txt'}}}});
+send('permission.asked',{id:'matched',permission:'files_read',patterns:['*'],tool:{messageID:'current-message',callID:'same-call'}});
+send('permission.asked',{id:'unmatched',permission:'files_read',patterns:['*'],tool:{messageID:'other-message',callID:'same-call'}});
+send('permission.asked',{id:'metadata',permission:'bash',patterns:['npm *'],metadata:{command:'npm test'}});
+});return}
+text=body.parts[0].text==='wait'?'partial':'synthetic final';created=Date.now();json({});setImmediate(()=>{send('session.status',{status:{type:'busy'}});send('message.updated',{info:{id:'assistant',role:'assistant',sessionID:session}});send('message.part.updated',{part:{id:'part',messageID:'assistant',sessionID:session,type:'text',text}});if(body.parts[0].text!=='wait')send('session.status',{status:{type:'idle'}})});return}
 if(path.endsWith('/abort'))return json({});
 if(path==='/session'||path==='/session/'+session)return json({id:session});
 res.writeHead(404).end();
@@ -30,7 +39,7 @@ async function setup(t: any, drain?: HostTools['drain']) {
   const provider = new OpenCodeProvider(host, executable)
   t.after(async () => { await provider.dispose(); await rm(dir, { recursive: true, force: true }) })
   const request = (taskId: string, prompt: string): RunRequest => ({ task: { id: taskId, projectId: null, title: 'Synthetic', providerId: 'opencode', model: 'synthetic/model', effort: 'high', mode: 'work', status: 'running', pinned: false, archived: false, draft: '', nativeSessions: {}, createdAt: 1, updatedAt: 1 }, cwd: dir, turnId: taskId + '-turn', prompt, history: [], attachments: [], mcpServers: [], ollamaUrl: '' })
-  return { provider, request }
+  return { provider, request, dir }
 }
 test('OpenCode discovery retries transient signal-0 EPERM after terminating its owned fixture server', async t => {
   const { provider } = await setup(t)
@@ -78,4 +87,42 @@ test('OpenCode reports native success before delayed successful cleanup even whe
   release(); await stopped; await handle.done
   assert.equal(settled, true)
   assert.deepEqual(events.filter(event => event.type === 'outcome'), [{ type: 'outcome', outcome: { status: 'completed' } }])
+})
+
+test('OpenCode receipt hashes accepted prompt system text and excludes rejected submissions', async t => {
+  const { provider, request, dir } = await setup(t)
+  const input = { ...request('context', 'hello'), systemContext: 'OpenCode selected Türkçe 🧪' }
+  const events: ProviderEvent[] = []
+  await provider.run(input, event => events.push(event)).done
+  const received = JSON.parse(await readFile(join(dir, 'received-prompt.json'), 'utf8'))
+  assert.equal(received.system, input.systemContext)
+  const receipt = events.find(event => event.type === 'context')?.receipt
+  assert.equal(receipt?.stage, 'accepted'); assert.equal(receipt?.channel, 'native-prompt')
+  assert.equal(receipt?.systemSha256, createHash('sha256').update(received.system).digest('hex'))
+  const rejected: ProviderEvent[] = []
+  await assert.rejects(provider.run({ ...request('rejected-context', 'hello'), systemContext: 'reject-context' }, event => rejected.push(event)).done, /503/)
+  assert.equal(rejected.some(event => event.type === 'context'), false)
+})
+
+test('OpenCode approval details preserve broad native scope and match only the referenced session and tool call', async t => {
+  const { provider, request } = await setup(t)
+  const approvals: Extract<ProviderEvent, { type: 'pending' }>[] = []
+  let ready!: () => void
+  const received = new Promise<void>(resolve => { ready = resolve })
+  const handle = provider.run(request('approval-task', 'approval-fixture'), event => {
+    if (event.type === 'pending') { approvals.push(event); if (approvals.length === 3) ready() }
+  })
+  const stopped = assert.rejects(handle.done, { name: 'AbortError' })
+  await received
+  const matched = approvals.find(event => event.request.id === 'matched')!.request.detail!
+  assert.match(matched, /Permission scope supplied by OpenCode:\n\*/)
+  assert.match(matched, /do not narrow/)
+  assert.match(matched, /actual-target.txt/)
+  assert.doesNotMatch(matched, /FOREIGN-SECRET/)
+  const unmatched = approvals.find(event => event.request.id === 'unmatched')!.request.detail!
+  assert.match(unmatched, /No additional tool details/)
+  assert.doesNotMatch(unmatched, /actual-target|FOREIGN-SECRET/)
+  const metadata = approvals.find(event => event.request.id === 'metadata')!.request.detail!
+  assert.match(metadata, /npm \*/); assert.match(metadata, /npm test/)
+  await handle.interrupt(); await stopped
 })
