@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
-  "updatedAt": "2026-09-06T14:12:40.618253+00:00",
-  "status": "B09_packaging_and_visible_acceptance",
+  "updatedAt": "2026-09-06T14:19:00.644315+00:00",
+  "status": "B09_delivered_preview",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
   "branch": "rebuild/codex-interaction-parity",
   "baselineCommit": "9dc779c",
@@ -15,7 +15,23 @@
     "testsPassed": 275,
     "testsFailed": 0,
     "typecheck": "passed",
-    "hiddenBrowserCapture": "actual Electron pixels and lifecycle assertions passed"
+    "hiddenBrowserCapture": "actual Electron pixels and lifecycle assertions passed",
+    "packagedUI": {
+      "projectCreate": "passed, native parent picker and initial task",
+      "projectRename": "passed, folder preserved",
+      "fileMention": "passed keyboard selection, no accidental send, provider read copied snapshot",
+      "realProviderScreenshot": {
+        "turnId": "8bb886de-d180-4dd2-8377-140c1c382e99",
+        "provider": "opencode",
+        "model": "opencode/mimo-v2.5-free",
+        "status": "completed",
+        "width": 2200,
+        "height": 1600,
+        "workspacePanel": "closed"
+      },
+      "nativeQuit": "owned B09 process exited",
+      "reopen": "passed: Project acceptance retains original folder; completed attachment/screenshot turn and closed panel restored"
+    }
   },
   "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09",
   "historicalStateArchive": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/historical-state-before-B09.json",
@@ -28,10 +44,12 @@
     "Hidden browser screenshot repair"
   ],
   "pending": [
-    "B09 packaged visible acceptance",
     "Exact Codex appearance/motion and comparable performance measurement",
     "Remaining legacy feature inventory, guided account onboarding, durable goals/memory and migration",
     "Full computer use permission acceptance"
   ],
-  "automationPolicy": "No recurring continuation automation or retry loop."
+  "automationPolicy": "No recurring continuation automation or retry loop.",
+  "sourceCommit": "02eb7b5",
+  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B09/mac-arm64/Akorith Next.app",
+  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/package-receipt.json"
 }
