@@ -77,6 +77,11 @@ export function Dialog({
           event.preventDefault()
           return
         }
+        if (!panel?.contains(document.activeElement)) {
+          event.preventDefault()
+          ;(event.shiftKey ? items.at(-1) : items[0])?.focus()
+          return
+        }
         const first = items[0],
           last = items.at(-1)!
         if (event.shiftKey && document.activeElement === first) {
