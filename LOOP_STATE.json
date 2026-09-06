@@ -1,30 +1,27 @@
 {
   "schemaVersion": 4,
-  "updatedAt": "2026-09-06T16:51:30.436373+00:00",
-  "status": "B13_reference_composition_corrected_full_parity_incomplete",
+  "updatedAt": "2026-09-06T17:26:10.221549+00:00",
+  "status": "B14_requested_UI_profile_corrections_verified_full_replacement_open",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
   "branch": "rebuild/codex-interaction-parity",
-  "sourceCommit": "61c04dc",
-  "packageId": "B13",
-  "version": "2.0.0-alpha.13",
-  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B13/mac-arm64/Akorith Next.app",
-  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B13/final-package-receipt.json",
-  "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B13",
+  "sourceCommit": "922fc5c",
+  "packageId": "B14",
+  "version": "2.0.0-alpha.14",
+  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B14/mac-arm64/Akorith Next.app",
+  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B14/final-package-receipt.json",
+  "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B14",
   "installed": false,
   "pushed": false,
   "userDataMigrated": false,
   "readyForReplacement": false,
   "verification": {
-    "testsPassed": 325,
+    "testsPassed": 338,
     "testsFailed": 0,
     "typecheck": "passed",
     "codesign": "deep strict passed",
-    "native": "Reference composition, real Astra read response, files panel, project pin and quit/reopen observed",
-    "nativeResize": "unverified: CUA drag did not change saved width",
-    "acceptanceVerifiedCurrent": 0,
-    "acceptanceHistoricalStale": 12,
-    "acceptancePending": 89,
-    "deliveryGate": "blocked"
+    "native": "fullscreen alignment; compact menus keyboard/focus; folder disclosure endpoints; actual Astra four readonly files folded details; local profile persistence; clear/restore/reopen; final history-action focus",
+    "nativeResize": "not verified",
+    "deliveryGate": "blocked: full scope remains open"
   },
   "completed": [
     "New Codex-inspired desktop composition and separate lab/plugins pages",
@@ -44,8 +41,10 @@
   ],
   "automationPolicy": "No recurring automation created or resumed. Independent critique did not dispatch fixes.",
   "next": [
-    "Native resize gesture verification remains open",
-    "Measured icons/motion and remaining UI acceptance remain open"
+    "Exact Codex motion/icon equivalence remains unmeasured",
+    "Native sidebar drag remains unverified",
+    "Computer permissions and Claude authentication need user-controlled setup",
+    "Full replacement acceptance remains open"
   ],
   "currentPackageIncludesChanges": true
 }

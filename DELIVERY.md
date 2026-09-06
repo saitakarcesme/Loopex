@@ -1,13 +1,13 @@
-# Akorith Next — B13 UI düzeltmesi
+# Akorith Next — B14
 
-Branch: `rebuild/codex-interaction-parity`. Paket kaynak commit: `61c04dc`. Sürüm: `2.0.0-alpha.13`.
+Branch: `rebuild/codex-interaction-parity`. Paket kaynağı: `922fc5c`. Sürüm: `2.0.0-alpha.14`.
 
-`Open Akorith Next.command` B13 paketini mevcut ayrı geliştirme profiliyle açar. Son paket şu anda açık. Eski kurulu uygulama/veri değiştirilmedi; push yapılmadı.
+`Open Akorith Next.command` son B14 paketini ayrı geliştirme profiliyle açar. Şu anda yalnızca yeni paket açık.
 
-Kullanıcının Codex ekran görüntüsüne göre başlangıç ekranı yeniden düzenlendi: alttaki composer ve proje şeridi, dört yatay kart, proje başlığı, koyu yüzeyler ve sidebar hiyerarşisi. Gerçek proje sabitleme, model seçimi, Astra dosya okuma/yanıtı, sağ dosya paneli ve yeniden açılışta proje/konuşma kalıcılığı gözlendi. 325 test ve TypeScript kontrolü geçti; paket imzası deep/strict doğrulandı.
+Klasör geçişleri, tam ekranda kontrol hizası, ince outline ikonlar, kompakt model seçimi, çerçevesiz izin/efor menüleri ve gerçek araç geçmişinin katlanması eklendi. Sol altta kalıcı yerel profil; profil, görünüm, bağlantı/eklenti erişimi, bildirilen kullanım ve geçmişi geri alma alanları var. Geçmiş temizlendi; tek boş konuşma bırakıldı. Kayıtlar geri alınabilir.
 
-Birebir ikon/hareket eşdeğerliği, tüm Codex özellikleri ve tam uygulama değişimi kabulü tamamlanmadı. Kenar çubuğu sürüklemesi native denemede doğrulanamadı. Computer panelindeki macOS izinleri eksik. Tam teslim gate'i açık gereksinimler ve eski kaynak kanıtları nedeniyle geçmiyor. Stop hook'un runtime'da çalıştığı kanıtlanmadı; otomasyon kurulmadı.
+338 test, TypeScript ve paket imzası doğrulaması geçti. Tam ekran hizası, gerçek Astra dört dosya okuma turu, menü klavye/odak davranışları, profil kalıcılığı ve temizle/geri al/yeniden aç işlevleri native uygulamada gözlendi.
 
-Ayrıntılar: `docs/ui-parity/B13-REFERENCE-CORRECTION.md`. Görsel eleştiri: `docs/ui-parity/B13-INDEPENDENT-OPINION.md`.
+Tam Codex değişimi kabulü açık: kesin ikon/hareket eşdeğerliği, native sidebar sürükleme doğrulaması, macOS bilgisayar kontrol izinleri ve Claude oturumu tamamlanmış değil. Geniş teslim gate'i geçmiyor; Stop hook runtime kanıtı yok. Otomasyon/push yapılmadı.
 
-Kanıt klasörü: `/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B13`.
+Ayrıntılar: `docs/ui-parity/B14-VERIFICATION.md`. Kanıtlar: `/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B14`.
