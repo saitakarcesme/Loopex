@@ -1,5 +1,8 @@
 import {
   Archive,
+  Blocks,
+  FlaskConical,
+  Columns3,
   ArrowDown,
   ArrowUp,
   Check,
@@ -28,6 +31,8 @@ import { groupSidebarTasks, sidebarPage, PROJECT_PAGE_SIZE, TASK_PAGE_SIZE } fro
 interface SidebarProps {
   tasks: Task[]
   projects: Project[]
+  activePage?: string
+  onPage?: (page: 'chat' | 'research' | 'benchmark' | 'plugins') => void
   selectedId: string | null
   selectionRevision: number
   onSelect: (id: string) => void
@@ -44,6 +49,8 @@ interface SidebarProps {
 export const Sidebar = memo(function Sidebar({
   tasks,
   projects,
+  activePage = 'chat',
+  onPage,
   selectedId,
   selectionRevision,
   onSelect,
@@ -198,10 +205,7 @@ export const Sidebar = memo(function Sidebar({
     <>
       <aside className="sidebar" aria-label="Workspace sidebar">
         <div className="sidebar-top titlebar-drag">
-          <span className="sidebar-wordmark">
-            akorith
-            <span className="version-dot" />
-          </span>
+          <span className="sidebar-app-label">Akorith</span>
           <IconButton label="Hide sidebar (⌘B)" onClick={onCollapse}>
             <PanelLeftClose size={17} />
           </IconButton>
@@ -217,6 +221,9 @@ export const Sidebar = memo(function Sidebar({
             <span>Search tasks</span>
             <kbd>⌘K</kbd>
           </button>
+          <button className={`nav-action ${activePage === 'plugins' ? 'active' : ''}`} aria-current={activePage === 'plugins' ? 'page' : undefined} onClick={() => onPage?.('plugins')}><Blocks size={17}/><span>Plugins</span></button>
+          <button className={`nav-action ${activePage === 'research' ? 'active' : ''}`} aria-current={activePage === 'research' ? 'page' : undefined} onClick={() => onPage?.('research')}><FlaskConical size={17}/><span>Research</span></button>
+          <button className={`nav-action ${activePage === 'benchmark' ? 'active' : ''}`} aria-current={activePage === 'benchmark' ? 'page' : undefined} onClick={() => onPage?.('benchmark')}><Columns3 size={17}/><span>Benchmark</span></button>
         </div>
         <div className="sidebar-scroll" ref={scroll}>
           {showArchive ? (

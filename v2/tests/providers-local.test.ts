@@ -146,3 +146,16 @@ test('Ollama receipt matches the actual clipped loopback request and rejects HTT
   await assert.rejects(provider.run(request, event => rejected.push(event)).done, /503/)
   assert.equal(rejected.some(event => event.type === 'context'), false)
 })
+
+test('Ollama benchmark policy removes disallowed tools from catalog and rejects forged calls', async t => {
+  let count = 0
+  const f = await setup(t, (body, res) => {
+    assert.ok(!body.tools.some((tool: any) => tool.function.name === 'files_read'))
+    if (++count === 1) res.end(JSON.stringify({ message: { role: 'assistant', content: '', tool_calls: [{ function: { name: 'files_read', arguments: { path: 'proof.txt' } } }] }, done: true }) + '\n')
+    else { assert.match(body.messages.at(-1).content, /unknown|unavailable|not found|outside/i); res.end(JSON.stringify({ message: { content: 'Tool unavailable.' }, done: true }) + '\n') }
+  })
+  const scoped = new OllamaProvider(f.host, () => f.request.ollamaUrl!, () => ({ allowedHostTools: [], allowedMcpServerIds: [] }))
+  t.after(() => scoped.dispose())
+  await scoped.run(f.request, () => {}).done
+  assert.equal(f.calls.length, 0)
+})

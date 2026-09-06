@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
-  "updatedAt": "2026-09-06T14:19:00.644315+00:00",
-  "status": "B09_delivered_preview",
+  "updatedAt": "2026-09-06T14:53:49.817080+00:00",
+  "status": "B10_packaged_UI_and_real_provider_acceptance",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
   "branch": "rebuild/codex-interaction-parity",
   "baselineCommit": "9dc779c",
@@ -44,12 +44,28 @@
     "Hidden browser screenshot repair"
   ],
   "pending": [
-    "Exact Codex appearance/motion and comparable performance measurement",
-    "Remaining legacy feature inventory, guided account onboarding, durable goals/memory and migration",
-    "Full computer use permission acceptance"
+    "Package and visually verify new desktop composition, Research, Benchmark and Plugins",
+    "Real Research baseline/candidate evaluator flow",
+    "Real benchmark run and automatic browser recording/export",
+    "Reference motion/icon comparison evidence",
+    "Actual hook trust/runtime verification",
+    "Independent opinion-only critique after implementation"
   ],
   "automationPolicy": "No recurring continuation automation or retry loop.",
   "sourceCommit": "02eb7b5",
   "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B09/mac-arm64/Akorith Next.app",
-  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/package-receipt.json"
+  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/package-receipt.json",
+  "activeScope": "docs/ui-parity/acceptance.json",
+  "currentPackageIncludesChanges": true,
+  "unpackagedRefinements": [
+    "Disclosure exit completion filters height transition",
+    "Plugin version selection does not implicitly enable"
+  ],
+  "next": [
+    "Finish real browser benchmark recordings",
+    "Rebuild final UI refinements and verify native persisted results",
+    "Update evidence matrix without marking unmeasured motion parity verified",
+    "Independent opinion-only critique",
+    "Clean owned resources"
+  ]
 }

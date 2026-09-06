@@ -25,6 +25,12 @@ import { randomUUID } from "node:crypto";
 import { Store } from "./storage";
 import { searchProjectFiles, attachProjectFile } from "./project-files";
 import { Engine } from "./engine";
+import { ResearchService, researchCommand } from './research';
+import { BenchmarkStore } from './benchmark';
+import { BenchmarkRuntime } from './benchmark-runtime';
+import { BenchmarkEvidenceFiles } from './benchmark-evidence';
+import { BenchmarkBrowserRecorder } from './benchmark-video';
+import { exportBenchmarkComparison } from './benchmark-export';
 import { observeShellLifecycle } from "./window-lifecycle";
 import { ShutdownCoordinator } from "./shutdown";
 import { CommandOperations } from "./operations";
@@ -76,13 +82,15 @@ let store: Store,
   plugins: PluginManager,
   host: ReturnType<typeof createHostTools>;
 let checkpoints: CheckpointManager;
+let research: ResearchService | undefined;
+let benchmarks: BenchmarkStore, benchmarkRuntime: BenchmarkRuntime | undefined, benchmarkEvidence: BenchmarkEvidenceFiles;
 let providers: ReturnType<typeof createProviders> = [];
 let providerInfo: ProviderInfo[] = [];
 let refresh: Promise<ProviderInfo[]> | undefined;
 const commandOperations = new CommandOperations();
 const shutdown = new ShutdownCoordinator([
   { name: "runtime and extensions", run: () => quiesceExtensions({
-    engine: () => engine?.shutdown(),
+    engine: async () => { await Promise.all([research?.dispose(), benchmarkRuntime?.dispose()]); await engine?.shutdown(); },
     host: () => host?.dispose(),
     commands: () => commandOperations.drain(),
     extensions: () => extensions?.dispose(),
@@ -216,6 +224,44 @@ async function command(name: string, payload: unknown) {
         return result.canceled ? null : { path: result.filePaths[0] };
       },
     });
+  }
+  if (name.startsWith('research:')) {
+    if (!research) throw new Error('Research is not ready yet.');
+    return researchCommand(name, p, research);
+  }
+  if (name.startsWith('benchmark:')) {
+    const benchmarkId = name === 'benchmark:create' || name === 'benchmark:list' ? '' : id(p.benchmarkId);
+    switch (name) {
+      case 'benchmark:list': return benchmarks.list();
+      case 'benchmark:create': { const record = benchmarks.create(p); send({type:'changed'}); return record; }
+      case 'benchmark:read': return benchmarks.read(benchmarkId);
+      case 'benchmark:start': return benchmarkRuntime!.start(benchmarkId);
+      case 'benchmark:stop': return benchmarkRuntime!.stop(benchmarkId);
+      case 'benchmark:annotate': { const record = benchmarks.annotate(benchmarkId, p.notes, p.variantId === undefined ? undefined : id(p.variantId)); send({type:'changed'}); return record; }
+      case 'benchmark:media': {
+        const record = benchmarks.read(benchmarkId), variant = record.variants.find(v => v.id === id(p.variantId));
+        if (!variant?.evidence.some(e => e.id === id(p.evidenceId))) throw new Error('Evidence does not belong to this variant.');
+        return benchmarkEvidence.preview(record, id(p.evidenceId));
+      }
+      case 'benchmark:addEvidence': {
+        const record = benchmarks.read(benchmarkId), variantId = id(p.variantId);
+        if (!record.variants.some(v => v.id === variantId && v.turnId)) throw new Error('Start the variant before adding evidence.');
+        const picked = await dialog.showOpenDialog(window!, {title:'Add comparison evidence',properties:['openFile']});
+        if (picked.canceled) return null;
+        const path = picked.filePaths[0], extension = extname(path).toLowerCase();
+        const kind = ['.mp4','.webm','.mov'].includes(extension) ? 'video' : ['.png','.jpg','.jpeg','.webp','.gif'].includes(extension) ? 'image' : 'artifact';
+        const evidence = await benchmarkEvidence.capture({path,kind,label:basename(path).slice(0,200),origin:'user-selected'},[resolve(path,'..')]);
+        const updated = benchmarks.recordEvidence(benchmarkId,variantId,evidence); send({type:'changed'}); return updated;
+      }
+      case 'benchmark:export': {
+        const picked = await dialog.showOpenDialog(window!, {title:'Save comparison results',properties:['openDirectory','createDirectory']});
+        if(picked.canceled) return null;
+        const result = await exportBenchmarkComparison(benchmarks.read(benchmarkId),picked.filePaths[0],benchmarkEvidence.directory);
+        const error = await shell.openPath(result.indexPath); if(error) throw new Error(error);
+        return result;
+      }
+      default: throw new Error('Unknown benchmark command.');
+    }
   }
   switch (name) {
     case "app:diagnostics":
@@ -634,6 +680,8 @@ app
   .then(async () => {
     mkdirSync(userData, { recursive: true });
     store = new Store(join(userData, "workspace.sqlite"));
+    benchmarks = new BenchmarkStore(store); benchmarks.reconcile();
+    benchmarkEvidence = new BenchmarkEvidenceFiles(join(userData,'benchmarks','evidence'));
     // Native sessions can retain MCP assets beyond a turn. Without a complete
     // ownership proof, cleanup reports usage_unknown and preserves those copies.
     plugins = new PluginManager({ db: store.db, userData });
@@ -652,6 +700,7 @@ app
     });
     providers = createProviders(host, {
       getOllamaUrl: () => store.settings().ollamaUrl,
+      getLocalToolPolicy: request => benchmarkRuntime?.localPolicy(request) ?? null,
     });
     providerInfo = providers.map((p) => ({
       id: p.id,
@@ -685,6 +734,8 @@ app
       },
       send,
       {
+        executionStarted: (task,turnId) => benchmarkRuntime?.executionStarted(task,turnId),
+        executionSettled: (task,turnId) => benchmarkRuntime?.executionSettled(task,turnId),
         beforeRun:async(task,turnId,path)=>{await checkpoints.begin(task.id,turnId,path)},
         afterRun:async(task,turnId,path)=>{
           const summary=await checkpoints.finish(task.id,turnId,path)
@@ -695,6 +746,14 @@ app
         }
       }
     );
+    research = new ResearchService(store, engine, userData, () => send({ type: 'changed' }));
+    benchmarkRuntime = new BenchmarkRuntime({benchmarks,engine,directory:join(userData,'benchmarks','workspaces'),changed:()=>send({type:'changed'}),notice:text=>send({type:'notice',text}),evidence:benchmarkEvidence,
+      recorder:new BenchmarkBrowserRecorder({directory:join(userData,'benchmarks','recordings'),ffmpeg:'/opt/homebrew/bin/ffmpeg',captureFrame:async(taskId,turnId,signal)=>{
+        const tabs = await host.invoke('browser:list',{taskId}) as Array<{id:string}>;
+        if(!tabs.length)return null;
+        const result = await host.execute('browser_screenshot',{id:tabs[0].id},{...getContext(taskId),turnId},signal) as {dataUrl:string};
+        return result.dataUrl;
+      }})});
     ipcMain.handle("akorith:command", async (event, input: unknown) => {
       try {
         if (

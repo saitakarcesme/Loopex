@@ -113,3 +113,14 @@ B08 actual provider follow-up completed: genuine currency invalid-input regressi
 
 B09 packaged acceptance passed: native picker created project-create-check plus first task; metadata rename to Project acceptance retained original folder. @README keyboard Down/Enter produced README attachment without sending. Actual OpenCode MiMo turn 8bb886de-d180-4dd2-8377-140c1c382e99 read the copied snapshot, opened localhost inventory and completed browser_screenshot at 2200x1600 while workspace panel closed. Result/activities/AX/PNG and source/package hash receipt retained in B09 evidence. Normal native Quit exited owned B09 process. Package is development preview, not a full replacement-ready claim.
 B09 native reopen passed: renamed project with original folder, completed README/screenshot turn, selected model and closed workspace panel survived. Separate development launcher preserves the isolated acceptance profile; old installed app/data untouched. No continuation automation.
+
+## UI-first step after user scope correction
+Research now means autoresearch hypothesis/baseline/isolated measured experiments, not web research. Benchmark means side-by-side model/method outputs/video/time/tokens/cost with human quality judgement. Plugins has its own main page. No legacy or ResearchLab source/assets transferred. Official static Codex reference inspected in browser; timings not inferred as measured. Native B04 and old Akorith closed, owned 4310/4311/4317 servers stopped, reference tab closed after evidence. 101 concrete acceptance requirements and source/evidence hash gate created; runtime Stop hook trust not yet confirmed. New UI and domain changes in progress; no readiness claim.
+
+## B10 real-provider and UI acceptance
+- New alpha10 Mac package built and codesign --deep --strict passed. B09 Quit verified before B10 launch. Fresh shell screenshot and dedicated Plugins page captured; actual fixture enabled via packaged UI.
+- 306 integration tests passed before final UI preset/guard refinements. Final suite still required.
+- Research actual Codex Astra run: host baseline133867 -> candidate2297, retained;214841 independent integer cases and actual lookup counts checked. Fractional/Infinity equivalence fails; supplied evaluator scope only. Source project untouched. Evidence B10/research-live/run-towyCz.
+- Benchmark actual Codexmini and MiMo text run: both expected result,4.27s/14.70s; costs/tokens available only as reported. Isolated sequential fixtures, portableHTML, clean shutdown. Actual browser recording still in progress.
+- Public official InAppBrowser video was played; outlinecontrols/embeddedbrowser layout observed. Exact animation timing/easing remains unmeasured.
+- Native CUA snapshots can lag actions and some click/focus paths require another observation. No passing UI flow inferred from attempted click.

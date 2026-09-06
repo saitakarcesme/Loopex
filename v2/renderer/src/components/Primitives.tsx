@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import {
   useEffect,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
@@ -38,8 +39,19 @@ export function Dialog({
   labelled?: boolean
 }>) {
   const ref = useRef<HTMLDivElement>(null)
+  const [closing, setClosing] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestClose = () => {
+    if (closeTimer.current) return
+    setClosing(true)
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null
+      onClose()
+      setClosing(false)
+    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 110)
+  }
   const closeRef = useRef(onClose)
-  closeRef.current = onClose
+  closeRef.current = requestClose
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
     const panel = ref.current
@@ -78,15 +90,16 @@ export function Dialog({
     }
     document.addEventListener('keydown', keydown)
     return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current)
       document.removeEventListener('keydown', keydown)
       previous?.focus()
     }
   }, [])
   return createPortal(
     <div
-      className="modal-backdrop"
+      className={`modal-backdrop ${closing ? 'is-closing' : ''}`}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
+        if (event.target === event.currentTarget) requestClose()
       }}
     >
       <div
@@ -100,7 +113,7 @@ export function Dialog({
         {labelled ? (
           <div className="dialog-heading">
             <h2>{title}</h2>
-            <IconButton label="Close" onClick={onClose}>
+            <IconButton label="Close" onClick={requestClose}>
               <X size={18} />
             </IconButton>
           </div>

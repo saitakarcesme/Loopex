@@ -1,0 +1,6 @@
+{
+  "description": "Akorith UI scope and evidence completion gate. Requires runtime trust; does not schedule jobs.",
+  "hooks": {
+    "Stop": [{ "hooks": [{ "type": "command", "command": "node /Users/ibrahimsaitakarcesme/Developer/AkorithNext/scripts/ui/acceptance-gate.mjs --stop-hook", "timeout": 10, "statusMessage": "Checking requested UI and product outcomes" }] }]
+  }
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Local delivery evidence gate; no network action is performed by this hook.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+node scripts/ui/acceptance-gate.mjs

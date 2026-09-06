@@ -18,6 +18,9 @@ import {
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Project, Settings } from '../../shared/contracts'
 import { api, isActive, persist, remember, statusLabel } from './api'
+import { ResearchPage } from './pages/ResearchPage'
+import { BenchmarkPage } from './pages/BenchmarkPage'
+import { PluginsPage } from './pages/PluginsPage'
 import { Composer } from './components/Composer'
 import { ContextDialog } from './components/ContextDialog'
 import { ArtifactPreviewProvider } from './components/ArtifactPreview'
@@ -59,6 +62,11 @@ function Notice({
 export function App() {
   const workspace = useWorkspace()
   const { snapshot, detail, selectedId, reportError, notify } = workspace
+  const [page, setPage] = useState<'chat' | 'research' | 'benchmark' | 'plugins'>('chat')
+  const showPage = (next: 'chat' | 'research' | 'benchmark' | 'plugins') => {
+    if (next !== 'chat') { void api('browser:hideAll').catch(reportError); setPanelOpen(false) }
+    setPage(next)
+  }
   const shellRef = useRef<HTMLDivElement>(null)
   const { sidebarOpen, panelOpen, setSidebarOpen, setPanelOpen, changing: layoutChanging } = useWorkspaceLayout(selectedId, shellRef, reportError)
   const [panelTab, setPanelTab] = useState<PanelTab>(() => remember('panelTab', 'files'))
@@ -91,6 +99,7 @@ export function App() {
   const overlay = !!settingsTab || searchOpen || sidebarOverlay || reviewOverlay || artifactOverlay || modelOverlay || contextOpen
   const newTask = useCallback(
     async (projectId?: string | null) => {
+      setPage('chat')
       if (creating.current) return
       creating.current = true
       try {
@@ -170,6 +179,7 @@ export function App() {
   }, [workspace.refresh, newTask, reportError])
   const selectTask = useCallback(
     (id: string) => {
+      setPage('chat')
       workspace.selectTask(id)
       setSelectionRevision((value) => value + 1)
     },
@@ -330,7 +340,9 @@ export function App() {
           <Sidebar
             tasks={snapshot.tasks}
             projects={snapshot.projects}
-            selectedId={selectedId}
+            activePage={page}
+            onPage={showPage}
+            selectedId={page === 'chat' ? selectedId : null}
             selectionRevision={selectionRevision}
             onSelect={selectTask}
             onNew={newSidebarTask}
@@ -361,7 +373,7 @@ export function App() {
             <header
               className={`workspace-header titlebar-drag ${!sidebarOpen ? 'sidebar-hidden' : ''}`}
             >
-              <div className="header-context" id="workspace-navigation-heading" tabIndex={-1} aria-label={task?.title || 'Workspace'}>
+              <div className="header-context" id="workspace-navigation-heading" tabIndex={-1} aria-label={page === 'chat' ? task?.title || 'Workspace' : page}>
                 {!sidebarOpen ? (
                   <IconButton
                     label="Show sidebar (⌘B)"
@@ -387,9 +399,9 @@ export function App() {
                 </div>
                 <span className="header-project" title={project?.path}>
                   {project ? <Folder size={14} /> : null}
-                  {project?.name || 'Workspace'}
+                  {page === 'chat' ? project?.name || 'Workspace' : page === 'plugins' ? 'Plugins' : page === 'research' ? 'Research' : 'Benchmark'}
                 </span>
-                {task ? (
+                {task && page === 'chat' ? (
                   <>
                     <span className="header-divider">/</span>
                     <span id="active-task-heading" tabIndex={-1} className="header-task" title={task.title}>
@@ -398,7 +410,7 @@ export function App() {
                   </>
                 ) : null}
               </div>
-              <div className="header-actions">
+              {page === 'chat' ? <div className="header-actions">
                 {task && isActive(task.status) ? (
                   <span className="header-status">
                     <span className="live-orb" />
@@ -430,9 +442,11 @@ export function App() {
                 >
                   <PanelRightOpen size={17} />
                 </IconButton>
-              </div>
+              </div> : null}
             </header>
-            {task && detail ? (
+            {page === 'plugins' ? <PluginsPage onError={reportError} onRefresh={workspace.refresh}/> :
+             page === 'research' ? <ResearchPage snapshot={snapshot} initialProjectId={task?.projectId} onError={reportError} onOpenTask={selectTask}/> :
+             page === 'benchmark' ? <BenchmarkPage snapshot={snapshot} onError={reportError} onOpenTask={selectTask}/> : task && detail ? (
               <div className={`conversation ${detail.messages.length ? '' : 'empty-conversation'}`}>
                 {detail.messages.length || detail.pending.length ? (
                   <Transcript
@@ -450,19 +464,7 @@ export function App() {
                   />
                 ) : (
                   <div className="welcome">
-                    <div className="welcome-mark" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                    <div className="welcome-eyebrow">{project ? project.name : 'Your workspace'}</div>
-                    <h1>
-                      What would you like
-                      <br />
-                      to work on?
-                    </h1>
-                    <p>From the first thought to the finished thing.</p>
+                    <h1>{project ? `What should we build in ${project.name}?` : 'What should we work on?'}</h1>
                     <div className="welcome-starters">
                       <button
                         onClick={() =>
@@ -554,7 +556,7 @@ export function App() {
               document.getElementById('workspace-panel-toggle')?.focus({ preventScroll: true })
               setPanelOpen(false)
             }}
-            overlay={overlay || layoutChanging}
+            overlay={overlay || layoutChanging || page !== 'chat'}
             theme={resolvedTheme}
             requestedPath={filePath}
             requestVersion={fileVersion}

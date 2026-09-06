@@ -46,6 +46,8 @@ export function workspacesOverlap(first: string, second: string): boolean {
   return contains(first, second) || contains(second, first);
 }
 export interface RunLifecycleHooks {
+  executionStarted?: (task: Task, turnId: string) => void | Promise<void>;
+  executionSettled?: (task: Task, turnId: string) => void | Promise<void>;
   beforeRun?: (task: Task, turnId: string, cwd: string) => Promise<Activity[] | void>;
   afterRun?: (task: Task, turnId: string, cwd: string) => Promise<Activity[] | void>;
 }
@@ -111,6 +113,7 @@ export class Engine {
     requestId: string,
     prompt: string,
     attachments: Attachment[] = [],
+    onAccepted?: (turn: StoredTurn) => void,
   ) {
     if (this.storageFault) throw new Error("Task storage failed. Your draft is retained; reopen Akorith before starting more work.");
     if (this.closing)
@@ -121,12 +124,16 @@ export class Engine {
       throw new Error("Write a message or attach a file.");
     if (prompt.length > 200_000)
       throw new Error("Message is too large. Attach a file instead.");
-    const accepted = this.store.acceptTurn(
+    const accepted = this.store.db.transaction(() => {
+      const result = this.store.acceptTurn(
       taskId,
       requestId,
       prompt.trim(),
       attachments,
-    );
+      );
+      onAccepted?.(result.turn);
+      return result;
+    })();
     if (!accepted.duplicate) {
       this.emit({ type: "changed", taskId });
       if (!this.active.has(taskId)) this.status(taskId, "queued");
@@ -314,6 +321,7 @@ export class Engine {
       this.emit({ type: "message", message: userMessage });
       run.message.status = "starting";
       this.store.setTurnStatus(run.turn.id, "starting");
+      await this.lifecycle.executionStarted?.(task, run.turn.id);
       this.status(task.id, "starting");
       this.flush(run);
       if (task.mode !== "read" && this.lifecycle.beforeRun)
@@ -498,6 +506,7 @@ export class Engine {
         this.store.setTurnStatus(run.turn.id, terminal);
         this.flush(run);
         this.store.event(task.id, run.turn.id, "ended", { status: terminal });
+        await this.lifecycle.executionSettled?.(task, run.turn.id);
         this.status(task.id, terminal);
       } catch (error) {
         this.storageFault = true;

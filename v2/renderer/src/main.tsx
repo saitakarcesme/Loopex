@@ -7,6 +7,8 @@ import './styles/panels.css'
 import './styles/settings.css'
 import './styles/shell.css'
 import './styles/tokens.css'
+import './styles/desktop.css'
+import './styles/lab-pages.css'
 
 class ErrorBoundary extends React.Component<React.PropsWithChildren, { error: string | null }> {
   state: { error: string | null } = { error: null }

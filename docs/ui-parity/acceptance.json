@@ -1,0 +1,714 @@
+{
+  "version": 1,
+  "scope": "UI transformation + autoresearch + comparative benchmark + dedicated plugins",
+  "rule": "No legacy code transfer. Build/test pass cannot replace visual and interaction evidence. Source/reference observations distinguished from implementation choices.",
+  "items": [
+    {
+      "id": "SHELL-001",
+      "requirement": "window chrome placement",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-002",
+      "requirement": "sidebar surface contrast",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-003",
+      "requirement": "main surface contrast",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-004",
+      "requirement": "default dimensions",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-005",
+      "requirement": "resize handles",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-006",
+      "requirement": "narrow window containment",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-007",
+      "requirement": "header action alignment",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-008",
+      "requirement": "sidebar collapse focus",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-009",
+      "requirement": "panel collapse focus",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "SHELL-010",
+      "requirement": "no idle animation",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-001",
+      "requirement": "new task",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-002",
+      "requirement": "search",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-003",
+      "requirement": "plugins page",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-004",
+      "requirement": "research page",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-005",
+      "requirement": "benchmark page",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-006",
+      "requirement": "selected section",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-007",
+      "requirement": "project expansion",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-008",
+      "requirement": "task selection",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-009",
+      "requirement": "long title truncation",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "NAVIGATION-010",
+      "requirement": "history back and forward",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-001",
+      "requirement": "centered empty composer",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-002",
+      "requirement": "single line heading",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-003",
+      "requirement": "attachment button",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-004",
+      "requirement": "permission selector",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-005",
+      "requirement": "model selector alignment",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-006",
+      "requirement": "reasoning selector",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-007",
+      "requirement": "send circle icon",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-008",
+      "requirement": "stop icon",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-009",
+      "requirement": "growing textarea",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-010",
+      "requirement": "keyboard mention list",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-011",
+      "requirement": "Shift Enter newline",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-012",
+      "requirement": "empty send disabled",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-013",
+      "requirement": "queue controls",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "COMPOSER-014",
+      "requirement": "pending persistence",
+      "status": "pending",
+      "reference": "https://learn.chatgpt.com/images/codex/app/codex-app-basic-dark.webp",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-001",
+      "requirement": "prompt departure transition",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-002",
+      "requirement": "streamed text layout",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-003",
+      "requirement": "activity row density",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-004",
+      "requirement": "activity expand",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-005",
+      "requirement": "activity collapse",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-006",
+      "requirement": "code block wrapping",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-007",
+      "requirement": "copy feedback",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-008",
+      "requirement": "approval card",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-009",
+      "requirement": "error state",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-010",
+      "requirement": "retry path",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-011",
+      "requirement": "follow-up flow",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-012",
+      "requirement": "scroll following",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-013",
+      "requirement": "manual scroll respected",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "CONVERSATION-014",
+      "requirement": "final result typography",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-001",
+      "requirement": "independent page navigation",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-002",
+      "requirement": "search field",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-003",
+      "requirement": "installed filter",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-004",
+      "requirement": "plugin row icon",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-005",
+      "requirement": "plugin description",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-006",
+      "requirement": "details panel",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-007",
+      "requirement": "skill contents",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-008",
+      "requirement": "MCP contents",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-009",
+      "requirement": "import local",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-010",
+      "requirement": "enable state",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-011",
+      "requirement": "disable state",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "PLUGINS-012",
+      "requirement": "version selection",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-001",
+      "requirement": "study creation",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-002",
+      "requirement": "goal and hypothesis",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-003",
+      "requirement": "metric direction",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-004",
+      "requirement": "fixed evaluator protocol",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-005",
+      "requirement": "baseline run",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-006",
+      "requirement": "isolated candidate",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-007",
+      "requirement": "host measured evidence",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-008",
+      "requirement": "keep discard decision",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-009",
+      "requirement": "bounded iteration count",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-010",
+      "requirement": "pause and resume",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-011",
+      "requirement": "stop child processes",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "RESEARCH-012",
+      "requirement": "reopen history",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-001",
+      "requirement": "comparison type",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-002",
+      "requirement": "same immutable prompt",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-003",
+      "requirement": "model variants",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-004",
+      "requirement": "method variants",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-005",
+      "requirement": "method capability restrictions",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-006",
+      "requirement": "real duration",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-007",
+      "requirement": "reported tokens",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-008",
+      "requirement": "reported cost",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-009",
+      "requirement": "missing data state",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-010",
+      "requirement": "side by side output",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-011",
+      "requirement": "video synchronization",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-012",
+      "requirement": "playback seeking",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-013",
+      "requirement": "artifact association",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-014",
+      "requirement": "export results page",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK-015",
+      "requirement": "human quality judgement",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-001",
+      "requirement": "sidebar enter",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-002",
+      "requirement": "sidebar exit",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-003",
+      "requirement": "right panel enter",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-004",
+      "requirement": "right panel exit",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-005",
+      "requirement": "page change",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-006",
+      "requirement": "model menu enter",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-007",
+      "requirement": "modal enter",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-008",
+      "requirement": "modal exit",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-009",
+      "requirement": "disclosure expand",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-010",
+      "requirement": "disclosure collapse",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-011",
+      "requirement": "interrupted transitions",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-012",
+      "requirement": "reduced motion",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-013",
+      "requirement": "no native view occlusion",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    },
+    {
+      "id": "MOTION-014",
+      "requirement": "focus restoration",
+      "status": "pending",
+      "reference": "user requirement; motion timing needs observed reference",
+      "evidence": []
+    }
+  ]
+}

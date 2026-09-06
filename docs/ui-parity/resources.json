@@ -1,0 +1,44 @@
+{
+  "closed": [
+    {
+      "resource": "B04 Akorith Next",
+      "method": "native Quit",
+      "verified": true
+    },
+    {
+      "resource": "old installed Akorith",
+      "method": "native CmdQ",
+      "verified": true
+    },
+    {
+      "resource": "service-desk 22959 / inventory demo 24398",
+      "method": "SIGTERM owned synthetic fixture servers",
+      "verified": true
+    },
+    {
+      "resource": "B09 main PID 75284",
+      "method": "Native Quit, ps verified absent before B10 launch",
+      "verified": true
+    },
+    {
+      "resource": "Root official static-reference Chrome tab",
+      "method": "CUA tab.close",
+      "verified": true
+    },
+    {
+      "resource": "Reference-motion Chrome tab 834533575",
+      "method": "CUA tab.close by reference reviewer",
+      "verified": true
+    }
+  ],
+  "retained": [
+    {
+      "resource": "B10 alpha10 native application PID 93873",
+      "reason": "current packaged UI acceptance; isolated B05/live-data profile"
+    },
+    {
+      "resource": "Real benchmark Electron harness",
+      "reason": "bounded provider-driven browser recording acceptance; owner plugin_bootstrap cleans at completion"
+    }
+  ]
+}

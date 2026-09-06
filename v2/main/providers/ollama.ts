@@ -1,3 +1,4 @@
+import { scopedBenchmarkHost, type BenchmarkLocalToolPolicy } from '../benchmark-tool-policy'
 import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import type { HostTools, ProviderAdapter, ProviderInfo, RunHandle, RunRequest } from '../../shared/contracts'
@@ -35,7 +36,7 @@ export class OllamaProvider implements ProviderAdapter {
   private completions = new Set<Promise<unknown>>()
   private plugins = new Set<LocalMcpTools>()
   private cleanup = new Map<Promise<unknown>, () => Promise<void>>()
-  constructor(private hostTools: HostTools, private getUrl: () => string = () => 'http://127.0.0.1:11434') {}
+  constructor(private hostTools: HostTools, private getUrl: () => string = () => 'http://127.0.0.1:11434', private getToolPolicy?: (request: RunRequest) => BenchmarkLocalToolPolicy | null) {}
   async discover(): Promise<ProviderInfo> {
     const capabilities = { resume: true, steer: false, tools: false, approvals: true, images: false }
     try {
@@ -55,6 +56,10 @@ export class OllamaProvider implements ProviderAdapter {
     } catch (error) { return { id: this.id, name: 'Ollama', available: false, models: [], capabilities, connectionLabel: 'Ollama unavailable', error: errorText(error) } }
   }
   run(request: RunRequest, emit: Emit): RunHandle {
+    const policy = this.getToolPolicy?.(request);
+    const host = policy ? scopedBenchmarkHost(this.hostTools, request, policy) : this.hostTools;
+    if (policy) for (const id of policy.allowedMcpServerIds) if (!request.mcpServers.some(server => server.id === id && server.enabled)) throw new Error(`Requested benchmark MCP server is unavailable: ${id}`);
+    if (policy) request = { ...request, mcpServers: request.mcpServers.filter(server => policy.allowedMcpServerIds.includes(server.id)) };
     const controller = new AbortController(); this.controllers.add(controller)
     const pending = new Map<string, ReturnType<typeof deferred<boolean>>>()
     const abort = () => { for (const answer of pending.values()) answer.reject(abortError()); pending.clear() }
@@ -66,7 +71,7 @@ export class OllamaProvider implements ProviderAdapter {
       return answer.promise
     })
     this.plugins.add(plugins)
-    const native = plugins.connect(this.hostTools).then(host => this.execute(request, emit, controller.signal, host)).catch(error => { if (controller.signal.aborted) throw abortError(); throw error })
+    const native = plugins.connect(host).then(connected => this.execute(request, emit, controller.signal, connected)).catch(error => { if (controller.signal.aborted) throw abortError(); throw error })
     void native.catch(() => {})
     const cleanup = retryableCleanup(async () => {
       controller.abort(); pending.clear()

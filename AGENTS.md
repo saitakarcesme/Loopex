@@ -20,3 +20,12 @@ Root: v2/shared, storage, engine, bootstrap, package/config, integration/E2E.
 Provider agent: v2/main/providers/ and provider tests.
 UI agent: v2/renderer/.
 Host agent: v2/main/host/, v2/native/ and host tests.
+
+## UI-focused acceptance (6 September 2026)
+- The active UI/Research/Benchmark/Plugins scope is docs/ui-parity/acceptance.json. A passing build is not task completion.
+- No legacy Akorith or ResearchLab source, CSS, assets or implementation may be transferred. Reference only behavioral philosophy.
+- UI parity requires actual reference and packaged observations; never mark motion duration verified from a static screenshot.
+- Run npm run verify:delivery before a completion claim. A failing gate means the requested scope remains open; continue useful work unless the user stops or a concrete external blocker prevents it.
+- Native Stop hook config exists in .codex/hooks.json; do not claim active runtime enforcement until an actual runtime event proves it. Never bypass hook trust.
+- Final independent critic is opinion-only: compare user requests against actual evidence, no edits or automatically dispatched fixes from that review.
+- Maintain resource ledger and close owned temporary apps/tabs/processes once no longer needed. No periodic continuation automation.

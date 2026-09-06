@@ -20,6 +20,7 @@ import { activityPresentation } from './activityPresentation'
 import { AttachmentLink } from './ArtifactPreview'
 import { Markdown } from './Markdown'
 import { IconButton, Spinner } from './Primitives'
+import { Disclosure } from './Disclosure'
 
 const scrollPositions = new Map<string, { top: number; pinned: boolean }>()
 export function ActivityRow({
@@ -76,7 +77,7 @@ export function ActivityRow({
         ) : null}
         {presentation.detail ? <ChevronRight className={expanded ? 'rotated' : ''} size={13} /> : null}
       </button>
-      {expanded && presentation.detail ? (
+      {presentation.detail ? <Disclosure open={expanded}>
         <div className="activity-detail">
           {activity.kind === 'plan' ? (
             <Markdown text={presentation.detail} onOpenFile={onOpenFile} onError={onError} />
@@ -89,7 +90,7 @@ export function ActivityRow({
             </button>
           ) : null}
         </div>
-      ) : null}
+      </Disclosure> : null}
     </div>
   )
 }
