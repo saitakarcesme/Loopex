@@ -84,3 +84,29 @@ Actual Astra terminal_execute fixture, edited/reordered/removed UIqueue, Stop332
 ## 2026-09-05T03:52:03.130171+00:00 — Performance series comparability corrected
 
 All3B03individual runs passed, but root identified its concurrent Store attribution edit affected subsequent seed payloads: run1has0attributedmessages,run2/3have10000. The frozen B03 renderer ignores the new field; nevertheless strict same-input comparison is withdrawn andG03reopened. Earlier “three comparable” entries are superseded by this correction. FinalB04will preseed all3fromsamefrozenStore, recordseed/storehashes, thenrun.
+
+## 2026-09-06 — Resumed implementation in independent checkout
+
+Preserved all existing rebuild source in local commit `9dc779c`. Original checkout is clean and retained. Independent non-hardlinked Git clone at `/Users/ibrahimsaitakarcesme/Developer/AkorithNext`, branch `rebuild/codex-interaction-parity`; npm ci and Electron native rebuild succeeded. No automation created or resumed. Direct Codex native UI inspection was refused by Computer Use; no alternate access attempted. Animation equivalence remains unmeasured.
+
+Fixed engine abort ordering so context survives provider cleanup after a storage failure. Added behavioral regression and unchanged/changed native-context continuity tests: focused engine suite 15/15 passes. Plugin/context and renderer integration are in progress; historical package results do not certify this source.
+
+## B05 package and real development acceptance started
+
+Source66f2bca, alpha.5 package built and deep strict codesign verified. Full suite234/234passed after native helper build. Unmodified native screenshots and package receipt in recovery-2026-09-06/B05. Actual Astra service desk and inventory worker projects started through Akorith composer in isolated data; neither acceptance is complete. CUA clipboard/control feedback became delayed and reconnect timed out; no UI workaround/bypass used. B06 source now adds navigation/motion/model picker and readable command summaries; B05 package does not include those.
+
+## B06 live continuation and B07 lifecycle correction
+
+B06 source726640b/alpha.6 full suite254/254passed (initial253/254 PTY readiness race preserved, readiness corrected to await foreground+background). Deep strict codesign passes; asar005b849acaa3f8a4d45bd2d070189df552c117612fdc5c5c068127e74d96ff43. B05 actual native Quit succeeded after unproven stale/blank-on-reload issue. B06 reopened same isolated data with both real projects completed. Native model picker search and provider changes work. A API14/browser7passed; B18passed. Local Ollama followup reached outputlimit and is correctly failed, not credited as code success. OpenCode continuation now requests independently reproduced own-key API validation bug, genuine failing/passing evidence, formatter feature and actual synthetic plugin MCP invocation. Pluginv1 realUI inspected/imported disabled/enabled. Main-shell lifecycle correction hides native views on document reload/failure/exit and adds privacy-bounded diagnostics;4focused tests+typecheckpass, fullblank cause not proven fixed. B07 not yet packaged.
+
+## B07/B08 native acceptance and independent project review
+
+B07 sourceffd8e38 alpha.7:258/258passed, signature verified. Native Browser panel opened actual service-desk localhost4317 with persisted synthetic Support login. Main renderer reload explicitly focused in composer then View→Reload: second navigation-started/dom-ready/load-finished triplet recorded, entire shell and live browser visible, ticket navigation worked afterward. First Reload while browser focused only reloaded browser and is not counted as main reload. B05 fullblank original cause remains unproven. B07 nativeQuit with live browser succeeded. Unmodified screenshots and timestamps under B07/screenshots.
+
+Actual projectA final logs14TAP API tests (13scenarios+parent),9TAP browser tests (8scenarios+parent). Actual projectB OpenCode MiMo continuation repaired inherited-option validation,1pass/6fail before→7pass after, full33pass, newBigIntEURutility. Independent audit confirms realHTTPtests reject withoutjobcreation. Native skill lookup failed but pluginMCP independently returnedV1; extracted exact tool outputs under B06/verified-followup-evidence. Currency helper audit found invalidinputacceptance and noUIintegration; this is now requested through actualB08composer, not silently credited ascomplete.
+
+B07 realUI importedpluginV2 withoutchangingactiveV1, explicitlyactivatedV2; configpreserved intoB08. B08sourcec15abb1 alpha.8:259/259passed,typecheckpassed,deepstrictsignatureverified,asar533deb30ff3bbc09e56e7606594427630e685856e74c8e79365275ad77c1645c. Managedskillcontext now tellsmodels suppliedinstructions arecontext, notnativecatalogentries. B08actualmodelturn toverifythis/V2 pluscurrencyvalidation is inprogress. Noautomationscreated, nopush, oldapp/datauntouched.
+
+## B09 integration — 2026-09-06
+Restored native new-project creation and display-name rename, project-scoped @file snapshot attachments, and hidden native browser screenshots using the same WebContents in a never-shown capture owner. Cancellation/error/task-switch cleanup verified with actual Electron pixel fixture. Complete suite 275/275 passed, TypeScript passed. Packaged acceptance pending.
+B08 actual provider follow-up completed: genuine currency invalid-input regression 8 failures before fix, 16 formatter tests and 41 full project tests after. Managed plugin V2 actual MCP output succeeded; disabling produced a fresh provider session with zero managed skill/MCP context and the tool absent. Large-number dashboard browser regression remains unproven; normal dashboard snapshot passed, its screenshot failure is addressed by B09.

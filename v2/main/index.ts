@@ -1,3 +1,5 @@
+import { createProjectFolder } from './project-creation';
+import { projectFolderName } from './project-names';
 import {
   app,
   BrowserWindow,
@@ -21,6 +23,7 @@ import { mkdirSync, realpathSync, statSync, existsSync } from "node:fs";
 import { copyFile, stat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { Store } from "./storage";
+import { searchProjectFiles, attachProjectFile } from "./project-files";
 import { Engine } from "./engine";
 import { observeShellLifecycle } from "./window-lifecycle";
 import { ShutdownCoordinator } from "./shutdown";
@@ -239,6 +242,17 @@ async function command(name: string, payload: unknown) {
       };
     case "providers:refresh":
       return refreshProviders();
+    case "project:create": {
+      const name = projectFolderName(p.name);
+      const selected = await dialog.showOpenDialog(window!, { properties: ["openDirectory"], title: `Choose a location for ${name}`, buttonLabel: "Create project here" });
+      if (selected.canceled) return null;
+      const project = createProjectFolder(store, selected.filePaths[0], name);
+      send({ type: "changed" }); return project;
+    }
+    case "project:rename": {
+      const project = store.renameProject(id(p.projectId), p.name);
+      send({ type: "changed" }); return project;
+    }
     case "project:open": {
       const selected = await dialog.showOpenDialog(window!, {
         properties: ["openDirectory", "createDirectory"],
@@ -267,7 +281,7 @@ async function command(name: string, payload: unknown) {
       if(busy())throw new Error('A task started while choosing the folder. Finish it and try again.')
       const path=realpathSync(selected.filePaths[0])
       if(store.projects().some(other=>other.id!==projectId&&other.path===path))throw new Error('That folder is already open as another project.')
-      const next={...project,path,name:basename(path)}
+      const next={...project,path}
       store.db.prepare('UPDATE projects SET path=?,data=? WHERE id=?').run(path,JSON.stringify(next),projectId)
       send({type:'changed'});return next
     }
@@ -420,6 +434,16 @@ async function command(name: string, payload: unknown) {
       return engine.steer(id(p.taskId), string(p.text, "guidance", 100_000));
     case "task:respond":
       return engine.respond(id(p.taskId), id(p.requestId), p.response);
+    case "projectFiles:search":
+    case "projectFiles:attach": {
+      const taskId = id(p.taskId), task = store.task(taskId);
+      const project = task.projectId ? store.project(task.projectId) : null;
+      if (!project) throw new Error("Choose an existing project before mentioning files.");
+      if (name === "projectFiles:search" && typeof p.query !== "string") throw new Error("Invalid project file search.");
+      return name === "projectFiles:search"
+        ? searchProjectFiles(project.path, p.query as string)
+        : attachProjectFile(project.path, string(p.path, "project file", 2000), userData, taskId);
+    }
     case "attachments:add": {
       const taskId = id(p.taskId);
       store.task(taskId);

@@ -2,9 +2,19 @@ import { randomUUID, createHash } from 'node:crypto'
 import type { BrowserWindow, WebContentsView } from 'electron'
 import type { BrowserState, HostContext } from '../../shared/contracts'
 import { writable } from './files'
+import { boundedCapture, capturePng } from './browser-capture'
 import { settleStages, settleWithin } from './lifecycle'
 
-interface Tab { state: BrowserState; view: WebContentsView; attachedTo?: BrowserWindow; referencePrefix?: string; closing?: Promise<void> }
+interface CaptureState {
+  controller: AbortController
+  window?: BrowserWindow
+  restoreWindow?: BrowserWindow
+  bounds: { x: number; y: number; width: number; height: number }
+  visible: boolean
+  done: Promise<void>
+  finish: () => void
+}
+interface Tab { capturePending?: Promise<unknown>; capture?: CaptureState; state: BrowserState; view: WebContentsView; attachedTo?: BrowserWindow; referencePrefix?: string; closing?: Promise<void> }
 const WORLD = 999
 export function browserURL(input: string): string {
   const trimmed = input.trim()
@@ -102,17 +112,31 @@ export class BrowserManager {
     const tab = this.get(taskId, id); const win = this.getWindow()
     if (!win || win.isDestroyed()) return
     if (!bounds || Object.values(bounds).some(value => !Number.isFinite(value))) throw new Error('Browser bounds must be finite numbers.')
-    if (visible) for (const other of this.tabs.values()) if (other !== tab) other.view.setVisible(false)
+    if (visible) for (const other of this.tabs.values()) if (other !== tab) this.hideTab(other)
+    const [windowWidth, windowHeight] = win.getContentSize()
+    const x = Math.max(0, Math.min(windowWidth, Math.round(bounds.x))); const y = Math.max(0, Math.min(windowHeight, Math.round(bounds.y)))
+    const next = { x, y, width: Math.max(0, Math.min(windowWidth - x, Math.round(bounds.width))), height: Math.max(0, Math.min(windowHeight - y, Math.round(bounds.height))) }
+    const show = visible && next.width > 0 && next.height > 0
+    if (tab.capture) {
+      tab.capture.restoreWindow = win
+      tab.capture.visible = show
+      if (show) tab.capture.bounds = next
+      return
+    }
     if (tab.attachedTo !== win) {
       if (tab.attachedTo && !tab.attachedTo.isDestroyed()) tab.attachedTo.contentView.removeChildView(tab.view)
       win.contentView.addChildView(tab.view); tab.attachedTo = win
     }
-    const [windowWidth, windowHeight] = win.getContentSize()
-    const x = Math.max(0, Math.min(windowWidth, Math.round(bounds.x))); const y = Math.max(0, Math.min(windowHeight, Math.round(bounds.y)))
-    tab.view.setBounds({ x, y, width: Math.max(0, Math.min(windowWidth - x, Math.round(bounds.width))), height: Math.max(0, Math.min(windowHeight - y, Math.round(bounds.height))) })
-    tab.view.setVisible(visible && bounds.width > 0 && bounds.height > 0)
+    // Hiding a panel must not collapse the page viewport to a 1px placeholder.
+    if (show) tab.view.setBounds(next)
+    tab.view.setVisible(show)
   }
-  hideAll(): void { for (const tab of this.tabs.values()) tab.view.setVisible(false) }
+  private hideTab(tab: Tab): void {
+    if (tab.capture) tab.capture.visible = false
+    else if (!tab.view.webContents.isDestroyed()) tab.view.setVisible(false)
+  }
+  hideAll(): void { for (const tab of this.tabs.values()) this.hideTab(tab) }
+
   async navigate(taskId: string, id: string | undefined, url: string, signal?: AbortSignal): Promise<BrowserState> {
     if (signal?.aborted) throw new Error('Browser navigation cancelled.')
     const tab = this.get(taskId, id)
@@ -203,11 +227,68 @@ export class BrowserManager {
     await wc.executeJavaScriptInIsolatedWorld(WORLD, [{ code: `window.scrollBy({ top: ${amount}, behavior: 'instant' })` }])
     return { ok: true }
   }
-  async screenshot(taskId: string, id?: string): Promise<{ id: string; dataUrl: string; width: number; height: number }> {
+  async screenshot(taskId: string, id?: string, signal?: AbortSignal): Promise<{ id: string; dataUrl: string; width: number; height: number }> {
     const tab = this.get(taskId, id)
-    const image = await tab.view.webContents.capturePage()
-    return { id: tab.state.id, dataUrl: image.toDataURL(), ...image.getSize() }
+    if (this.closing || tab.closing || signal?.aborted) throw new Error('Browser screenshot cancelled.')
+    if (tab.capture || tab.capturePending) throw new Error('This browser tab is already being captured. Wait for that screenshot to finish.')
+    const controller = new AbortController()
+    const linked = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal
+    let finish!: () => void
+    const done = new Promise<void>(resolve => { finish = resolve })
+    const capture: CaptureState = { controller, restoreWindow: tab.attachedTo, bounds: tab.view.getBounds(), visible: tab.view.getVisible(), done, finish }
+    tab.capture = capture
+    try {
+      return await boundedCapture(async () => {
+        const { BrowserWindow, nativeImage } = await import('electron')
+        if (linked.aborted || tab.view.webContents.isDestroyed()) throw new Error('Browser screenshot cancelled.')
+        // A hidden WebContentsView has no capture surface on this Electron/macOS
+        // combination. Reparent the SAME view into a never-shown capture owner.
+        // Its DOM, login session and task identity stay unchanged.
+        const width = Math.max(1, capture.bounds.width), height = Math.max(1, capture.bounds.height)
+        if (width > 1800 || height > 1400) throw new Error('The browser viewport exceeds the screenshot size limit. Resize the workspace browser and try again.')
+        capture.window = new BrowserWindow({ show: false, focusable: false, skipTaskbar: true, width, height, webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true } })
+        if (tab.attachedTo && !tab.attachedTo.isDestroyed()) tab.attachedTo.contentView.removeChildView(tab.view)
+        capture.window.contentView.addChildView(tab.view)
+        tab.attachedTo = capture.window
+        tab.view.setBounds({ x: 0, y: 0, width, height })
+        tab.view.setVisible(true)
+        const pending = this.protocol(tab, 'Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: false })
+        tab.capturePending = pending
+        // A timeout restores UI immediately, but cannot cancel a specific CDP
+        // command. Keep one pending capture per tab until transport settlement.
+        void pending.finally(() => { if (tab.capturePending === pending) tab.capturePending = undefined }).catch(() => {})
+        const result = await pending as { data?: unknown }
+        if (linked.aborted) throw new Error('Browser screenshot cancelled.')
+        const bytes = capturePng(result.data)
+        const image = nativeImage.createFromBuffer(bytes)
+        if (image.isEmpty()) throw new Error('Browser screenshot returned an undecodable PNG.')
+        const size = image.getSize()
+        return { id: tab.state.id, dataUrl: `data:image/png;base64,${bytes.toString('base64')}`, ...size }
+      }, linked)
+    } finally {
+      controller.abort()
+      const owner = capture.window
+      try {
+        if (!tab.view.webContents.isDestroyed()) {
+          tab.view.setVisible(false)
+          if (owner && !owner.isDestroyed()) owner.contentView.removeChildView(tab.view)
+          const restore = capture.restoreWindow
+          tab.attachedTo = undefined
+          if (restore && !restore.isDestroyed()) {
+            restore.contentView.addChildView(tab.view)
+            tab.attachedTo = restore
+            tab.view.setBounds(capture.bounds)
+            tab.view.setVisible(capture.visible && !this.closing && !tab.closing)
+          }
+        }
+      } finally {
+        if (owner && !owner.isDestroyed()) owner.destroy()
+        tab.capture = undefined
+        capture.finish()
+      }
+    }
   }
+
   close(taskId: string, id: string): Promise<void> { return this.closeTab(this.get(taskId, id)) }
   private closeTab(tab: Tab): Promise<void> {
     if (tab.closing) return tab.closing
@@ -215,6 +296,7 @@ export class BrowserManager {
     if (wc.isDestroyed()) { this.tabs.delete(tab.state.id); return Promise.resolve() }
     const destroyed = new Promise<void>(resolve => wc.once('destroyed', resolve))
     const operation = (async () => {
+      if (tab.capture) { tab.capture.controller.abort(); await tab.capture.done }
       tab.referencePrefix = undefined
       try { if (tab.attachedTo && !tab.attachedTo.isDestroyed()) tab.attachedTo.contentView.removeChildView(tab.view) }
       finally { wc.close({ waitForBeforeUnload: false }) }

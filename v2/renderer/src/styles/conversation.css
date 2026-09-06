@@ -912,3 +912,10 @@
 .model-picker-connections { border-top: 1px solid var(--border); border-radius: 0 0 6px 6px; margin-top: 4px; }
 .model-picker-connections:hover, .model-picker-more:hover { background: var(--hover); }
 @media (max-width: 1120px) { .model-picker-provider { display: none; } .model-picker-trigger { max-width: 200px; } }
+
+.file-mention-menu { margin: 6px 8px; padding: 5px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); max-height: 240px; overflow-y: auto; font-size: 12px; }
+.file-mention-heading { display: flex; justify-content: space-between; gap: 12px; padding: 6px 8px; color: var(--text-secondary); }
+.file-mention-heading span { font-size: 10px; }
+.file-mention-menu [role="option"] { padding: 7px 8px; border-radius: 5px; cursor: pointer; overflow-wrap: anywhere; }
+.file-mention-menu [role="option"].selected, .file-mention-menu [role="option"]:hover { background: var(--hover); }
+.file-mention-menu [role="status"] { padding: 8px; color: var(--text-secondary); }

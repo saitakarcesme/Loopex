@@ -120,7 +120,7 @@ export function createHostTools(options: { getContext(taskId: string): HostConte
         case 'browser_type': return browsers.type(context, requiredString(args, 'ref'), requiredString(args, 'text'), optionalString(args, 'id'), args.clear !== false, signal)
         case 'browser_key': return browsers.key(context, requiredString(args, 'key'), optionalString(args, 'id'))
         case 'browser_scroll': return browsers.scroll(context, requiredString(args, 'direction'), Number(args.pixels) || 600, optionalString(args, 'id'))
-        case 'browser_screenshot': return browsers.screenshot(context.taskId, optionalString(args, 'id'))
+        case 'browser_screenshot': return browsers.screenshot(context.taskId, optionalString(args, 'id'), signal)
         case 'computer_stop': computers.stop(); return { ok: true }
         default:
           if (['computer_state', 'computer_select', 'computer_snapshot', 'computer_capture', 'computer_click', 'computer_type', 'computer_key'].includes(name)) return computers.execute(name.slice('computer_'.length), args, context, signal)

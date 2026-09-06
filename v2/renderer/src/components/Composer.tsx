@@ -9,6 +9,9 @@ import { IconButton, Spinner } from './Primitives'
 import { ModelPicker } from './ModelPicker'
 import { modelSelectionPatch } from './modelPickerState'
 import { Queue } from './Queue'
+import type { ProjectFileChoice } from '../../../shared/project-files'
+import { FileMentionMenu } from './FileMentionMenu'
+import { fileMentionAt, insertFileMention, mentionKey, currentMentionFiles, type FileMention } from './fileMentionState'
 
 interface ComposerProps {
   task: Task
@@ -40,6 +43,14 @@ export function Composer({
   const selectingModelRef = useRef(false)
   const [sending, setSending] = useState(false)
   const [attaching, setAttaching] = useState(false)
+  const attachingRef = useRef(false)
+  const [mention, setMention] = useState<FileMention | null>(null)
+  const [mentionResult, setMentionResult] = useState<{query:string;start:number;files:ProjectFileChoice[]} | null>(null)
+  const mentionFiles = currentMentionFiles(mention, mentionResult)
+  const mentionCaret = useRef<number | null>(null)
+  const [mentionIndex, setMentionIndex] = useState(0)
+  const [mentionLoading, setMentionLoading] = useState(false)
+  const [mentionError, setMentionError] = useState('')
   const [stopping, setStopping] = useState(false)
   const [sendMode, setSendMode] = useState<'queue' | 'steer'>('queue')
   const textarea = useRef<HTMLTextAreaElement>(null)
@@ -91,6 +102,7 @@ export function Composer({
     if (element) {
       element.style.height = '0px'
       element.style.height = `${Math.min(element.scrollHeight, 220)}px`
+      if (mentionCaret.current !== null) { element.setSelectionRange(mentionCaret.current, mentionCaret.current); mentionCaret.current = null }
     }
   }, [draft])
   useEffect(() => {
@@ -121,10 +133,44 @@ export function Composer({
       disposed = true
     }
   }, [localDraft.pending, sending, task.id, updateLocalDraft])
+  useEffect(() => {
+    setMentionResult(null); setMentionIndex(0); setMentionError('')
+    if (!mention || !task.projectId) return
+    let disposed = false
+    setMentionLoading(true)
+    const timer = setTimeout(() => {
+      void api<ProjectFileChoice[]>('projectFiles:search', { taskId:task.id, query:mention.query })
+        .then(files => { if (!disposed) setMentionResult({query:mention.query,start:mention.start,files}) })
+        .catch(() => { if (!disposed) setMentionError('Project files could not be searched. Try again.') })
+        .finally(() => { if (!disposed) setMentionLoading(false) })
+    }, 120)
+    return () => { disposed = true; clearTimeout(timer) }
+  }, [mention?.query, mention?.start, task.id, task.projectId])
+  const trackMention = (text: string, caret: number) => {
+    setMention(task.projectId && !(active && sendMode === 'steer') && !attachingRef.current ? fileMentionAt(text, caret) : null)
+  }
+  const chooseMention = async (file: ProjectFileChoice) => {
+    if (!mention || attachingRef.current || sendingRef.current || (active && sendMode === 'steer') || !mentionFiles.some(item=>item.path===file.path)) return
+    if (attachments.length >= 20) { onError(new Error('A message can contain at most 20 attachments.')); return }
+    const selected = mention, original = draftRef.current
+    attachingRef.current = true; setAttaching(true); setMention(null)
+    try {
+      const attachment = await api<Attachment>('projectFiles:attach', { taskId:task.id, path:file.path })
+      const next = updateLocalDraft(current => {
+        const inserted = current.text === original ? insertFileMention(current.text, selected, file.path) : null
+        mentionCaret.current = inserted?.caret ?? null
+        return { ...current, attachments:[...current.attachments, attachment], text:inserted?.text ?? current.text }
+      })
+      draftRef.current = next.text
+      textarea.current?.focus()
+    } catch (error) { onError(error) }
+    finally { attachingRef.current = false; setAttaching(false) }
+  }
   const submit = async () => {
     if (
       !draftRef.current.trim() ||
       sendingRef.current ||
+      attachingRef.current ||
       selectingModelRef.current ||
       !available ||
       localDraft.pending?.kind === 'steer'
@@ -164,6 +210,9 @@ export function Composer({
     }
   }
   const attach = async () => {
+    if (attachingRef.current) return
+    attachingRef.current = true
+    setMention(null)
     setAttaching(true)
     try {
       const added = await api<Attachment[]>('attachments:add', { taskId: task.id })
@@ -179,6 +228,7 @@ export function Composer({
     } catch (error) {
       onError(error)
     } finally {
+      attachingRef.current = false
       setAttaching(false)
     }
   }
@@ -245,7 +295,13 @@ export function Composer({
             ))}
           </div>
         ) : null}
+        {mention ? <FileMentionMenu files={mentionFiles} index={mentionIndex} loading={mentionLoading} error={mentionError} onChoose={file=>void chooseMention(file)} /> : null}
         <textarea
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          aria-controls={mention ? 'file-mention-list' : undefined}
+          aria-expanded={!!mention}
+          aria-activedescendant={mention && mentionFiles.length ? `file-mention-${mentionIndex}` : undefined}
           ref={textarea}
           id="prompt-input"
           aria-label="Message"
@@ -260,8 +316,15 @@ export function Composer({
           onChange={(event) => {
             const next = updateLocalDraft((current) => ({ ...current, text: event.target.value }))
             draftRef.current = next.text
+            trackMention(next.text, event.target.selectionStart)
           }}
+          onClick={event=>trackMention(draftRef.current, event.currentTarget.selectionStart)}
+          onKeyUp={event=>{ if (['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) trackMention(draftRef.current, event.currentTarget.selectionStart) }}
           onKeyDown={(event) => {
+            if (mention && !event.nativeEvent.isComposing) {
+              const action = mentionKey(event.key, mentionFiles.length, mentionIndex, {shiftKey:event.shiftKey})
+              if (action.handled) { event.preventDefault(); setMentionIndex(action.index); if (action.close) setMention(null); if (action.commit) void chooseMention(mentionFiles[action.index]); return }
+            }
             if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
               event.preventDefault()
               void submit()
@@ -329,7 +392,7 @@ export function Composer({
               }
               className="send-button"
               disabled={
-                !draft.trim() || sending || selectingModel || !available || localDraft.pending?.kind === 'steer'
+                !draft.trim() || sending || attaching || selectingModel || !available || localDraft.pending?.kind === 'steer'
               }
               onClick={() => void submit()}
             >

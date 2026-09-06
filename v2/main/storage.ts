@@ -1,3 +1,4 @@
+import { projectDisplayName } from './project-names';
 import Database from "better-sqlite3";
 import { randomUUID, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -126,6 +127,13 @@ export class Store {
       .prepare("INSERT INTO projects(id,path,data) VALUES (?,?,?)")
       .run(p.id, path, JSON.stringify(p));
     return p;
+  }
+  renameProject(id: string, name: unknown): Project {
+    const project = this.project(id);
+    if (!project) throw new Error("Project not found.");
+    const next = { ...project, name: projectDisplayName(name) };
+    this.db.prepare("UPDATE projects SET data=? WHERE id=?").run(JSON.stringify(next), id);
+    return next;
   }
   tasks(): Task[] {
     return this.db

@@ -1,112 +1,37 @@
 {
-  "schemaVersion": 2,
-  "updatedAt": "2026-09-05T03:52:03.130171+00:00",
-  "status": "B03_performance_and_B04_migration_implementation",
-  "repository": "/Users/ibrahimsaitakarcesme/Desktop/Projects/Akorith/workspace-v2",
-  "branch": "rebuild/workspace-v2",
-  "baselineCommit": "1d5af3abe3036b15e4558697b017970f8f4766b5",
-  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B03/mac-arm64/Akorith Next.app",
-  "packageId": "B03",
-  "packageIncludesLatestChanges": false,
+  "schemaVersion": 3,
+  "updatedAt": "2026-09-06T14:12:40.618253+00:00",
+  "status": "B09_packaging_and_visible_acceptance",
+  "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
+  "branch": "rebuild/codex-interaction-parity",
+  "baselineCommit": "9dc779c",
+  "packageId": "B09",
+  "version": "2.0.0-alpha.9",
   "installed": false,
   "pushed": false,
   "userDataMigrated": false,
-  "sourceAccess": {
-    "accessible": true,
-    "restoredAt": "2026-09-05T02:56:30.871Z",
-    "previousStallCause": "Unproven; ordinary original-path reads restored, no OS permission change or alternate access route"
+  "readyForReplacement": false,
+  "verification": {
+    "testsPassed": 275,
+    "testsFailed": 0,
+    "typecheck": "passed",
+    "hiddenBrowserCapture": "actual Electron pixels and lifecycle assertions passed"
   },
-  "recoveryDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05",
-  "activeOwnedTestProcesses": 0,
-  "verifiedCurrentPackage": {
-    "coreJourney": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/journey-1/journey.json",
-    "coreResult": "PASS: two real Astra turns, immediate native paste/CmdQ draft recovery, CAS compare/reload, checkpoint conflict, isolated browser form, image containment, PTY close and native Quit with live PTY/preview",
-    "connectedJourney": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/connected-1",
-    "connectedResult": "PASS: six real turns; Codex/Ollama/OpenCode/OpenCode/Codex/browser. Same Codex native ID and same OpenCode native ID; both OpenCode turns remain completed after cleanup; no active/queue/writer leases at terminal success. Exact owned main SIGTERM cleanup confirmed."
-  },
-  "currentSourceChanges": [
-    "B04 migration fidelity/status/attribution implementation in progress; not included in B03",
-    "Optional message attribution and inactive imported activity statuses",
-    "Transcript renders unknown outcome and immutable provider/model history"
+  "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09",
+  "historicalStateArchive": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/historical-state-before-B09.json",
+  "completed": [
+    "Unified provider/model picker and navigation",
+    "Managed versioned skill/MCP plugins with actual V1/V2/disable turns",
+    "Two real native-provider-built projects and genuine regression fixes",
+    "Project creation and metadata rename",
+    "Project @file attachments",
+    "Hidden browser screenshot repair"
   ],
-  "currentCycle": {
-    "B03Package": {
-      "id": "B03",
-      "version": "2.0.0-alpha.3",
-      "output": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B03",
-      "built": true,
-      "asarSha256": "628810d2e637b940d178a79896fd83915dd47167eaaa9206a56790703438cddb",
-      "cdHash": "4b3f5fcf776b0af40b119816370bfadd5f96da1e",
-      "signature": "deep strict app and bothhelpers verified, ad-hoc hardenedruntime, notnotarized"
-    },
-    "fullSuite": {
-      "passed": 152,
-      "failed": 0,
-      "skipped": 0,
-      "durationMs": 10444.786625,
-      "runtime": "Electron44 RUN_AS_NODE",
-      "typecheck": "passed",
-      "session": 61548
-    },
-    "testsScope": "152 passed on B03 source before B04 edits; do not claim current B04 suite passed",
-    "B04Focused": {
-      "passed": 19,
-      "failed": 0,
-      "scope": "Engine, message attribution, crash activity recovery, transcript SSR"
-    },
-    "B04MigrationFocused": {
-      "passed": 20,
-      "failed": 0,
-      "typecheck": "passed"
-    },
-    "B04ImportReceiptFocused": {
-      "passed": 5,
-      "failed": 0,
-      "typecheck": "passed"
-    }
-  },
-  "performance": {
-    "protocol": 3,
-    "packageId": "B03",
-    "series": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/performance-v3-series-2",
-    "status": "Three individual runs passed; strict comparable series withdrawn due to seed payload drift",
-    "harnessSha256": "2dfcdc8bbd9aecbe8cd8f062747f369e1d53bcb0283de44009a2cbc11067c87f",
-    "protocolSha256": "8e95c3b00a01482631ebcb82fab1781bb784fbfe037ac76f849f007e4480b511",
-    "priorAttempt": "System sqlite CLI preflight failed before launch; preserved. Matching Electron/SQLite reader fixed; 4 harness guard tests passed.",
-    "comparison": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/performance-v3-series-2/comparison.json",
-    "correction": {
-      "at": "2026-09-05T03:52:03.130171+00:00",
-      "reason": "Root changed Store.acceptTurn attribution while sequential seeds were being created. Run1 has0 attributed messages; runs2/3 have10000. Frozen B03 renderer ignores that optional field, but payload fixtures differ so strict same-input series acceptance is withdrawn. Individual runs remain successful measurements.",
-      "next": "Preseed all3 before measurement from same frozen source; record seed/store hashes; rerun final B04."
-    }
-  },
   "pending": [
-    "B04 migration correctness tests/package/aggregate verified real import into separate Next data",
-    "Native computer input blocked by missing app Accessibility/ScreenRecording permissions; Claude unauthenticated; no false readiness claim",
-    "Effective context/plugin lifecycle and remaining product parity gaps",
-    "Safe local commit and separate Next installation; preserve old app/data",
-    "Preseed three finalB04 performance fixtures against one frozen source; compare seed/store hashes before standard runs"
+    "B09 packaged visible acceptance",
+    "Exact Codex appearance/motion and comparable performance measurement",
+    "Remaining legacy feature inventory, guided account onboarding, durable goals/memory and migration",
+    "Full computer use permission acceptance"
   ],
-  "parity": {
-    "inventory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/parity/PARITY_INVENTORY.json",
-    "readyForReplacement": false,
-    "rows": 28,
-    "openGates": [
-      "G03",
-      "G05"
-    ],
-    "closedGates": [
-      "G01",
-      "G02",
-      "G04",
-      "G06"
-    ],
-    "scopeAudit": "docs/rebuild-2026-09-04/current-product-gap-audit.md"
-  },
-  "historicalStateArchive": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/LOOP_STATE-before-B03-acceptance-refresh.json",
-  "currentLiveTest": {
-    "status": "completed",
-    "evidence": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/cancellation-1/cancellation.json",
-    "successful": true
-  }
+  "automationPolicy": "No recurring continuation automation or retry loop."
 }

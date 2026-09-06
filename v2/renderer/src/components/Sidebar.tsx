@@ -22,6 +22,7 @@ import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'r
 import type { Project, Task } from '../../../shared/contracts'
 import { api, isActive, persist, remember, statusLabel } from '../api'
 import { Dialog, IconButton, Spinner } from './Primitives'
+import { ProjectDialog } from './ProjectDialog'
 import { groupSidebarTasks, sidebarPage, PROJECT_PAGE_SIZE, TASK_PAGE_SIZE } from './sidebarModel'
 
 interface SidebarProps {
@@ -68,6 +69,7 @@ export const Sidebar = memo(function Sidebar({
   const shouldReveal = useRef(true)
   const [menu, setMenu] = useState<Task | null>(null)
   const [projectMenu, setProjectMenu] = useState<Project | null>(null)
+  const [projectDialog, setProjectDialog] = useState<Project | 'create' | null>(null)
   const [busyAction, setBusyAction] = useState(false)
   const [renaming, setRenaming] = useState<Task | null>(null)
   const [title, setTitle] = useState('')
@@ -118,6 +120,7 @@ export const Sidebar = memo(function Sidebar({
   const closeMenu = () => {
     setMenu(null)
     setProjectMenu(null)
+    setProjectDialog(null)
     setRenaming(null)
     onOverlay(false)
   }
@@ -239,9 +242,14 @@ export const Sidebar = memo(function Sidebar({
           <section className="sidebar-section">
             <div className="section-heading">
               <span>Projects</span>
+              <span>
+              <IconButton label="Create a new project" onClick={() => { setProjectDialog('create'); onOverlay(true) }}>
+                <Plus size={15} />
+              </IconButton>
               <IconButton label="Open a project folder" onClick={onOpenProject}>
                 <FolderPlus size={15} />
               </IconButton>
+              </span>
             </div>
             {[...projectPage.visible, ...(projectPage.selected ? [projectPage.selected] : [])].map(
               (project) => {
@@ -412,6 +420,9 @@ export const Sidebar = memo(function Sidebar({
               <SquarePen size={16} />
               New task in project
             </button>
+            <button disabled={busyAction} onClick={() => { setProjectDialog(projectMenu); setProjectMenu(null) }}>
+              <Pencil size={16} />Rename project
+            </button>
             <button disabled={busyAction} onClick={() => void relocateProject()}>
               {busyAction ? <Spinner size={16} /> : <FolderInput size={16} />}Relocate folder
             </button>
@@ -420,6 +431,15 @@ export const Sidebar = memo(function Sidebar({
             </p>
           </div>
         </Dialog>
+      ) : null}
+      {projectDialog ? (
+        <ProjectDialog project={projectDialog === 'create' ? null : projectDialog} onClose={closeMenu}
+          onSaved={project => {
+            const created = projectDialog === 'create'
+            closeMenu()
+            void onRefresh().catch(onError)
+            if (created) onNew(project.id)
+          }} />
       ) : null}
       {renaming ? (
         <Dialog title="Rename task" onClose={closeMenu} className="small-dialog">
