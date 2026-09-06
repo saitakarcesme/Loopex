@@ -207,3 +207,23 @@ test('duplicate preparation cannot discard the original bundle cleanup ownership
   await f.plugins.collectUnused();
   assert.equal(await exists(plugin.version.rootPath), false);
 });
+
+test('managed skills are delivered as instructions with honest native catalog guidance', async t => {
+  const f = await fixture(t);
+  const body = 'When explicitly asked, use inventory_health and report its actual output.';
+  await f.addPlugin('guidance-plugin', body);
+  const prepared = await f.extensions.prepare({ ...f.task, providerId: 'opencode' }, 'native-guidance');
+  const source = prepared.manifest.sources.find(source => source.plugin?.pluginId === 'guidance-plugin')!;
+  assert.equal(source.state, 'included');
+  assert.equal(source.includedBytes, Buffer.byteLength(body));
+  assert.equal(source.sha256, hash(body), 'source hash remains the original skill, not wrapper text');
+  assert.ok(prepared.systemContext.includes(body));
+  assert.match(prepared.systemContext, /already supplied below as context text/);
+  assert.match(prepared.systemContext, /do not call a native skill loader to load this source by name/);
+  assert.match(prepared.systemContext, /not registered this source in the provider's native skill catalog/);
+  assert.match(prepared.systemContext, /only when exposed by the actual tool catalog/);
+  assert.ok(prepared.manifest.notes.some(note => note.includes('not as verified entries')));
+  assert.equal(prepared.manifest.systemBytes, Buffer.byteLength(prepared.systemContext));
+  assert.equal(prepared.manifest.systemSha256, hash(prepared.systemContext));
+  await prepared.release();
+});
