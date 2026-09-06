@@ -1,4 +1,4 @@
-import { ArrowUp, ChevronDown, Paperclip, ShieldCheck, Square, X } from 'lucide-react'
+import { ArrowUp, ChevronDown, Folder, Plus, ShieldAlert, ShieldCheck, Square, X } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Attachment, PermissionMode, ProviderInfo, Task } from '../../../shared/contracts'
 import { api, isActive } from '../api'
@@ -15,6 +15,8 @@ import { fileMentionAt, insertFileMention, mentionKey, currentMentionFiles, type
 
 interface ComposerProps {
   task: Task
+  projectName?: string
+  onChooseProject?: () => void
   providers: ProviderInfo[]
   onPatch: (patch: Partial<Task>) => Promise<unknown>
   onSent: () => void
@@ -25,6 +27,8 @@ interface ComposerProps {
 }
 export function Composer({
   task,
+  projectName,
+  onChooseProject,
   providers,
   onPatch,
   onSent,
@@ -242,7 +246,7 @@ export function Composer({
     }
   }
   return (
-    <div className="composer-region">
+    <div className="composer-region composer-reference">
       <Queue taskId={task.id} onError={onError} />
       {localDraft.pending?.kind === 'steer' && !sending ? (
         <div className="composer-recovery" role="alert">
@@ -272,6 +276,11 @@ export function Composer({
               Mark as sent
             </button>
           </div>
+        </div>
+      ) : null}
+      {projectName || onChooseProject ? (
+        <div className="composer-project-strip">
+          {onChooseProject ? <button type="button" onClick={onChooseProject} title={projectName || 'Choose project'} aria-label={projectName ? `Choose project, current project ${projectName}` : 'Choose project'}><Folder size={16} /><span>{projectName || 'Choose project'}</span></button> : <span className="composer-project-label"><Folder size={16} /><span>{projectName}</span></span>}
         </div>
       ) : null}
       <div className={`composer ${sending ? 'submitting' : ''}`}>
@@ -308,7 +317,7 @@ export function Composer({
           placeholder={
             active
               ? 'Add a follow-up or guide the current task…'
-              : 'Ask anything, or describe what to build…'
+              : 'Do anything'
           }
           value={draft}
           rows={2}
@@ -338,8 +347,27 @@ export function Composer({
               disabled={attaching || sending || (active && sendMode === 'steer')}
               onClick={() => void attach()}
             >
-              {attaching ? <Spinner /> : <Paperclip size={17} />}
+              {attaching ? <Spinner /> : <Plus size={19} />}
             </IconButton>
+        <label
+          className={`permission-select permission-${task.mode}`}
+          title="Read: inspect only. Work: changes inside the project. Full access: includes the wider computer."
+        >
+          {task.mode === 'full' ? <ShieldAlert size={15} /> : <ShieldCheck size={15} />}
+          <select
+            aria-label="Permission mode"
+            disabled={active || sending || selectingModel}
+            value={task.mode}
+            onChange={(event) => update({ mode: event.target.value as PermissionMode })}
+          >
+            <option value="read">Read only</option>
+            <option value="work">Workspace access</option>
+            <option value="full">Full access</option>
+          </select>
+          <ChevronDown size={10} />
+        </label>
+          </div>
+          <div className="composer-model-controls">
             <ModelPicker task={task} providers={providers} disabled={active || sending} onConnections={onConnections} onOverlay={onModelOverlay} onError={onError} onChoose={async (providerId, modelId) => {
               if (selectingModelRef.current || active || sendingRef.current) return
               const patch = modelSelectionPatch(providers, providerId, modelId, task.effort)
@@ -402,23 +430,6 @@ export function Composer({
         </div>
       </div>
       <div className="composer-meta">
-        <label
-          className="permission-select"
-          title="Read: inspect only. Work: changes inside the project. Full access: includes the wider computer."
-        >
-          <ShieldCheck size={12} />
-          <select
-            aria-label="Permission mode"
-            disabled={active || sending || selectingModel}
-            value={task.mode}
-            onChange={(event) => update({ mode: event.target.value as PermissionMode })}
-          >
-            <option value="read">Read only</option>
-            <option value="work">Workspace access</option>
-            <option value="full">Full access</option>
-          </select>
-          <ChevronDown size={10} />
-        </label>
         {provider?.available && provider.authenticated !== false && !model ? (
           <span className="connection-warning">Choose a model above</span>
         ) : !available ? (

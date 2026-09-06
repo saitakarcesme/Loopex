@@ -179,7 +179,7 @@ function updateSettings(input: unknown) {
   if (patch.sidebarWidth !== undefined)
     next.sidebarWidth = Math.max(
       200,
-      Math.min(420, Number(patch.sidebarWidth) || 258),
+      Math.min(420, Number(patch.sidebarWidth) || 265),
     );
   if (patch.panelWidth !== undefined)
     next.panelWidth = Math.max(
@@ -294,6 +294,11 @@ async function command(name: string, payload: unknown) {
       if (selected.canceled) return null;
       const project = createProjectFolder(store, selected.filePaths[0], name);
       send({ type: "changed" }); return project;
+    }
+    case "project:pin": {
+      if (typeof p.pinned !== 'boolean') throw new Error('Project pinned state must be a boolean.');
+      const project = store.setProjectPinned(id(p.projectId), p.pinned);
+      send({ type: 'changed' }); return project;
     }
     case "project:rename": {
       const project = store.renameProject(id(p.projectId), p.name);

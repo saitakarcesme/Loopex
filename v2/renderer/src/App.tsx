@@ -1,16 +1,16 @@
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowUpRight,
+  Badge,
+  Bug,
+  Hammer,
+  RefreshCw,
+  Telescope,
   CircleAlert,
-  Code2,
   Folder,
-  FolderOpen,
   GitCompareArrows,
   PanelLeftOpen,
   PanelRightOpen,
-  Plus,
-  Search,
   ScrollText,
   Terminal,
   X,
@@ -76,7 +76,7 @@ export function App() {
   const shellRef = useRef<HTMLDivElement>(null)
   const { sidebarOpen, panelOpen, setSidebarOpen, setPanelOpen, changing: layoutChanging } = useWorkspaceLayout(selectedId, shellRef, reportError)
   const [panelTab, setPanelTab] = useState<PanelTab>(() => remember('panelTab', 'files'))
-  const [sidebarWidth, setSidebarWidth] = useState(() => remember('sidebarWidth', 246))
+  const [sidebarWidth, setSidebarWidth] = useState(() => remember('sidebarWidth', 265))
   const [panelWidth, setPanelWidth] = useState(() => remember('panelWidth', 520))
   const [settingsTab, setSettingsTab] = useState<'general' | 'connections' | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -356,6 +356,10 @@ export function App() {
             onSearch={openSearch}
             onSettings={openSettings}
             onCollapse={collapseSidebar}
+            canGoBack={canGoBack}
+            canGoForward={canGoForward}
+            onBack={() => navigateTask(-1)}
+            onForward={() => navigateTask(1)}
             onPatch={workspace.patchTask}
             onRefresh={workspace.refresh}
             onError={reportError}
@@ -377,7 +381,7 @@ export function App() {
         >
           <main className="main-workspace">
             <header
-              className={`workspace-header titlebar-drag ${!sidebarOpen ? 'sidebar-hidden' : ''}`}
+              className={`workspace-header titlebar-drag ${page === 'chat' && !detail?.messages.length ? 'empty-task-header' : ''} ${!sidebarOpen ? 'sidebar-hidden' : ''}`}
             >
               <div className="header-context" id="workspace-navigation-heading" tabIndex={-1} aria-label={page === 'chat' ? task?.title || 'Workspace' : page}>
                 {!sidebarOpen ? (
@@ -399,7 +403,7 @@ export function App() {
                     <PanelLeftOpen size={17} />
                   </IconButton>
                 )}
-                <div className="task-history-controls" aria-label="Task navigation">
+                <div className={`task-history-controls ${sidebarOpen ? 'history-in-sidebar' : ''}`} aria-label="Task navigation">
                   <IconButton label="Previous task (⌘[)" disabled={!canGoBack} onClick={() => navigateTask(-1)}><ArrowLeft size={15} /></IconButton>
                   <IconButton label="Next task (⌘])" disabled={!canGoForward} onClick={() => navigateTask(1)}><ArrowRight size={15} /></IconButton>
                 </div>
@@ -470,57 +474,30 @@ export function App() {
                   />
                 ) : (
                   <div className="welcome">
-                    <h1>{project ? `What should we build in ${project.name}?` : 'What should we work on?'}</h1>
+                    <div className="welcome-symbol" aria-hidden="true"><Badge size={54} strokeWidth={1.35} /><Terminal size={29} strokeWidth={2.1} /></div>
+                    <h1>What should we work on{project ? <> in <button className="welcome-project-name" onClick={() => void openProject()}>{project.name}?</button></> : '?'}</h1>
                     <div className="welcome-starters">
-                      <button
-                        onClick={() =>
-                          setSuggestion({
-                            id: crypto.randomUUID(),
-                            text: 'Explore this project and explain its architecture, key files, and how to run it.',
-                          })
-                        }
-                      >
-                        <Search size={16} />
-                        <span>Explore a project</span>
-                        <ArrowUpRight size={13} />
+                      <button onClick={() => setSuggestion({ id: crypto.randomUUID(), text: 'Explore this project and explain its architecture, key files, and how to run it.' })}>
+                        <Telescope size={19} /><span>Explore and<br />understand code</span>
                       </button>
-                      <button
-                        onClick={() =>
-                          setSuggestion({
-                            id: crypto.randomUUID(),
-                            text: 'Help me find and fix a problem in this project. Start by inspecting the code and available checks.',
-                          })
-                        }
-                      >
-                        <Code2 size={16} />
-                        <span>Fix a problem</span>
-                        <ArrowUpRight size={13} />
+                      <button onClick={() => setSuggestion({ id: crypto.randomUUID(), text: 'I want to build a new feature, app, or tool. ' })}>
+                        <Hammer size={19} /><span>Build a new feature,<br />app, or tool</span>
                       </button>
-                      <button
-                        onClick={() =>
-                          setSuggestion({ id: crypto.randomUUID(), text: 'I want to build ' })
-                        }
-                      >
-                        <Plus size={16} />
-                        <span>Build something</span>
-                        <ArrowUpRight size={13} />
+                      <button onClick={() => setSuggestion({ id: crypto.randomUUID(), text: 'Review the code in this project and suggest changes. Explain your findings before making edits.' })}>
+                        <RefreshCw size={19} /><span>Review code and<br />suggest changes</span>
+                      </button>
+                      <button onClick={() => setSuggestion({ id: crypto.randomUUID(), text: 'Help me find and fix issues and failures in this project. Start by inspecting the code and available checks.' })}>
+                        <Bug size={19} /><span>Fix issues and failures</span>
                       </button>
                     </div>
-                    {!project ? (
-                      <button
-                        className="welcome-open-project text-button"
-                        onClick={() => void openProject()}
-                      >
-                        <FolderOpen size={14} />
-                        Open a project folder
-                      </button>
-                    ) : null}
                   </div>
                 )}
                 <Composer
                   key={`composer:${task.id}`}
                   task={task}
                   providers={snapshot.providers}
+                  projectName={project?.name}
+                  onChooseProject={() => void openProject()}
                   onPatch={(patch) => workspace.patchTask(task.id, patch)}
                   onSent={() => {
                     void workspace.readTask(task.id).catch(reportError)

@@ -68,3 +68,18 @@ test('database registration failure retains the new empty directory for explicit
   assert.throws(() => createProjectFolder(failing, f.parent, 'recoverable'), /Open that folder to recover/);
   assert.deepEqual(await readdir(join(f.parent, 'recoverable')), []);
 });
+
+test('project pin survives restart and rename without changing metadata, tasks or the folder', async t => {
+  const f = await fixture(t), project = f.store.addProject('/synthetic/pinned-project', 'Pinned fixture', 123, 'research');
+  const task = f.store.createTask({ projectId: project.id });
+  const pinned = f.store.setProjectPinned(project.id, true);
+  assert.deepEqual(pinned, { ...project, pinned: true });
+  assert.deepEqual(f.reopen().project(project.id), pinned);
+  assert.deepEqual(f.store.task(task.id), task);
+  assert.equal(f.store.renameProject(project.id, 'Renamed').pinned, true);
+  const unpinned = f.store.setProjectPinned(project.id, false);
+  assert.deepEqual(f.reopen().project(project.id), { ...project, name: 'Renamed', pinned: false });
+  for (const invalid of ['true', 1, null, undefined]) assert.throws(() => f.store.setProjectPinned(project.id, invalid as unknown as boolean), /boolean/);
+  assert.throws(() => f.store.setProjectPinned('missing', true), /not found/);
+  assert.deepEqual(f.store.project(project.id), unpinned);
+});

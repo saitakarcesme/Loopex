@@ -9,6 +9,8 @@ import './styles/shell.css'
 import './styles/tokens.css'
 import './styles/desktop.css'
 import './styles/lab-pages.css'
+import './styles/sidebar-reference.css'
+import './styles/composer-reference.css'
 
 class ErrorBoundary extends React.Component<React.PropsWithChildren, { error: string | null }> {
   state: { error: string | null } = { error: null }

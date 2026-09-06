@@ -100,3 +100,29 @@ test('orphan project references do not hide tasks from the sidebar', () => {
   const grouped = groupSidebarTasks([task(1, { projectId: 'missing' })], false, new Set())
   assert.equal(grouped.loose[0]?.id, 'task-1')
 })
+
+test('pinned projects appear once above ordinary projects with their children and independent task pins', () => {
+  const projects: Project[] = [
+    { id: 'ordinary', name: 'Ordinary project', path: '/fixture/a', createdAt: 1 },
+    { id: 'pinned', name: 'Pinned project', path: '/fixture/b', createdAt: 2, pinned: true },
+  ];
+  const tasks = [task(1, { projectId: 'pinned' }), task(2, { projectId: 'pinned', pinned: true }), task(3, { projectId: 'ordinary' })];
+  const html = render(tasks, 'task-1', projects);
+  assert.ok(html.indexOf('>Pinned project</span>') < html.indexOf('>Projects</span>'));
+  assert.ok(html.indexOf('Fixture task 1') < html.indexOf('>Projects</span>'));
+  assert.equal(html.match(/>Pinned project<\/span>/g)?.length, 1);
+  assert.equal(html.match(/Fixture task 2<\/span>/g)?.length, 1, 'task pin stays independent without duplicate child');
+  const unpinned = render(tasks, 'task-1', projects.map(project => ({ ...project, pinned: false })));
+  assert.ok(unpinned.indexOf('>Pinned project</span>') > unpinned.indexOf('>Projects</span>'));
+});
+
+test('pinned project paging retains selected older project and archive only renders archived child tasks', () => {
+  const projects: Project[] = Array.from({ length: 20 }, (_, index) => ({ id: `pin-${index}`, name: `Pinned ${index}`, path: `/fixture/${index}`, createdAt: index, pinned: true }));
+  const tasks = [task(1, { projectId: 'pin-19', archived: true }), task(2, { projectId: 'pin-19' })];
+  const html = render(tasks, 'task-1', projects);
+  assert.equal(html.match(/class="project-group"/g)?.length, 13);
+  assert.match(html, /Show more pinned projects/);
+  assert.match(html, /Fixture task 1/);
+  assert.doesNotMatch(html, /Fixture task 2/);
+  assert.match(html, /Archived tasks/);
+});

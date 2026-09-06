@@ -1,0 +1,121 @@
+/* Control arrangement from the supplied desktop reference; interaction logic stays in Composer. */
+.composer-reference .composer-project-strip {
+  margin: 0 14px -1px;
+  padding: 0 14px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  background: var(--surface-soft);
+  border-radius: 18px 18px 0 0;
+  color: var(--text-secondary);
+}
+.composer-reference .composer-project-strip button,
+.composer-reference .composer-project-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 0;
+  font-size: 14px;
+  color: inherit;
+}
+.composer-reference .composer-project-strip span span,
+.composer-reference .composer-project-strip button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.composer-reference .composer-project-strip svg { flex-shrink: 0; }
+.composer-reference .composer {
+  position: relative;
+  padding: 14px 12px 10px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: none;
+}
+.composer-reference .composer:focus-within { border-color: var(--border-strong); box-shadow: none; }
+.composer-reference .composer > textarea {
+  padding: 0 0 15px;
+  min-height: 56px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.composer-reference .composer > textarea::placeholder { color: var(--text-tertiary); }
+.composer-reference .composer-toolbar { display: flex; align-items: center; gap: 8px; }
+.composer-reference .composer-controls {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  gap: 9px;
+  min-width: 0;
+}
+.composer-reference .composer-controls > .icon-button:first-child { margin: 0; flex-shrink: 0; }
+.composer-reference .composer-model-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 0;
+  margin-left: auto;
+}
+.composer-reference .model-picker-trigger {
+  max-width: 280px;
+  padding: 5px 3px;
+  gap: 5px;
+  font-size: 14px;
+  color: var(--text);
+}
+.composer-reference .model-picker-provider,
+.composer-reference .model-picker-trigger .provider-dot { display: none; }
+.composer-reference .effort-select { max-width: 105px; height: 30px; padding: 0 3px; gap: 4px; }
+.composer-reference .effort-select select,
+.composer-reference .permission-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  field-sizing: content;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  padding: 3px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: inherit;
+  cursor: pointer;
+  min-width: 0;
+}
+.composer-reference select:focus-visible,
+.composer-reference .composer-project-strip button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.composer-reference .permission-select { gap: 5px; color: var(--text-secondary); min-width: 0; }
+.composer-reference .permission-full { color: #f57b42; }
+.composer-reference .permission-select > svg { flex-shrink: 0; }
+.composer-reference .composer-send-controls { flex-shrink: 0; margin-left: 6px; gap: 7px; }
+.composer-reference .send-button,
+.composer-reference .stop-button { width: 32px; height: 32px; }
+.composer-reference .composer-meta { justify-content: flex-end; min-height: 0; padding: 7px 8px 0; font-size: 11px; }
+.composer-reference .queue-select select { font-size: 11px; }
+@media (max-width: 1050px) {
+  .composer-reference .model-picker-trigger { max-width: 200px; }
+  .composer-reference .composer-toolbar { gap: 5px; }
+  .composer-reference .composer-controls { gap: 5px; }
+}
+@media (max-width: 760px) {
+  .composer-reference .composer-toolbar { flex-wrap: wrap; }
+  .composer-reference .composer-controls { flex: 1 0 calc(100% - 42px); }
+  .composer-reference .composer-model-controls { order: 3; flex: 1 0 100%; justify-content: flex-start; margin: 3px 0 0; }
+  .composer-reference .model-picker-trigger { max-width: calc(100% - 110px); }
+}
+
+/* The reference keeps the card 16px above the window edge; invisible hints must not reserve a row. */
+.composer-reference .composer-meta:not(:has(.connection-warning, .queue-select)) { display: none; }
+:root[data-theme='dark'] .composer-reference .composer-project-strip { background: #1e1e1e; }
+
+:root[data-theme='dark'] .composer-reference .composer { background: #2b2b2b; }

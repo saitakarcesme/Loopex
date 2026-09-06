@@ -1,9 +1,11 @@
 import {
   Archive,
-  Blocks,
+  Aperture,
   FlaskConical,
   Columns3,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   ArrowUp,
   Check,
   ChevronDown,
@@ -40,6 +42,10 @@ interface SidebarProps {
   onOpenProject: () => void
   onSearch: () => void
   onSettings: () => void
+  canGoBack?: boolean
+  canGoForward?: boolean
+  onBack?: () => void
+  onForward?: () => void
   onCollapse: () => void
   onPatch: (id: string, patch: Partial<Task>) => Promise<unknown>
   onRefresh: () => Promise<unknown>
@@ -59,11 +65,16 @@ export const Sidebar = memo(function Sidebar({
   onSearch,
   onSettings,
   onCollapse,
+  canGoBack = false,
+  canGoForward = false,
+  onBack,
+  onForward,
   onPatch,
   onRefresh,
   onError,
   onOverlay,
 }: SidebarProps) {
+  const [workspaceMenu, setWorkspaceMenu] = useState(false)
   const [collapsed, setCollapsed] = useState<string[]>(() => remember('collapsedProjects', []))
   const selectedTask = useMemo(
     () => tasks.find((task) => task.id === selectedId),
@@ -71,6 +82,7 @@ export const Sidebar = memo(function Sidebar({
   )
   const [showArchive, setShowArchive] = useState(() => !!selectedTask?.archived)
   const [limits, setLimits] = useState<Record<string, number>>({})
+  const [pinnedProjectLimit, setPinnedProjectLimit] = useState(PROJECT_PAGE_SIZE)
   const [projectLimit, setProjectLimit] = useState(PROJECT_PAGE_SIZE)
   const scroll = useRef<HTMLDivElement>(null)
   const shouldReveal = useRef(true)
@@ -89,7 +101,10 @@ export const Sidebar = memo(function Sidebar({
   const menuPinIndex = menu ? pinned.findIndex((task) => task.id === menu.id) : -1
   const selectedProjectId =
     selectedTask?.archived === showArchive && !selectedTask.pinned ? selectedTask.projectId : null
-  const projectPage = sidebarPage(projects, projectLimit, selectedProjectId)
+  const pinnedProjects = useMemo(() => projects.filter(project => project.pinned), [projects])
+  const ordinaryProjects = useMemo(() => projects.filter(project => !project.pinned), [projects])
+  const projectPage = sidebarPage(ordinaryProjects, projectLimit, selectedProjectId)
+  const pinnedProjectPage = sidebarPage(pinnedProjects, pinnedProjectLimit, selectedProjectId)
 
   useLayoutEffect(() => {
     if (!selectedTask) return
@@ -125,6 +140,7 @@ export const Sidebar = memo(function Sidebar({
       return next
     })
   const closeMenu = () => {
+    setWorkspaceMenu(false)
     setMenu(null)
     setProjectMenu(null)
     setProjectDialog(null)
@@ -201,29 +217,90 @@ export const Sidebar = memo(function Sidebar({
       </>
     )
   }
+  const renderProject = (project: Project) => {
+    const projectTasks = byProject.get(project.id) || []
+    const isCollapsed = collapsed.includes(project.id)
+    return (
+      <div key={project.id} className="project-group">
+        <div className="project-row">
+          <button
+            className="project-select"
+            aria-expanded={!isCollapsed}
+            onClick={() => toggleProject(project.id)}
+            onContextMenu={(event) => {
+              event.preventDefault()
+              setProjectMenu(project)
+              onOverlay(true)
+            }}
+            title={project.path}
+          >
+            {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            <Folder size={18} />
+            <span>{project.name}</span>
+          </button>
+          <IconButton
+            className="project-more"
+            label={`Actions for project ${project.name}`}
+            onClick={() => {
+              setProjectMenu(project)
+              onOverlay(true)
+            }}
+          >
+            <MoreHorizontal size={14} />
+          </IconButton>
+          <IconButton
+            className="project-add"
+            label={`New task in ${project.name}`}
+            onClick={() => onNew(project.id)}
+          >
+            <Plus size={15} />
+          </IconButton>
+        </div>
+        {!isCollapsed ? (
+          <div className="project-tasks">
+            {projectTasks.length ? (
+              renderTasks(projectTasks, `${showArchive}:project:${project.id}`)
+            ) : (
+              <button className="project-empty" onClick={() => onNew(project.id)}>
+                Start a task <Plus size={12} />
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+  const toggleProjectPin = async () => {
+    if (!projectMenu || busyAction) return
+    setBusyAction(true)
+    try {
+      await api('project:pin', { projectId: projectMenu.id, pinned: !projectMenu.pinned })
+      await onRefresh()
+      closeMenu()
+    } catch (error) { onError(error) }
+    finally { setBusyAction(false) }
+  }
   return (
     <>
-      <aside className="sidebar" aria-label="Workspace sidebar">
+      <aside className="sidebar sidebar-reference" aria-label="Workspace sidebar">
         <div className="sidebar-top titlebar-drag">
-          <span className="sidebar-app-label">Akorith</span>
-          <IconButton label="Hide sidebar (⌘B)" onClick={onCollapse}>
-            <PanelLeftClose size={17} />
-          </IconButton>
+          <IconButton label="Hide sidebar (⌘B)" onClick={onCollapse}><PanelLeftClose size={18} /></IconButton>
+          <IconButton label="Previous task (⌘[)" disabled={!canGoBack || !onBack} onClick={onBack}><ArrowLeft size={18} /></IconButton>
+          <IconButton label="Next task (⌘])" disabled={!canGoForward || !onForward} onClick={onForward}><ArrowRight size={18} /></IconButton>
+        </div>
+        <div className="sidebar-identity-row">
+          <button className="sidebar-workspace-menu" aria-haspopup="dialog" aria-expanded={workspaceMenu} onClick={() => { setWorkspaceMenu(true); onOverlay(true) }}>Akorith <ChevronDown size={16} /></button>
+          <IconButton label="Search tasks (⌘K)" onClick={onSearch}><Search size={19} /></IconButton>
         </div>
         <div className="sidebar-actions">
           <button className="nav-action" onClick={() => onNew()}>
-            <SquarePen size={17} />
-            <span>New task</span>
+            <SquarePen size={19} />
+            <span>New chat</span>
             <kbd>⌘N</kbd>
           </button>
-          <button className="nav-action" onClick={onSearch}>
-            <Search size={17} />
-            <span>Search tasks</span>
-            <kbd>⌘K</kbd>
-          </button>
-          <button className={`nav-action ${activePage === 'plugins' ? 'active' : ''}`} aria-current={activePage === 'plugins' ? 'page' : undefined} onClick={() => onPage?.('plugins')}><Blocks size={17}/><span>Plugins</span></button>
-          <button className={`nav-action ${activePage === 'research' ? 'active' : ''}`} aria-current={activePage === 'research' ? 'page' : undefined} onClick={() => onPage?.('research')}><FlaskConical size={17}/><span>Research</span></button>
-          <button className={`nav-action ${activePage === 'benchmark' ? 'active' : ''}`} aria-current={activePage === 'benchmark' ? 'page' : undefined} onClick={() => onPage?.('benchmark')}><Columns3 size={17}/><span>Benchmark</span></button>
+          <button className={`nav-action ${activePage === 'plugins' ? 'active' : ''}`} aria-current={activePage === 'plugins' ? 'page' : undefined} onClick={() => onPage?.('plugins')}><Aperture size={19}/><span>Plugins</span></button>
+          <button className={`nav-action ${activePage === 'research' ? 'active' : ''}`} aria-current={activePage === 'research' ? 'page' : undefined} onClick={() => onPage?.('research')}><FlaskConical size={19}/><span>Research</span></button>
+          <button className={`nav-action ${activePage === 'benchmark' ? 'active' : ''}`} aria-current={activePage === 'benchmark' ? 'page' : undefined} onClick={() => onPage?.('benchmark')}><Columns3 size={19}/><span>Benchmark</span></button>
         </div>
         <div className="sidebar-scroll" ref={scroll}>
           {showArchive ? (
@@ -234,15 +311,17 @@ export const Sidebar = memo(function Sidebar({
               </IconButton>
             </div>
           ) : null}
-          {pinned.length ? (
+          {pinned.length || pinnedProjects.length ? (
             <section className="sidebar-section">
               <div className="section-heading">
                 <span>
                   <Pin size={12} />
                   Pinned
                 </span>
-                <span>{pinned.length}</span>
+                <span>{pinned.length + pinnedProjects.length}</span>
               </div>
+              {[...pinnedProjectPage.visible, ...(pinnedProjectPage.selected ? [pinnedProjectPage.selected] : [])].map(renderProject)}
+              {pinnedProjectPage.remaining > 0 ? <button className="sidebar-show-more" onClick={() => setPinnedProjectLimit(value => value + PROJECT_PAGE_SIZE)}>Show more pinned projects<span>{pinnedProjectPage.remaining} remaining</span></button> : null}
               {renderTasks(pinned, `${showArchive}:pinned`)}
             </section>
           ) : null}
@@ -258,61 +337,7 @@ export const Sidebar = memo(function Sidebar({
               </IconButton>
               </span>
             </div>
-            {[...projectPage.visible, ...(projectPage.selected ? [projectPage.selected] : [])].map(
-              (project) => {
-                const projectTasks = byProject.get(project.id) || []
-                const isCollapsed = collapsed.includes(project.id)
-                return (
-                  <div key={project.id} className="project-group">
-                    <div className="project-row">
-                      <button
-                        className="project-select"
-                        aria-expanded={!isCollapsed}
-                        onClick={() => toggleProject(project.id)}
-                        onContextMenu={(event) => {
-                          event.preventDefault()
-                          setProjectMenu(project)
-                          onOverlay(true)
-                        }}
-                        title={project.path}
-                      >
-                        {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-                        <Folder size={15} />
-                        <span>{project.name}</span>
-                      </button>
-                      <IconButton
-                        className="project-more"
-                        label={`Actions for project ${project.name}`}
-                        onClick={() => {
-                          setProjectMenu(project)
-                          onOverlay(true)
-                        }}
-                      >
-                        <MoreHorizontal size={14} />
-                      </IconButton>
-                      <IconButton
-                        className="project-add"
-                        label={`New task in ${project.name}`}
-                        onClick={() => onNew(project.id)}
-                      >
-                        <Plus size={15} />
-                      </IconButton>
-                    </div>
-                    {!isCollapsed ? (
-                      <div className="project-tasks">
-                        {projectTasks.length ? (
-                          renderTasks(projectTasks, `${showArchive}:project:${project.id}`)
-                        ) : (
-                          <button className="project-empty" onClick={() => onNew(project.id)}>
-                            Start a task <Plus size={12} />
-                          </button>
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-                )
-              },
-            )}
+            {[...projectPage.visible, ...(projectPage.selected ? [projectPage.selected] : [])].map(renderProject)}
             {projectPage.remaining > 0 ? (
               <button
                 className="sidebar-show-more"
@@ -362,6 +387,12 @@ export const Sidebar = memo(function Sidebar({
           </div>
         </div>
       </aside>
+      {workspaceMenu ? <Dialog title="Akorith workspace" onClose={closeMenu} className="task-menu-dialog"><div className="menu-actions">
+        <button onClick={() => { closeMenu(); onNew() }}><SquarePen size={17} />New chat</button>
+        <button onClick={() => { closeMenu(); onOpenProject() }}><FolderPlus size={17} />Open a project folder</button>
+        <button onClick={() => { closeMenu(); setShowArchive(value => !value) }}><Archive size={17} />{showArchive ? 'Return to workspace' : 'Archived tasks'}</button>
+        <button onClick={() => { closeMenu(); onSettings() }}><Settings2 size={17} />Settings and connections</button>
+      </div></Dialog> : null}
       {menu ? (
         <Dialog title="Task actions" onClose={closeMenu} className="task-menu-dialog">
           <p className="menu-task-name">{menu.title}</p>
@@ -427,6 +458,7 @@ export const Sidebar = memo(function Sidebar({
               <SquarePen size={16} />
               New task in project
             </button>
+            <button disabled={busyAction} onClick={() => void toggleProjectPin()}><Pin size={16} />{projectMenu.pinned ? 'Unpin project' : 'Pin project'}</button>
             <button disabled={busyAction} onClick={() => { setProjectDialog(projectMenu); setProjectMenu(null) }}>
               <Pencil size={16} />Rename project
             </button>

@@ -15,7 +15,7 @@ import type {
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: "system",
-  sidebarWidth: 258,
+  sidebarWidth: 265,
   panelWidth: 480,
   ollamaUrl: "http://127.0.0.1:11434",
   defaultProvider: "codex",
@@ -159,6 +159,14 @@ export class Store {
         }
       }
     })();
+  }
+  setProjectPinned(id: string, pinned: boolean): Project {
+    if (typeof pinned !== 'boolean') throw new Error('Project pinned state must be a boolean.');
+    const project = this.project(id);
+    if (!project) throw new Error('Project not found.');
+    const next = { ...project, pinned };
+    this.db.prepare('UPDATE projects SET data=? WHERE id=?').run(JSON.stringify(next), id);
+    return next;
   }
   renameProject(id: string, name: unknown): Project {
     const project = this.project(id);
