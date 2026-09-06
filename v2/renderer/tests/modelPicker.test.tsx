@@ -46,3 +46,17 @@ test('one compact trigger identifies both model and connection, and remains disa
   assert.match(html, /disabled=""/)
   assert.doesNotMatch(html, /<select/)
 })
+
+test('OpenCode trigger shortens only known provider suffix and preserves full accessible identity', async () => {
+  const { modelTriggerLabel } = await import('../src/components/modelPickerState')
+  assert.equal(modelTriggerLabel('opencode', 'Muse Spark 1.3 Free · OpenCode Zen'), 'Muse Spark 1.3 Free')
+  assert.equal(modelTriggerLabel('opencode', 'Model · OpenCode Go'), 'Model')
+  assert.equal(modelTriggerLabel('opencode', 'Model · Other router'), 'Model · Other router')
+  assert.equal(modelTriggerLabel('codex', 'Model · OpenCode Zen'), 'Model · OpenCode Zen')
+  const full = 'Muse Spark 1.3 Free · OpenCode Zen'
+  const catalog: ProviderInfo[] = [{ ...providers[0], id: 'opencode', name: 'OpenCode', models: [{ id: 'opencode/muse', name: full }] }]
+  const html = renderToStaticMarkup(<ModelPicker task={{ ...task, providerId: 'opencode', model: 'opencode/muse' }} providers={catalog} disabled={false} onChoose={async () => {}} onConnections={() => {}} onOverlay={() => {}} onError={() => {}} />)
+  assert.ok(html.includes('<span>Muse Spark 1.3 Free</span>'))
+  assert.ok(html.includes(`title="${full} · OpenCode"`)); assert.ok(html.includes(`aria-label="Choose model and connection: ${full}, OpenCode"`))
+  assert.equal(catalog[0].models[0].id, 'opencode/muse'); assert.equal(catalog[0].models[0].name, full)
+})

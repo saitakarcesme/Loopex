@@ -653,3 +653,22 @@
     font-size: 18px;
   }
 }
+
+.local-profile-page { max-width: 610px; margin: 0 auto; padding: 4px 0 24px; }
+.profile-identity { display:flex; align-items:center; gap:16px; margin-bottom:28px; }
+.profile-avatar { width:60px; height:60px; border-radius:50%; display:grid; place-items:center; font-size:22px; color:white; }
+.profile-identity h3 { margin:0 0 5px; font-size:22px; font-weight:550; }
+.profile-identity p,.profile-footnote { color:var(--text-secondary); font-size:12px; line-height:1.6; margin:0; }
+.profile-field { display:flex; flex-direction:column; gap:8px; font-size:13px; margin-bottom:18px; }
+.profile-field input,.profile-field textarea { width:100%; border:1px solid var(--border); border-radius:9px; background:var(--surface-soft); color:var(--text); font:inherit; padding:10px 12px; resize:vertical; }
+.profile-field span { color:var(--text-tertiary); font-size:11px; }
+.profile-form-footer,.profile-colors,.profile-history-actions { display:flex; align-items:center; gap:10px; }
+.profile-form-footer { justify-content:space-between; }
+.profile-color { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; color:white; }
+.profile-color.slate,.profile-avatar.slate { background:#62676d; }.profile-color.blue,.profile-avatar.blue { background:#4870a7; }.profile-color.violet,.profile-avatar.violet { background:#8266a5; }.profile-color.green,.profile-avatar.green { background:#528573; }
+.profile-section { border-top:1px solid var(--border); margin-top:25px; padding-top:22px; }
+.profile-section h4 { margin:0 0 14px; font-size:13px; font-weight:550; }
+.profile-theme { display:flex; gap:8px; }.profile-theme button { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; border-radius:9px; background:var(--surface-soft); color:var(--text-secondary); border:1px solid transparent; }.profile-theme button[aria-pressed='true'] { border-color:var(--border-strong); color:var(--text); }
+.profile-link { width:100%; display:flex; align-items:center; justify-content:space-between; text-align:left; padding:12px 0; font-size:14px; }.profile-link small { display:block; color:var(--text-secondary); font-size:12px; margin-top:4px; }.profile-link:hover { color:var(--text-secondary); }
+.profile-stats { display:flex; gap:30px; margin-bottom:14px; }.profile-stats div { display:flex; flex-direction:column; gap:6px; }.profile-stats strong { font-size:22px; font-weight:500; }.profile-stats span { font-size:11px; color:var(--text-secondary); }
+.profile-history-actions { margin-top:14px; flex-wrap:wrap; }

@@ -14,7 +14,7 @@ import {
   FolderInput,
   FolderPlus,
   MoreHorizontal,
-  PanelLeftClose,
+  PanelLeft,
   Pencil,
   Pin,
   Plus,
@@ -23,12 +23,16 @@ import {
   SquarePen,
   X,
 } from 'lucide-react'
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react'
 import type { Project, Task } from '../../../shared/contracts'
 import { api, isActive, persist, remember, statusLabel } from '../api'
 import { Dialog, IconButton, Spinner } from './Primitives'
 import { ProjectDialog } from './ProjectDialog'
 import { groupSidebarTasks, sidebarPage, PROJECT_PAGE_SIZE, TASK_PAGE_SIZE } from './sidebarModel'
+
+export function ProjectTaskDisclosure({ open, projectId, children }: PropsWithChildren<{ open: boolean; projectId: string }>) {
+  return <div id={`project-children-${projectId}`} className={`project-disclosure ${open ? 'is-open' : ''}`} aria-hidden={!open} inert={!open || undefined}><div className="project-disclosure-clip">{children}</div></div>
+}
 
 interface SidebarProps {
   tasks: Task[]
@@ -42,6 +46,8 @@ interface SidebarProps {
   onOpenProject: () => void
   onSearch: () => void
   onSettings: () => void
+  onProfile?: () => void
+  profileName?: string
   canGoBack?: boolean
   canGoForward?: boolean
   onBack?: () => void
@@ -64,6 +70,8 @@ export const Sidebar = memo(function Sidebar({
   onOpenProject,
   onSearch,
   onSettings,
+  onProfile,
+  profileName = 'Local profile',
   onCollapse,
   canGoBack = false,
   canGoForward = false,
@@ -226,7 +234,8 @@ export const Sidebar = memo(function Sidebar({
           <button
             className="project-select"
             aria-expanded={!isCollapsed}
-            onClick={() => toggleProject(project.id)}
+            aria-controls={`project-children-${project.id}`}
+            onClick={event => { event.currentTarget.focus({ preventScroll: true }); toggleProject(project.id) }}
             onContextMenu={(event) => {
               event.preventDefault()
               setProjectMenu(project)
@@ -234,7 +243,7 @@ export const Sidebar = memo(function Sidebar({
             }}
             title={project.path}
           >
-            {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            <ChevronRight className={`project-chevron ${!isCollapsed ? 'is-open' : ''}`} size={12} />
             <Folder size={18} />
             <span>{project.name}</span>
           </button>
@@ -256,7 +265,7 @@ export const Sidebar = memo(function Sidebar({
             <Plus size={15} />
           </IconButton>
         </div>
-        {!isCollapsed ? (
+        <ProjectTaskDisclosure open={!isCollapsed} projectId={project.id}>
           <div className="project-tasks">
             {projectTasks.length ? (
               renderTasks(projectTasks, `${showArchive}:project:${project.id}`)
@@ -266,7 +275,7 @@ export const Sidebar = memo(function Sidebar({
               </button>
             )}
           </div>
-        ) : null}
+        </ProjectTaskDisclosure>
       </div>
     )
   }
@@ -284,7 +293,7 @@ export const Sidebar = memo(function Sidebar({
     <>
       <aside className="sidebar sidebar-reference" aria-label="Workspace sidebar">
         <div className="sidebar-top titlebar-drag">
-          <IconButton label="Hide sidebar (⌘B)" onClick={onCollapse}><PanelLeftClose size={18} /></IconButton>
+          <IconButton label="Hide sidebar (⌘B)" onClick={onCollapse}><PanelLeft size={18} /></IconButton>
           <IconButton label="Previous task (⌘[)" disabled={!canGoBack || !onBack} onClick={onBack}><ArrowLeft size={18} /></IconButton>
           <IconButton label="Next task (⌘])" disabled={!canGoForward || !onForward} onClick={onForward}><ArrowRight size={18} /></IconButton>
         </div>
@@ -380,6 +389,10 @@ export const Sidebar = memo(function Sidebar({
             <Settings2 size={16} />
             <span>Settings</span>
             <kbd>⌘,</kbd>
+          </button>
+          <button className="sidebar-profile-row" onClick={onProfile || onSettings} aria-label={`Open profile: ${profileName}`}>
+            <span className="sidebar-profile-avatar" aria-hidden="true">{profileName.trim().slice(0, 1).toLocaleUpperCase() || 'A'}</span>
+            <span>{profileName}</span><ChevronRight size={15} />
           </button>
           <div className="sidebar-footnote">
             <span className="local-dot" />

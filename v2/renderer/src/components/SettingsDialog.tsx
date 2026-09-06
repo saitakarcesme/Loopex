@@ -1,4 +1,5 @@
-import { BookOpen, Cable, Layers3, Package, Settings2 } from 'lucide-react'
+import { ProfileSettings } from './settings/ProfileSettings'
+import { BookOpen, Cable, Layers3, Package, Settings2, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { Dialog } from './Primitives'
 import { ConnectionsSettings } from './settings/ConnectionsSettings'
@@ -7,8 +8,9 @@ import { McpSettings } from './settings/McpSettings'
 import { PluginsSettings } from './settings/PluginsSettings'
 import { SkillsSettings } from './settings/SkillsSettings'
 import type { SettingsSectionProps } from './settings/types'
-type SettingsTab = 'general' | 'connections' | 'skills' | 'mcp' | 'plugins'
+type SettingsTab = 'profile' | 'general' | 'connections' | 'skills' | 'mcp' | 'plugins'
 const tabs = [
+  { id: 'profile', name: 'Local profile', icon: UserRound },
   { id: 'general', name: 'General', icon: Settings2 },
   { id: 'connections', name: 'Connections', icon: Cable },
   { id: 'plugins', name: 'Plugins', icon: Package },
@@ -42,7 +44,7 @@ export function SettingsDialog({
           </div>
         </nav>
         <div className="settings-content">
-          {tab === 'general' ? (
+          {tab === 'profile' ? <ProfileSettings {...props} onConnections={() => setTab('connections')} onPlugins={() => setTab('plugins')} /> : tab === 'general' ? (
             <GeneralSettings {...props} />
           ) : tab === 'connections' ? (
             <ConnectionsSettings {...props} />

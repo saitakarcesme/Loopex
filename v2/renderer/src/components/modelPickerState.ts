@@ -23,3 +23,8 @@ export function modelSelectionPatch(providers: ProviderInfo[], providerId: strin
 export function providerAvailability(provider: ProviderInfo): string {
   return !provider.available ? 'Unavailable' : provider.authenticated === false ? 'Sign in required' : !provider.models.length ? 'No models available' : provider.connectionLabel
 }
+
+/** Shorten only the provider-added routing suffix, never the model identifier or arbitrary names. */
+export function modelTriggerLabel(providerId: string, label: string): string {
+  return providerId === 'opencode' ? label.replace(/ · OpenCode (?:Zen|Go)$/, '') : label
+}

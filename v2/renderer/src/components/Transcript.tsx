@@ -7,6 +7,7 @@ import {
   Copy,
   FileCode2,
   MessageSquare,
+  ListChecks,
   RotateCcw,
   ScrollText,
   Terminal,
@@ -56,14 +57,15 @@ export function ActivityRow({
         : activity.kind === 'error'
           ? CircleAlert
           : activity.kind === 'plan'
-            ? Check
+            ? ListChecks
             : Wrench
+  const Summary = presentation.detail ? 'button' : 'div'
   return (
     <div className={`activity ${activity.status}`}>
-      <button
+      <Summary
         className="activity-summary"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={presentation.detail ? expanded : undefined}
+        onClick={presentation.detail ? () => setExpanded((value) => !value) : undefined}
       >
         {activity.status === 'running' ? <Spinner size={13} /> : <Icon size={14} />}
         <span>{presentation.title}</span>
@@ -76,7 +78,7 @@ export function ActivityRow({
           </span>
         ) : null}
         {presentation.detail ? <ChevronRight className={expanded ? 'rotated' : ''} size={13} /> : null}
-      </button>
+      </Summary>
       {presentation.detail ? <Disclosure open={expanded}>
         <div className="activity-detail">
           {activity.kind === 'plan' ? (
@@ -94,6 +96,39 @@ export function ActivityRow({
     </div>
   )
 }
+/** Only recorded completed actions may fold together; uncertainty and commentary stay visible. */
+function activitySections(activities: Activity[]): Activity[][] {
+  const sections: Activity[][] = []
+  for (const activity of activities) {
+    const canFold = activity.status === 'completed' && activity.kind !== 'commentary' && activity.kind !== 'error'
+    const previous = sections.at(-1)
+    const previousAction = previous?.[0]
+    if (canFold && previousAction?.status === 'completed' && previousAction.kind !== 'commentary' && previousAction.kind !== 'error') previous!.push(activity)
+    else sections.push([activity])
+  }
+  return sections
+}
+function ActivitySection({ activities, onOpenFile, onError }: {
+  activities: Activity[]
+  onOpenFile: (path: string) => void
+  onError: (error: unknown) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const earlier = activities.length > 3 ? activities.slice(0, -2) : []
+  const recent = earlier.length ? activities.slice(-2) : activities
+  const row = (activity: Activity) => <ActivityRow key={activity.id} activity={activity} onOpenFile={onOpenFile} onError={onError} />
+  return <div className="activity-section">
+    {earlier.length ? <>
+      <button className="activity-expand" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
+        <ChevronRight size={13} className={expanded ? 'rotated' : ''} />
+        {expanded ? 'Hide earlier actions' : `Show ${earlier.length} earlier actions`}
+      </button>
+      <Disclosure open={expanded}>{earlier.map(row)}</Disclosure>
+    </> : null}
+    {recent.map(row)}
+  </div>
+}
+
 export const MessageView = memo(function MessageView({
   message,
   undoBlockReason,
@@ -110,10 +145,6 @@ export const MessageView = memo(function MessageView({
   onContext: (taskId: string, turnId: string) => void
 }) {
   const [copied, setCopied] = useState(false)
-  const activityCount = message.activities.filter(
-    (activity) => activity.kind !== 'commentary',
-  ).length
-  const [showAll, setShowAll] = useState(false)
   const active = isActive(message.status)
   const providerNames = { codex: 'Codex', claude: 'Claude', opencode: 'OpenCode', ollama: 'Ollama' }
   const attribution = message.attribution
@@ -129,18 +160,6 @@ export const MessageView = memo(function MessageView({
         ? 'This imported turn timed out. Partial work is preserved.'
         : undefined
     : undefined
-  const lastActivityIds = new Set(
-    message.activities
-      .filter((activity) => activity.kind !== 'commentary')
-      .slice(-3)
-      .map((activity) => activity.id),
-  )
-  const visibleActivities =
-    showAll || active || activityCount <= 6
-      ? message.activities
-      : message.activities.filter(
-          (activity) => activity.kind === 'commentary' || lastActivityIds.has(activity.id),
-        )
   return (
     <article
       data-message-id={message.id}
@@ -164,19 +183,8 @@ export const MessageView = memo(function MessageView({
       ) : (
         <>
           <div className="assistant-activities">
-            {activityCount > 6 && !active ? (
-              <button className="activity-expand" onClick={() => setShowAll((value) => !value)}>
-                <ChevronRight size={13} className={showAll ? 'rotated' : ''} />
-                {showAll ? 'Collapse activity' : `Show all ${activityCount} actions`}
-              </button>
-            ) : null}
-            {visibleActivities.map((activity) => (
-              <ActivityRow
-                key={activity.id}
-                activity={activity}
-                onOpenFile={onOpenFile}
-                onError={onError}
-              />
+            {activitySections(message.activities).map((section) => (
+              <ActivitySection key={section[0].id} activities={section} onOpenFile={onOpenFile} onError={onError} />
             ))}
           </div>
           {message.content ? (

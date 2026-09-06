@@ -9,8 +9,8 @@ import {
   CircleAlert,
   Folder,
   GitCompareArrows,
-  PanelLeftOpen,
-  PanelRightOpen,
+  PanelLeft,
+  PanelRight,
   ScrollText,
   Terminal,
   X,
@@ -65,7 +65,7 @@ export function App() {
   const { snapshot, detail, selectedId, reportError, notify } = workspace
   const [page, setPage] = useState<'chat' | 'research' | 'benchmark' | 'plugins'>('chat')
   const navigation = useMemo(() => {
-    const projects = snapshot?.projects.filter(project => !project.origin) || []
+    const projects = snapshot?.projects.filter(project => !project.origin && !project.hiddenFromSidebar) || []
     const internalIds = new Set(snapshot?.projects.filter(project => project.origin).map(project => project.id))
     const tasks = snapshot?.tasks.filter(task => !task.projectId || !internalIds.has(task.projectId) || task.pinned || (page === 'chat' && task.id === selectedId)) || []
     return { projects, tasks }
@@ -81,7 +81,14 @@ export function App() {
   useEffect(() => () => { resizeCleanup.current?.(); resizeCleanup.current = null }, [])
   const [sidebarWidth, setSidebarWidth] = useState(() => remember('sidebarWidth', 265))
   const [panelWidth, setPanelWidth] = useState(() => remember('panelWidth', 520))
-  const [settingsTab, setSettingsTab] = useState<'general' | 'connections' | null>(null)
+  const [settingsTab, setSettingsTab] = useState<'general' | 'connections' | 'profile' | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
+  useEffect(() => {
+    setFullscreen(snapshot?.fullscreen ?? false)
+  }, [snapshot?.fullscreen])
+  useEffect(() => window.akorith?.onEvent(event => {
+    if (event.type === 'window') setFullscreen(event.fullscreen)
+  }), [])
   const [searchOpen, setSearchOpen] = useState(false)
   const [selectionRevision, setSelectionRevision] = useState(0)
   const [sidebarOverlay, setSidebarOverlay] = useState(false)
@@ -328,7 +335,7 @@ export function App() {
   return (
     <div
       ref={shellRef}
-      className={`app-shell ${sidebarOpen ? 'sidebar-is-open' : ''} ${panelOpen ? 'panel-is-open' : ''}`}
+      className={`app-shell ${fullscreen ? 'is-fullscreen' : ''} ${sidebarOpen ? 'sidebar-is-open' : ''} ${panelOpen ? 'panel-is-open' : ''}`}
       style={
         {
           '--sidebar-width': `${sidebarWidth}px`,
@@ -349,6 +356,8 @@ export function App() {
             onOpenProject={openSidebarProject}
             onSearch={openSearch}
             onSettings={openSettings}
+            onProfile={() => { void api('browser:hideAll').catch(reportError); setSettingsTab('profile') }}
+            profileName={snapshot.profile?.name}
             onCollapse={collapseSidebar}
             canGoBack={canGoBack}
             canGoForward={canGoForward}
@@ -386,7 +395,7 @@ export function App() {
                       if (window.innerWidth <= 1080) setPanelOpen(false)
                     }}
                   >
-                    <PanelLeftOpen size={17} />
+                    <PanelLeft size={17} />
                   </IconButton>
                 ) : (
                   <IconButton
@@ -394,7 +403,7 @@ export function App() {
                     className="responsive-sidebar-toggle"
                     onClick={() => setPanelOpen(false)}
                   >
-                    <PanelLeftOpen size={17} />
+                    <PanelLeft size={17} />
                   </IconButton>
                 )}
                 <div className={`task-history-controls ${sidebarOpen ? 'history-in-sidebar' : ''}`} aria-label="Task navigation">
@@ -444,7 +453,7 @@ export function App() {
                   className={panelOpen ? 'active' : ''}
                   onClick={() => setPanelOpen((value) => !value)}
                 >
-                  <PanelRightOpen size={17} />
+                  <PanelRight size={17} />
                 </IconButton>
               </div> : null}
             </header>
@@ -554,6 +563,7 @@ export function App() {
         <SettingsDialog
           snapshot={snapshot}
           initialTab={settingsTab}
+          onHistoryCleared={async () => { setPage('chat'); await workspace.createTask(null) }}
           onSettings={saveSettings}
           onRefresh={workspace.refresh}
           onClose={() => setSettingsTab(null)}

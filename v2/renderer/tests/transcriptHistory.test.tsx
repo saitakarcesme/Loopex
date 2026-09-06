@@ -98,3 +98,40 @@ test('exact host tool labels describe actions while preserving failure details a
   assert.doesNotMatch(html, /Read file:|Read successfully|another\.txt/)
   assert.deepEqual(activityPresentation({ kind: 'command', title: 'files_read', detail }), { title: 'files_read', detail })
 })
+
+test('active turns fold only completed history while preserving commentary, running work and failure evidence', () => {
+  const completed: Activity[] = Array.from({ length: 7 }, (_, i) => ({ id: `done-${i}`, kind: 'tool', title: `Recorded action ${i}`, status: 'completed', startedAt: i }))
+  const activities: Activity[] = [
+    ...completed,
+    { id: 'comment', kind: 'commentary', title: 'Checking the actual result.', status: 'completed', startedAt: 8 },
+    { id: 'running', kind: 'tool', title: 'Current operation', status: 'running', startedAt: 9 },
+    { id: 'failed', kind: 'error', title: 'Permission denied', detail: 'Exact provider error', status: 'failed', startedAt: 10 },
+    { id: 'interrupted', kind: 'tool', title: 'Interrupted operation', status: 'interrupted', startedAt: 11 },
+  ]
+  for (const status of ['running', 'cancelled'] as const) {
+    const html = render({ ...response, importProvenance: undefined, status, activities })
+    assert.match(html, /Show 5 earlier actions/)
+    assert.doesNotMatch(html, /Recorded action 0/)
+    assert.match(html, /Recorded action 5/)
+    assert.match(html, /Recorded action 6/)
+    assert.match(html, /Checking the actual result/)
+    assert.match(html, /Current operation/)
+    assert.match(html, /Permission denied/)
+    assert.match(html, /Interrupted operation/)
+    assert.match(html, /Saved partial response/)
+    if (status === 'cancelled') assert.match(html, /Stopped. Partial work is preserved/)
+  }
+})
+
+test('commentary separates short action sequences and rows without detail are not empty disclosure buttons', () => {
+  const activities: Activity[] = Array.from({ length: 6 }, (_, i) => ({ id: `a-${i}`, kind: 'tool', title: `Action ${i}`, status: 'completed', startedAt: i }))
+  activities.splice(3, 0, { id: 'comment', kind: 'commentary', title: 'Actual checkpoint', status: 'completed', startedAt: 3 })
+  const html = render({ ...response, activities })
+  for (let i = 0; i < 6; i++) assert.match(html, new RegExp(`Action ${i}`))
+  assert.doesNotMatch(html, /earlier actions/)
+  const row = renderToStaticMarkup(<ActivityRow activity={activities[0]} onOpenFile={noop} onError={noop} />)
+  assert.doesNotMatch(row, /<button|aria-expanded/)
+  const plan = renderToStaticMarkup(<ActivityRow activity={{ ...activities[0], kind: 'plan' }} onOpenFile={noop} onError={noop} />)
+  assert.match(plan, /lucide-list-checks/)
+  assert.doesNotMatch(plan, /lucide-check /)
+})

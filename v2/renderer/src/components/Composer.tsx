@@ -6,6 +6,7 @@ import { useComposerDraft } from '../hooks/useComposerDraft'
 import { AttachmentLink } from './ArtifactPreview'
 import { acknowledgeComposerSubmission, beginComposerSubmission } from './composerDraftState'
 import { IconButton, Spinner } from './Primitives'
+import { CompactChoice } from './CompactChoice'
 import { ModelPicker } from './ModelPicker'
 import { modelSelectionPatch } from './modelPickerState'
 import { Queue } from './Queue'
@@ -70,7 +71,6 @@ export function Composer({
   const model = provider?.models.find((item) => item.id === task.model)
   const available = !!provider?.available && provider.authenticated !== false && !!model
   const allowSteer = !!provider?.capabilities.steer
-  const update = (patch: Partial<Task>) => void onPatch(patch).catch(onError)
   useEffect(() => {
     if (suggestion) {
       const next = updateLocalDraft((current) => ({ ...current, text: suggestion.text }))
@@ -349,23 +349,11 @@ export function Composer({
             >
               {attaching ? <Spinner /> : <Plus size={19} />}
             </IconButton>
-        <label
-          className={`permission-select permission-${task.mode}`}
-          title="Read: inspect only. Work: changes inside the project. Full access: includes the wider computer."
-        >
-          {task.mode === 'full' ? <ShieldAlert size={15} /> : <ShieldCheck size={15} />}
-          <select
-            aria-label="Permission mode"
-            disabled={active || sending || selectingModel}
-            value={task.mode}
-            onChange={(event) => update({ mode: event.target.value as PermissionMode })}
-          >
-            <option value="read">Read only</option>
-            <option value="work">Workspace access</option>
-            <option value="full">Full access</option>
-          </select>
-          <ChevronDown size={10} />
-        </label>
+            <CompactChoice label="Permission mode" value={task.mode} className={`permission-select permission-${task.mode}`} disabled={active || sending || selectingModel} icon={task.mode === 'full' ? <ShieldAlert size={15} strokeWidth={1.6} /> : <ShieldCheck size={15} strokeWidth={1.6} />} options={[
+              { value: 'read', label: 'Read only', description: 'Inspect without making changes' },
+              { value: 'work', label: 'Workspace access', description: 'Work within this project' },
+              { value: 'full', label: 'Full access', description: 'Includes tools for the wider computer' },
+            ]} onChoose={mode => onPatch({ mode: mode as PermissionMode })} onError={onError} onOverlay={onModelOverlay} />
           </div>
           <div className="composer-model-controls">
             <ModelPicker task={task} providers={providers} disabled={active || sending} onConnections={onConnections} onOverlay={onModelOverlay} onError={onError} onChoose={async (providerId, modelId) => {
@@ -376,26 +364,10 @@ export function Composer({
               try { await onPatch(patch) }
               finally { selectingModelRef.current = false; setSelectingModel(false) }
             }} />
-            {model?.efforts?.length ? (
-              <label className="compact-select effort-select" title="Reasoning effort">
-                <select
-                  aria-label="Reasoning effort"
-                  value={task.effort}
-                  disabled={active || sending || selectingModel}
-                  onChange={(event) => update({ effort: event.target.value })}
-                >
-                  {!model.efforts.includes(task.effort) ? (
-                    <option value={task.effort}>{task.effort || 'Default'}</option>
-                  ) : null}
-                  {model.efforts.map((effort) => (
-                    <option key={effort} value={effort}>
-                      {effort.charAt(0).toUpperCase() + effort.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={11} />
-              </label>
-            ) : null}
+            {model?.efforts?.length ? <CompactChoice label="Reasoning effort" value={task.effort} className="effort-select" disabled={active || sending || selectingModel} options={[
+              ...(!model.efforts.includes(task.effort) ? [{ value: task.effort, label: task.effort || 'Default', disabled: true }] : []),
+              ...model.efforts.map(effort => ({ value: effort, label: effort.charAt(0).toUpperCase() + effort.slice(1) })),
+            ]} onChoose={effort => onPatch({ effort })} onError={onError} onOverlay={onModelOverlay} /> : null}
           </div>
           <div className="composer-send-controls">
             {active ? (

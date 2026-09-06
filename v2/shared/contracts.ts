@@ -23,6 +23,7 @@ export type ActivityKind =
   | "status"
   | "error";
 export interface Project {
+  hiddenFromSidebar?: boolean;
   pinned?: boolean;
   /** Internal lab workspaces remain addressable but are not ordinary user projects. */
   origin?: 'research' | 'benchmark';
@@ -173,6 +174,8 @@ export interface AppSnapshot {
   providers: ProviderInfo[];
   settings: Settings;
   version: string;
+  fullscreen?: boolean;
+  profile?: import('./profile-contracts').LocalProfile;
 }
 export interface TaskDetail {
   task: Task;
@@ -180,6 +183,7 @@ export interface TaskDetail {
   pending: PendingRequest[];
 }
 export type AppEvent =
+  | { type: "window"; fullscreen: boolean }
   | { type: "changed"; taskId?: string }
   | { type: "task"; task: Task }
   | { type: "message"; message: Message }

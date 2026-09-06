@@ -1,3 +1,4 @@
+import { readProfile, saveProfile, profileSummary, archiveHistory, restoreHistory } from './local-profile';
 import { createProjectFolder } from './project-creation';
 import { projectFolderName } from './project-names';
 import {
@@ -285,7 +286,19 @@ async function command(name: string, payload: unknown) {
         providers: providerInfo,
         settings: store.settings(),
         version: app.getVersion(),
+        fullscreen: window?.isFullScreen() ?? false,
+        profile: readProfile(store),
       };
+    case "profile:summary": return profileSummary(store);
+    case "profile:save": {
+      const result = saveProfile(store, p.profile); send({type:"changed"}); return result;
+    }
+    case "history:archive": {
+      const result = archiveHistory(store); send({type:"changed"}); return result;
+    }
+    case "history:restore": {
+      const result = restoreHistory(store); send({type:"changed"}); return result;
+    }
     case "providers:refresh":
       return refreshProviders();
     case "project:create": {
@@ -672,6 +685,8 @@ async function createWindow() {
   window.webContents.on("will-navigate", (event, url) => {
     if (url !== window?.webContents.getURL()) event.preventDefault();
   });
+  window.on("enter-full-screen", () => send({ type: "window", fullscreen: true }));
+  window.on("leave-full-screen", () => send({ type: "window", fullscreen: false }));
   window.once("ready-to-show", () => window?.show());
   window.on("closed", () => {
     window = null;

@@ -53,3 +53,7 @@
 @media(prefers-reduced-motion:reduce){.disclosure-motion,.activity-summary>svg:last-child{transition:none}.modal-backdrop,.modal-backdrop>.dialog{animation:none}}
 .modal-backdrop.is-closing{animation:backdrop-leave var(--motion-exit) ease-in forwards;pointer-events:none}.modal-backdrop.is-closing>.dialog{animation:dialog-leave var(--motion-exit) ease-in forwards}@keyframes backdrop-leave{to{opacity:0}}@keyframes dialog-leave{to{opacity:0;transform:translateY(5px) scale(.99)}}
 @media(prefers-reduced-motion:reduce){.modal-backdrop.is-closing,.modal-backdrop.is-closing>.dialog{animation:none}}
+
+.app-shell.is-fullscreen .workspace-header.sidebar-hidden { padding-left: 14px; }
+.app-shell .header-actions svg,.app-shell .task-history-controls svg { stroke-width:1.65; }
+.sidebar-container { position:relative; }

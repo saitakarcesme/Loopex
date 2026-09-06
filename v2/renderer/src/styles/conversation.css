@@ -919,3 +919,22 @@
 .file-mention-menu [role="option"] { padding: 7px 8px; border-radius: 5px; cursor: pointer; overflow-wrap: anywhere; }
 .file-mention-menu [role="option"].selected, .file-mention-menu [role="option"]:hover { background: var(--hover); }
 .file-mention-menu [role="status"] { padding: 8px; color: var(--text-secondary); }
+
+
+/* Transcript flow: action history stays quiet beside real commentary and results. */
+.assistant-activities .activity-section { min-width: 0; }
+.assistant-activities .activity-section + .activity-section { margin-top: 4px; }
+.assistant-activities .activity-summary { min-height: 28px; padding: 4px 0; gap: 7px; font-size: 12px; }
+.assistant-activities .activity-summary > svg { flex-shrink: 0; stroke-width: 1.65; }
+.assistant-activities .activity.running .activity-summary { color: var(--text); }
+.assistant-activities .activity-expand { min-height: 28px; margin: 2px 0; font-size: 11px; gap: 7px; }
+.assistant-activities .activity-expand > svg { transition: transform var(--motion-standard) var(--motion-ease-out); }
+.assistant-activities .activity-detail pre { font-size: 11px; line-height: 1.65; }
+.assistant-activities .commentary { margin: 8px 0 12px; }
+.assistant-activities .commentary .markdown { font-size: 14px; line-height: 1.7; }
+.message-assistant > .markdown { margin-top: 12px; }
+.message-assistant .message-footer { font-size: 10px; gap: 10px; }
+.message-assistant .message-footer:focus-within { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .assistant-activities .activity-expand > svg { transition: none; }
+}

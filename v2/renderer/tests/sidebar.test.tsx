@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { Project, Task } from '../../shared/contracts'
-import { Sidebar } from '../src/components/Sidebar'
+import { Sidebar, ProjectTaskDisclosure } from '../src/components/Sidebar'
 import { groupSidebarTasks, sidebarPage, TASK_PAGE_SIZE } from '../src/components/sidebarModel'
 
 function task(index: number, extra: Partial<Task> = {}): Task {
@@ -125,4 +125,24 @@ test('pinned project paging retains selected older project and archive only rend
   assert.match(html, /Fixture task 1/);
   assert.doesNotMatch(html, /Fixture task 2/);
   assert.match(html, /Archived tasks/);
+});
+
+test('project disclosure retains children for reversible exit while removing collapsed content from focus and accessibility', () => {
+  const children = <button>Child task</button>;
+  const closed = renderToStaticMarkup(<ProjectTaskDisclosure projectId="p" open={false}>{children}</ProjectTaskDisclosure>);
+  assert.match(closed, /id="project-children-p"/);
+  assert.match(closed, /aria-hidden="true"/);
+  assert.match(closed, /inert=""/);
+  assert.match(closed, /Child task/);
+  const open = renderToStaticMarkup(<ProjectTaskDisclosure projectId="p" open>{children}</ProjectTaskDisclosure>);
+  assert.match(open, /project-disclosure is-open/);
+  assert.match(open, /aria-hidden="false"/);
+  assert.doesNotMatch(open, /inert=/);
+});
+
+test('project disclosure trigger names its own child region and profile never fabricates an account identity', () => {
+  const html = render([], null, [{ id: 'p', name: 'Project', path: '/fixture', createdAt: 1 }]);
+  assert.match(html, /aria-controls="project-children-p"/);
+  assert.match(html, /aria-label="Open profile: Local profile"/);
+  assert.doesNotMatch(html, /Pull requests|Scheduled|Notifications/);
 });

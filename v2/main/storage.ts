@@ -123,7 +123,14 @@ export class Store {
     const found = parse<Project>(
       this.db.prepare("SELECT data FROM projects WHERE path=?").get(path),
     );
-    if (found) return found;
+    if (found) {
+      if (found.hiddenFromSidebar) {
+        const visible = { ...found, hiddenFromSidebar: false };
+        this.db.prepare('UPDATE projects SET data=? WHERE id=?').run(JSON.stringify(visible), found.id);
+        return visible;
+      }
+      return found;
+    }
     const p: Project = { id: randomUUID(), path, name, createdAt, ...(origin ? { origin } : {}) };
     this.db
       .prepare("INSERT INTO projects(id,path,data) VALUES (?,?,?)")
