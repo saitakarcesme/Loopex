@@ -48,6 +48,7 @@ interface SidebarProps {
   onSettings: () => void
   onProfile?: () => void
   profileName?: string
+  profileColor?: 'slate' | 'blue' | 'violet' | 'green'
   canGoBack?: boolean
   canGoForward?: boolean
   onBack?: () => void
@@ -72,6 +73,7 @@ export const Sidebar = memo(function Sidebar({
   onSettings,
   onProfile,
   profileName = 'Local profile',
+  profileColor = 'slate',
   onCollapse,
   canGoBack = false,
   canGoForward = false,
@@ -391,7 +393,7 @@ export const Sidebar = memo(function Sidebar({
             <kbd>⌘,</kbd>
           </button>
           <button className="sidebar-profile-row" onClick={onProfile || onSettings} aria-label={`Open profile: ${profileName}`}>
-            <span className="sidebar-profile-avatar" aria-hidden="true">{profileName.trim().slice(0, 1).toLocaleUpperCase() || 'A'}</span>
+            <span className={`sidebar-profile-avatar profile-${profileColor}`} aria-hidden="true">{profileName.trim().slice(0, 1).toLocaleUpperCase() || 'A'}</span>
             <span>{profileName}</span><ChevronRight size={15} />
           </button>
           <div className="sidebar-footnote">

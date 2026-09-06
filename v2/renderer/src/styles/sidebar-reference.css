@@ -50,3 +50,6 @@
 
 .sidebar-reference .sidebar-top { transition:padding-left var(--motion-panel) var(--motion-ease); }
 @media (prefers-reduced-motion:reduce) { .sidebar-reference .sidebar-top { transition:none; } }
+
+.sidebar-reference .sidebar-profile-avatar { color:white; border-color:transparent; }
+.sidebar-profile-avatar.profile-slate { background:#62676d; }.sidebar-profile-avatar.profile-blue { background:#4870a7; }.sidebar-profile-avatar.profile-violet { background:#8266a5; }.sidebar-profile-avatar.profile-green { background:#528573; }

@@ -358,6 +358,7 @@ export function App() {
             onSettings={openSettings}
             onProfile={() => { void api('browser:hideAll').catch(reportError); setSettingsTab('profile') }}
             profileName={snapshot.profile?.name}
+            profileColor={snapshot.profile?.color}
             onCollapse={collapseSidebar}
             canGoBack={canGoBack}
             canGoForward={canGoForward}
