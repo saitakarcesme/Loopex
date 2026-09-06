@@ -1,25 +1,13 @@
-# Akorith Next — B09 geliştirme teslimi
+# Akorith Next — B13 UI düzeltmesi
 
-Kaynak branch: `rebuild/codex-interaction-parity`. Paket kaynak commit: `02eb7b5`. Sürüm: `2.0.0-alpha.9`.
+Branch: `rebuild/codex-interaction-parity`. Paket kaynak commit: `61c04dc`. Sürüm: `2.0.0-alpha.13`.
 
-`Open Akorith Next.command` bu bilgisayardaki B09 paketini ayrı geliştirme verisiyle açar. Eski kurulu Akorith ve geçmişi değiştirilmedi. Uygulama şu anda bu profil ile açık.
+`Open Akorith Next.command` B13 paketini mevcut ayrı geliştirme profiliyle açar. Son paket şu anda açık. Eski kurulu uygulama/veri değiştirilmedi; push yapılmadı.
 
-## Doğrulananlar
+Kullanıcının Codex ekran görüntüsüne göre başlangıç ekranı yeniden düzenlendi: alttaki composer ve proje şeridi, dört yatay kart, proje başlığı, koyu yüzeyler ve sidebar hiyerarşisi. Gerçek proje sabitleme, model seçimi, Astra dosya okuma/yanıtı, sağ dosya paneli ve yeniden açılışta proje/konuşma kalıcılığı gözlendi. 325 test ve TypeScript kontrolü geçti; paket imzası deep/strict doğrulandı.
 
-- 275/275 kaynak testi ve TypeScript kontrolü geçti; Mac ARM64 paket imzası deep/strict doğrulandı (ad-hoc, notarize değil).
-- Birleşik model seçimi, sidebar gezinmesi, panel geçişleri ve gerçek tur/araç/onay altyapısı.
-- Gerçek managed skill/MCP: V1 → V2 → disable; her turda kullanılan bağlam ve sağlayıcı teslim kayıtları.
-- Native yeni proje oluşturma, metadata rename ve yeniden açılışta kalıcılık.
-- @README klavye seçimi, snapshot eki, istemeden gönderim olmaması ve gerçek OpenCode okuması.
-- Panel kapalıyken gerçek browser screenshot: 2200×1600; hata/iptal/görev değişimi için ayrıca Electron piksel ve kaynak temizliği testleri.
-- Uygulama içinden üretilen service-desk ve inventory-worker projeleri: gerçek sağlayıcı kod üretimi ve öncesinde başarısız, düzeltmeden sonra başarılı regresyon testleri.
+Birebir ikon/hareket eşdeğerliği, tüm Codex özellikleri ve tam uygulama değişimi kabulü tamamlanmadı. Kenar çubuğu sürüklemesi native denemede doğrulanamadı. Computer panelindeki macOS izinleri eksik. Tam teslim gate'i açık gereksinimler ve eski kaynak kanıtları nedeniyle geçmiyor. Stop hook'un runtime'da çalıştığı kanıtlanmadı; otomasyon kurulmadı.
 
-## Henüz tamamlanmayanlar
+Ayrıntılar: `docs/ui-parity/B13-REFERENCE-CORRECTION.md`. Görsel eleştiri: `docs/ui-parity/B13-INDEPENDENT-OPINION.md`.
 
-Codex'in tüm görsel/geçiş ayrıntılarıyla birebir parite ve karşılaştırılabilir performans kabulü tamamlanmadı. Tüm abonelikler için evrensel bağlantı garantisi yok: Claude doğrulanmadı, OpenCode Go bakiye hatası verdi; küçük yerel model gerçek denemede çıktı sınırına ulaştı. Codex ve OpenCode Zen gerçek proje turlarını tamamladı.
-
-Eski özellik haritasında kalan yönlendirilmiş giriş, çoklu endpoint profilleri, kalıcı hedef/bellek/ilişkili alt görevler, ürün otomasyonu, uzak çalışma alanı, medya, güncelleme ve gerçek eski veri göçü işleri açık. Tam bilgisayar kullanımı izin/kabulü de açık. Bu nedenle paket henüz Codex'i tamamen bırakma tavsiyesi değildir.
-
-Kanıtlar: `/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/package-receipt.json`.
-
-Detaylı kapsam: `docs/rebuild-2026-09-04/LEGACY_FEATURE_MAP_2026-09-06.md`. Bu çalışma için tekrarlayan otomasyon kurulmadı.
+Kanıt klasörü: `/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B13`.
