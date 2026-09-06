@@ -22,6 +22,7 @@ import { copyFile, stat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { Store } from "./storage";
 import { Engine } from "./engine";
+import { observeShellLifecycle } from "./window-lifecycle";
 import { ShutdownCoordinator } from "./shutdown";
 import { CommandOperations } from "./operations";
 import { Extensions } from "./extensions";
@@ -580,6 +581,11 @@ async function createWindow() {
       sandbox: true,
     },
   });
+  observeShellLifecycle(
+    window.webContents,
+    () => host?.invoke("browser:hideAll", {}),
+    (event) => console.info("[akorith:shell]", JSON.stringify(event)),
+  );
   window.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const parsed = new URL(url);
