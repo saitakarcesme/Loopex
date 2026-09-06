@@ -124,7 +124,7 @@ export class ResearchService {
                 this.saveExperiment(current);
                 const root = this.store.project(study.projectId)!.path;
                 current.cwd = await this.workspaces.create(root, current.id, best?.cwd, run.controller.signal, best?.sourceCommit ?? study.initialCommit);
-                const project = this.store.addProject(current.cwd, `Research ${current.ordinal} · ${study.goal.slice(0, 40)}`);
+                const project = this.store.addProject(current.cwd, `Research ${current.ordinal} · ${study.goal.slice(0, 40)}`, Date.now(), 'research');
                 current.projectId = project.id;
                 if (best) {
                     const task = this.store.createTask({ projectId: project.id, title: `Experiment ${current.ordinal}: ${study.hypothesis.slice(0, 80)}`, providerId: study.providerId, model: study.model });

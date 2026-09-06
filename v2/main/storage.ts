@@ -59,6 +59,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS preferences(key TEXT PRIMARY KEY,data TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS imports(source TEXT NOT NULL,legacy_id TEXT NOT NULL,new_id TEXT NOT NULL,PRIMARY KEY(source,legacy_id));
     `);
+    this.backfillProjectOrigins();
     this.migrateTurnOrder();
     this.recover();
   }
@@ -117,16 +118,47 @@ export class Store {
       this.db.prepare("SELECT data FROM projects WHERE id=?").get(id),
     );
   }
-  addProject(path: string, name: string, createdAt = Date.now()): Project {
+  addProject(path: string, name: string, createdAt = Date.now(), origin?: Project['origin']): Project {
+    if (origin !== undefined && origin !== 'research' && origin !== 'benchmark') throw new Error('Invalid project origin.');
     const found = parse<Project>(
       this.db.prepare("SELECT data FROM projects WHERE path=?").get(path),
     );
     if (found) return found;
-    const p = { id: randomUUID(), path, name, createdAt };
+    const p: Project = { id: randomUUID(), path, name, createdAt, ...(origin ? { origin } : {}) };
     this.db
       .prepare("INSERT INTO projects(id,path,data) VALUES (?,?,?)")
       .run(p.id, path, JSON.stringify(p));
     return p;
+  }
+  /** Recover lab ownership only from persisted experiment/variant bindings, never names or paths. */
+  backfillProjectOrigins(): void {
+    const exists = (name: string) => !!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(name);
+    const rows = (table: string): Array<Record<string, any>> => {
+      if (!exists(table)) return [];
+      return (this.db.prepare(`SELECT data FROM ${table}`).all() as { data: string }[]).flatMap(row => {
+        try { const value = JSON.parse(row.data); return value && typeof value === 'object' && !Array.isArray(value) ? [value] : []; }
+        catch { return []; }
+      });
+    };
+    this.db.transaction(() => {
+      const mark = (id: unknown, origin: NonNullable<Project['origin']>) => {
+        if (typeof id !== 'string') return;
+        const project = this.project(id);
+        if (!project || project.origin) return;
+        this.db.prepare('UPDATE projects SET data=? WHERE id=?').run(JSON.stringify({ ...project, origin }), id);
+      };
+      const researchSources = new Map(rows('research_studies').map(study => [study.id, study.projectId]));
+      for (const experiment of rows('research_experiments')) {
+        if (experiment.projectId && experiment.projectId !== researchSources.get(experiment.studyId)) mark(experiment.projectId, 'research');
+      }
+      for (const benchmark of rows('benchmarks')) {
+        for (const variant of Array.isArray(benchmark.variants) ? benchmark.variants : []) {
+          if (!variant || typeof variant.taskId !== 'string' || variant.execution?.workspaceIsolation !== 'isolated-copy') continue;
+          const row = this.db.prepare('SELECT project_id FROM tasks WHERE id=?').get(variant.taskId) as { project_id: string | null } | undefined;
+          if (row?.project_id && row.project_id !== benchmark.projectId) mark(row.project_id, 'benchmark');
+        }
+      }
+    })();
   }
   renameProject(id: string, name: unknown): Project {
     const project = this.project(id);

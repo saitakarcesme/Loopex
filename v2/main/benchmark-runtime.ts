@@ -82,7 +82,7 @@ export class BenchmarkRuntime {
     if (copied.digest !== base.digest) throw new Error('Stored benchmark baseline changed. Variant was not started.');
     if (this.active !== active) return;
     if (active.stopping || this.closing) { this.active = undefined; return; }
-    const store = this.options.benchmarks.store, project = store.addProject(workspace, `${record.title} · ${variant.label}`);
+    const store = this.options.benchmarks.store, project = store.addProject(workspace, `${record.title} · ${variant.label}`, Date.now(), 'benchmark');
     let task = store.createTask({ projectId: project.id, providerId: variant.providerId, model: variant.model, title: `${record.title} · ${variant.label}` });
     task = store.updateTask(task.id, { effort: variant.effort, mode: variant.mode });
     active.taskId = task.id;

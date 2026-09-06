@@ -23,6 +23,8 @@ export type ActivityKind =
   | "status"
   | "error";
 export interface Project {
+  /** Internal lab workspaces remain addressable but are not ordinary user projects. */
+  origin?: 'research' | 'benchmark';
   id: string;
   name: string;
   path: string;

@@ -108,3 +108,42 @@ test('preview returns only captured image bytes and honors variant receipt membe
   const preview = await evidence.preview(snapshot, receipt.id); assert.ok('dataUrl' in preview); if ('dataUrl' in preview) assert.equal(preview.dataUrl, 'data:image/png;base64,' + png.toString('base64'));
   await assert.rejects(evidence.preview(snapshot, 'unknown'), /not found/);
 });
+
+test('comparison leads with real media and compact metrics, keeping prompt and provenance collapsed', async t => {
+  const f = await fixture(t), record = f.benchmarks.create(input()), variant = record.variants[0];
+  variant.durationMs = 135930.404666; variant.output = 'Observed Counter: 1';
+  variant.evidence = [{ id: randomUUID(), filename: `${randomUUID()}.mp4`, kind: 'video', label: 'Sampled task browser recording', origin: 'engine-capture', bytes: 100, sha256: 'a'.repeat(64), addedAt: 100, videoStartOffsetMs: 19967.399625 }];
+  const html = benchmarkComparisonHtml(record), article = html.slice(html.indexOf('<article>'), html.indexOf('</article>'));
+  assert.ok(article.indexOf('<video') < article.indexOf('<dl class="metrics">'));
+  assert.ok(article.indexOf('<dl class="metrics">') < article.indexOf('<h3>Recorded output'));
+  assert.ok(article.indexOf('<h3>Human assessment') < article.indexOf('<summary>Evidence and execution details'));
+  assert.ok(article.includes('135.93 s')); assert.ok(!article.includes('135.930405 s'));
+  assert.ok(article.includes('data-offset="19967.399625"'), 'rounding display must not alter synchronization offset');
+  assert.match(html, /<details><summary>Shared prompt<\/summary><pre>/);
+  assert.match(html, /<details><summary>Comparison provenance and playback<\/summary>/);
+  assert.ok(!html.includes('<details open')); assert.ok(html.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+});
+
+test('export playback waits for metadata, idles without animation frames, restarts and switches alignment', async t => {
+  const { runInNewContext } = await import('node:vm');
+  const f = await fixture(t), html = benchmarkComparisonHtml(f.benchmarks.create(input()));
+  const js = html.match(/<script>([\s\S]*?)<\/script>/)![1];
+  const element = (value = '') => ({ value, max: '', disabled: false, textContent: '', listeners: {} as Record<string, () => void>, addEventListener(name: string, fn: () => void) { this.listeners[name] = fn; } });
+  const play = element(), seek = element('0'), status = element(), alignment = element('clip');
+  const video = () => ({ ...element(), duration: NaN, currentTime: 0, error: null, paused: true, dataset: { offset: '20000' }, pause() { this.paused = true; }, play() { this.paused = false; return Promise.resolve(); } });
+  const videos = [video(), video()], frames = new Map<number, () => void>(); let now = 0, nextFrame = 0;
+  runInNewContext(js, { document: { querySelectorAll: () => videos, querySelector: (selector: string) => ({ '#play': play, '#seek': seek, '#playback-status': status, '#alignment': alignment })[selector] }, performance: { now: () => now }, requestAnimationFrame: (fn: () => void) => { frames.set(++nextFrame, fn); return nextFrame; }, cancelAnimationFrame: (id: number) => frames.delete(id) });
+  assert.equal(play.disabled, true); assert.equal(frames.size, 0); assert.match(status.textContent, /Loading/);
+  videos[0].duration = 10; videos[0].listeners.loadedmetadata(); assert.equal(play.disabled, true);
+  videos[1].duration = 8; videos[1].listeners.loadedmetadata(); assert.equal(play.disabled, false); assert.equal(seek.max, '10');
+  play.listeners.click(); assert.ok(videos.every(v => !v.paused)); assert.equal(frames.size, 1);
+  play.listeners.click(); assert.ok(videos.every(v => v.paused)); assert.equal(frames.size, 0);
+  seek.value = '10'; play.listeners.click(); assert.equal(seek.value, '0'); assert.equal(frames.size, 1);
+  now = 11000; const queued = [...frames.values()][0]; frames.clear(); queued();
+  assert.equal(frames.size, 0); assert.equal(play.textContent, 'Play recordings');
+  play.listeners.click(); assert.equal(seek.value, '0'); assert.equal(frames.size, 1);
+  alignment.value = 'run'; alignment.listeners.change(); assert.equal(frames.size, 0); assert.equal(seek.value, '0'); assert.equal(seek.max, '30'); assert.ok(videos.every(v => v.paused));
+  play.listeners.click(); assert.ok(videos.every(v => v.paused), 'run alignment preserves real lead-in');
+  seek.value = '22'; seek.listeners.input(); assert.ok(videos.every(v => v.currentTime === 2));
+  alignment.value = 'clip'; alignment.listeners.change(); assert.equal(frames.size, 0); assert.equal(seek.max, '10'); assert.ok(videos.every(v => v.currentTime === 0));
+});

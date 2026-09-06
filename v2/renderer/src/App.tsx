@@ -15,7 +15,7 @@ import {
   Terminal,
   X,
 } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import type { Project, Settings } from '../../shared/contracts'
 import { api, isActive, persist, remember, statusLabel } from './api'
 import { ResearchPage } from './pages/ResearchPage'
@@ -63,6 +63,12 @@ export function App() {
   const workspace = useWorkspace()
   const { snapshot, detail, selectedId, reportError, notify } = workspace
   const [page, setPage] = useState<'chat' | 'research' | 'benchmark' | 'plugins'>('chat')
+  const navigation = useMemo(() => {
+    const projects = snapshot?.projects.filter(project => !project.origin) || []
+    const internalIds = new Set(snapshot?.projects.filter(project => project.origin).map(project => project.id))
+    const tasks = snapshot?.tasks.filter(task => !task.projectId || !internalIds.has(task.projectId) || task.pinned || (page === 'chat' && task.id === selectedId)) || []
+    return { projects, tasks }
+  }, [snapshot?.projects, snapshot?.tasks, selectedId, page])
   const showPage = (next: 'chat' | 'research' | 'benchmark' | 'plugins') => {
     if (next !== 'chat') { void api('browser:hideAll').catch(reportError); setPanelOpen(false) }
     setPage(next)
@@ -338,8 +344,8 @@ export function App() {
     >
       <div className={`sidebar-container ${sidebarOpen ? 'open' : ''}`} inert={!sidebarOpen || undefined}>
           <Sidebar
-            tasks={snapshot.tasks}
-            projects={snapshot.projects}
+            tasks={navigation.tasks}
+            projects={navigation.projects}
             activePage={page}
             onPage={showPage}
             selectedId={page === 'chat' ? selectedId : null}
@@ -445,8 +451,8 @@ export function App() {
               </div> : null}
             </header>
             {page === 'plugins' ? <PluginsPage onError={reportError} onRefresh={workspace.refresh}/> :
-             page === 'research' ? <ResearchPage snapshot={snapshot} initialProjectId={task?.projectId} onError={reportError} onOpenTask={selectTask}/> :
-             page === 'benchmark' ? <BenchmarkPage snapshot={snapshot} onError={reportError} onOpenTask={selectTask}/> : task && detail ? (
+             page === 'research' ? <ResearchPage snapshot={{...snapshot, projects:navigation.projects}} initialProjectId={task?.projectId} onError={reportError} onOpenTask={selectTask}/> :
+             page === 'benchmark' ? <BenchmarkPage snapshot={{...snapshot, projects:navigation.projects}} onError={reportError} onOpenTask={selectTask}/> : task && detail ? (
               <div className={`conversation ${detail.messages.length ? '' : 'empty-conversation'}`}>
                 {detail.messages.length || detail.pending.length ? (
                   <Transcript
