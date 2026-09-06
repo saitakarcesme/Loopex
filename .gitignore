@@ -7,3 +7,12 @@ dist/
 
 # Phase 42: generated at build time
 build-info.json
+
+# V2 generated/runtime files
+out-v2/
+dist-v2/
+v2/native/.build/
+v2/native/akorith-computer
+v2/native/akorith-process-session
+artifacts-v2/
+*.local.json

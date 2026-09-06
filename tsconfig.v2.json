@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"ESNext","moduleResolution":"Bundler","strict":true,"jsx":"react-jsx","esModuleInterop":true,"allowSyntheticDefaultImports":true,"skipLibCheck":true,"resolveJsonModule":true,"types":["node","vite/client"],"lib":["ES2022","DOM","DOM.Iterable"],"noEmit":true},"include":["v2/**/*.ts","v2/**/*.tsx","electron.v2.config.ts"]}

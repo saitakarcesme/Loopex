@@ -1,0 +1,49 @@
+{
+  "appId": "com.akorith.workspace.v2",
+  "productName": "Akorith Next",
+  "directories": {
+    "output": "dist-v2",
+    "buildResources": "build"
+  },
+  "files": [
+    "out-v2/**/*",
+    "package.json",
+    "v2/native/**/*"
+  ],
+  "asarUnpack": [
+    "**/node_modules/node-pty/**",
+    "**/node_modules/better-sqlite3/**",
+    "v2/native/**/*",
+    "**/node_modules/@openai/codex*/**"
+  ],
+  "npmRebuild": false,
+  "mac": {
+    "category": "public.app-category.developer-tools",
+    "icon": "build/icon.icns",
+    "target": [
+      {
+        "target": "dir",
+        "arch": [
+          "arm64"
+        ]
+      }
+    ],
+    "identity": "-",
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist"
+  },
+  "artifactName": "Akorith-Next-${version}-${arch}.${ext}",
+  "extraResources": [
+    {
+      "from": "v2/native",
+      "to": "native",
+      "filter": [
+        "akorith-computer",
+        "ComputerBridge.swift",
+        "akorith-process-session",
+        "ProcessSession.c"
+      ]
+    }
+  ],
+  "afterPack": "scripts/v2-after-pack.cjs"
+}

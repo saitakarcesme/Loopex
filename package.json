@@ -1,174 +1,46 @@
 {
-  "name": "akorith",
-  "productName": "Akorith",
-  "version": "0.9.4",
-  "description": "Akorith — orchestrate AI coding agents (Claude/Codex CLIs, local Ollama) with no API keys",
-  "author": "Akorith",
-  "main": "./out/main/index.js",
+  "name": "akorith-next",
+  "productName": "Akorith Next",
+  "version": "2.0.0-alpha.4",
   "private": true,
+  "description": "A focused desktop workspace for your coding agents and local models",
+  "author": "Akorith",
+  "main": "./out-v2/main/index.js",
   "scripts": {
-    "predev": "node scripts/fix-dev-app-name.js && node scripts/gen-build-info.js",
-    "dev": "electron-vite dev",
-    "prebuild": "node scripts/gen-build-info.js",
-    "build": "electron-vite build",
-    "preview": "electron-vite preview",
-    "rebuild": "electron-rebuild -f -o better-sqlite3",
-    "postinstall": "electron-rebuild -f -o better-sqlite3 && node scripts/fix-spawn-helper.js && node scripts/fix-dev-app-name.js",
-    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
-    "verify:workspace-loop": "tsx scripts/verify-workspace-loop.ts",
-    "verify:workspace-writer-lease": "tsx scripts/verify-workspace-writer-lease.ts",
-    "verify:workspace-skill-loop": "npm run verify:workspace-writer-lease && tsx scripts/verify-workspace-skill-loop.ts",
-    "verify:local-executor": "tsx scripts/verify-local-executor.ts",
-    "verify:local-workspace": "tsx scripts/verify-local-workspace.ts",
-    "verify:controller": "tsx scripts/verify-controller.ts",
-    "verify:startup-hydration": "tsx scripts/verify-startup-hydration.ts",
-    "verify:update-version": "tsx scripts/verify-update-version.ts",
-    "setup": "bash scripts/setup-akorith.sh",
-    "setup:mac": "bash scripts/setup-akorith.sh",
-    "doctor": "bash scripts/setup-akorith.sh --check",
-    "release:check": "node scripts/release-check.js",
-    "verify:macos-app": "bash scripts/verify-macos-app.sh",
-    "verify:macos-artifact": "bash scripts/verify-macos-artifact.sh",
-    "macos:refresh": "bash scripts/refresh-macos-app.sh",
-    "refresh:mac": "bash scripts/refresh-macos-app.sh",
-    "refresh:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/refresh-windows-app.ps1",
-    "clean:apps": "bash scripts/clean-old-akorith-apps.sh",
-    "pack": "npm run build && electron-builder --dir",
-    "pack:mac": "npm run build && electron-builder --mac --dir",
-    "pack:win": "npm run build && electron-builder --win --dir",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:all": "npm run build && electron-builder -mw",
-    "verify:local-runtime": "tsx scripts/verify-local-runtime.ts",
-    "verify:project-loop": "tsx scripts/verify-project-loop.ts",
-    "verify:goal-cycle": "tsx scripts/verify-goal-cycle.ts",
-    "verify:companions": "tsx scripts/verify-companions.ts",
-    "verify:agents": "tsx scripts/verify-agents.ts",
-    "verify:chat-lifecycle": "tsx scripts/verify-chat-lifecycle.ts",
-    "verify:workspace-activity": "tsx scripts/verify-workspace-activity.ts",
-    "verify:opencode-output": "tsx scripts/verify-opencode-output.ts",
-    "verify:provider-runtime": "tsx scripts/verify-provider-runtime.ts",
-    "verify:workspace-actions": "tsx scripts/verify-workspace-actions.ts",
-    "verify:plugin-tools": "tsx scripts/verify-plugin-tools.ts",
-    "verify:windows-identity": "tsx scripts/verify-windows-app-identity.ts",
-    "verify:ui-zoom": "tsx scripts/verify-ui-zoom.ts",
-    "verify:replica-ui": "tsx scripts/verify-replica-ui.ts",
-    "verify:performance": "tsx scripts/verify-performance.ts",
-    "verify:bundle": "tsx scripts/verify-bundle-budget.ts"
-  },
-  "build": {
-    "appId": "com.akorith.app",
-    "productName": "Akorith",
-    "copyright": "Copyright © 2026 Akorith",
-    "npmRebuild": false,
-    "directories": {
-      "output": "dist",
-      "buildResources": "build"
-    },
-    "files": [
-      "out/**/*",
-      "build/icon.ico",
-      "build-info.json",
-      "package.json"
-    ],
-    "asarUnpack": [
-      "**/node_modules/node-pty/**",
-      "**/node_modules/better-sqlite3/**"
-    ],
-    "extraResources": [
-      {
-        "from": "build/icon.ico",
-        "to": "icon.ico"
-      }
-    ],
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
-    "mac": {
-      "category": "public.app-category.developer-tools",
-      "icon": "build/icon.icns",
-      "sign": "./scripts/sign-macos.cjs",
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "darkModeSupport": true,
-      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    },
-    "dmg": {
-      "title": "${productName} ${version}",
-      "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
-    },
-    "win": {
-      "icon": "build/icon.ico",
-      "executableName": "Akorith",
-      "signAndEditExecutable": true,
-      "artifactName": "${productName}-${version}-win-${arch}.${ext}",
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "menuCategory": false,
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico",
-      "shortcutName": "Akorith",
-      "uninstallDisplayName": "Akorith ${version}",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "runAfterFinish": true,
-      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
-    },
-    "portable": {
-      "artifactName": "${productName}-${version}-portable-${arch}.${ext}"
-    },
-    "linux": {
-      "icon": "build/icon.png",
-      "category": "Development",
-      "target": [
-        "AppImage"
-      ]
-    }
+    "dev": "electron-vite dev --config electron.v2.config.ts",
+    "build": "electron-vite build --config electron.v2.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.v2.json",
+    "test": "TSX_TSCONFIG_PATH=tsconfig.v2.json ELECTRON_RUN_AS_NODE=1 electron --import tsx --test v2/tests/*.test.ts v2/tests/host/*.test.ts v2/renderer/tests/*.test.ts v2/renderer/tests/*.test.tsx",
+    "postinstall": "electron-rebuild -f -o better-sqlite3 && node scripts/fix-spawn-helper.js",
+    "pack:mac": "npm run build:native && npm run build && node scripts/v2-package-mac.cjs",
+    "dist:mac": "npm run pack:mac",
+    "build:native": "sh v2/native/build.sh"
   },
   "dependencies": {
-    "@xterm/addon-fit": "^0.10.0",
-    "@xterm/xterm": "^5.5.0",
-    "better-sqlite3": "^12.10.0",
-    "node-pty": "^1.1.0",
-    "pdfkit": "^0.19.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "@openai/codex": "0.153.3",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "better-sqlite3": "13.0.3",
+    "lucide-react": "1.41.0",
+    "node-pty": "1.1.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
   },
   "devDependencies": {
-    "@electron/osx-sign": "^1.3.1",
-    "@electron/rebuild": "^4.0.4",
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react-swc": "^4.3.1",
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^2.3.0",
-    "tsx": "^4.22.4",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "@electron/rebuild": "4.2.0",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "5.2.0",
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "playwright-core": "1.62.1",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "vite": "7.3.6"
   }
 }

@@ -1,0 +1,86 @@
+# Akorith V2 findings
+
+## 2026-09-04 implementation start
+- User authorized overnight work and parallel agents without routine approvals.
+- Fresh full checkout on rebuild/workspace-v2, baseline 1d5af3abe3036b15e4558697b017970f8f4766b5 from origin/main. Old symlink broken; remote source selected under full implementation authorization. No local user changes overwritten.
+- macOS 26.6 arm64 8 GiB. Node 22.22.2, Codex CLI 0.144.6, Claude Code 2.1.220, Ollama 0.31.1, OpenCode and Swift 6.3.3 present.
+- V2 isolated in v2/; existing app/data preserved. Shared contracts established.
+- Auth, live provider calls, native browser/computer operation and packaged tests pending.
+
+## Next
+Provider, renderer and host agents implement owned modules. Root implements storage, engine, bootstrap and integration. Do not claim readiness before real tests.
+
+## Cycle 2 — genuine runtime and persistence (2026-09-04 22:10 UTC)
+
+- Public Codex npm runtime 0.153.3 discovers GPT-6 Astra; live Astra host `files_read` round trip passed. Installed system CLI 0.144.6 remains untouched.
+- Ollama qwen3:1.7b downloaded locally; real files_read tool loop passed. Model is installed, not bundled into the app.
+- OpenCode Go authentication/catalog discovered, but a paid model returned insufficient balance. Separately selected free MiMo V2.5 completed real streaming, approval, MCP file read and final response. No silent billing/provider fallback.
+- Claude CLI is installed but its status reports unauthenticated. Native adapter is implemented; paid/authenticated Claude generation cannot be claimed tested.
+- Engine tests caught and fixed shutdown writes racing database close, pending approvals overwritten by running status, and millisecond timestamp history ordering. Nine engine behavioral checks passed.
+- 29 combined provider/host/engine checks passed. A further legacy migration test passed with idempotency, unchanged source bytes, preserved dates, interrupted output, usage, activities and copied attachments.
+- Swift computer helper compiled ARM64; read-only probe reports Accessibility and ScreenRecording granted for its current launch context. Own packaged app permissions still need verification.
+- V2 queue prompt editing/removal implemented. Each queued turn snapshots provider/model/effort/mode at submission.
+- Electron data path is separate and single-instance locked; source app and original history untouched.
+- CUA refused direct inspection of com.openai.codex. No attempt to bypass that restriction; visual work uses the approved product behavior/specification and own app verification.
+
+## Cycle 3 — integrated desktop verification (2026-09-04 22:23 UTC)
+
+- The real Electron UI launched from the production bundle and discovered the public Astra catalog. A real prompt created a self-contained index.html, started the managed preview, used browser form controls, and verified the added task in the DOM.
+- Switching to another task preserved its draft. Switching back exposed duplicate transcript DOM despite correct persisted records. Root identified identical sibling React keys on Transcript and Composer; the UI agent fixed them with distinct prefixes. A full packaged regression is pending.
+- Fixed renderer output path resolving outside the project. Root/preload/renderer now share the expected out-v2 tree.
+- 41 behavior tests passed in the combined suite, including queue edits/removal and persistent cross-provider continuity. Later provider/host extensions add more cases; final counts will come from a fresh run.
+- Native provider instruction inheritance caused an unnecessary Sites skill detour. Public Codex skills.include_instructions=false was verified in a fresh live turn: exactly one host files_write, no SKILL.md/native-exec detour. Akorith-selected skill instructions still pass explicitly.
+- Skills are scoped by project and enabled skill directories are readable through a read-only registered-root allowance. Disabled/other-project skill directories and external symlinks are excluded.
+- Codex and OpenCode native session resumption passed after provider process restart. Live host-tool cancellation samples: Codex54ms, Ollama1ms, OpenCode57ms (samples, not p95 claims).
+- Public macOS application packaging underway with a separate bundle ID, native helper, public Codex binary and ad-hoc signature. Original installed Akorith remains unchanged.
+- External UI blocker: CUA's attempted inspection of the development Electron app opened macOS's Desktop access prompt for Codex Computer Use. CUA refuses control of UserNotificationCenter. No permission was granted and no alternate mechanism was used to dismiss/bypass it. Foreground computer tests pause; CDP/browser, persistence and packaging tests continue. Native select/snapshot/click/type/capture had genuinely passed before the prompt appeared.
+
+Packaging finding: macOS File Provider recreates FinderInfo attributes on app/framework bundles under the synced Desktop. Ad-hoc signing correctly rejected these bundles. Build packaging moved to ~/Library/Caches/AkorithNext/build; afterPack removes only FinderInfo/ResourceFork, preserving provenance/quarantine and other access controls. No signature checks are disabled.
+
+## Source access restored — 2026-09-05T02:56:30Z
+
+Original AGENTS read succeeded in6ms; normal git status and source reads now work. rebuild/workspace-v2 and all uncommitted work remain intact. Previous stall cause is unproven; no OS permission/action or alternate source path was used. Root and the3existing agents resumed actual engine/provider/renderer/host implementation. G06 access is restored; G01–G05 still open, B01 is not current source. Durable evidence and P01–P28 inventory remain at /Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05. Current reviewed process candidate has14focused and6live tests, still awaiting source integration at this checkpoint.
+
+## 2026-09-05T03:13:37.751148+00:00 — resumed integration cycle
+
+- Normal source access restored at02:56:30Z; original path and branch intact. No alternate access/OS permission change. All3existing agents resumed implementation.
+- Root: native outcome event tracked independently from quiescence; Stop/Quit during delayed successful cleanup preserves success/usage; original native failures retained; cleanup waits survive persistence faults, new work pauses after storage failure; provider callback storage errors no longer escape into native event loops. Scoped cleanup retry avoids collateral adapter disposal where available.
+- Root: idempotent shutdown coordinator settles engine/host/extensions/discovery/accepted IPC independently, retains timed-out operations for retry and closes Store only afterward. No force app.exit on unresolved cleanup; repeated Quit cannot skip ownership. Added diagnostics and fixed discovery errors retaining Checking label.
+-21root focused checks pass. Providers report40focused synthetic checks; renderer17state/render checks; host42cases with actual disposable PTY foreground/background and early-leader-exit survivor cleanup plus process preview stop. These counts overlap previous reports and are NOT a fresh full-suite total or GUI acceptance. Extension lifecycle tests are still finishing.
+- Renderer CAS/checkpoint guards, bounded sidebar and synchronous composer journal are implemented. Exact submissionStatus receipt prevents accepted-but-unacknowledged prompts resurrecting after restart.
+- New package will beB02/version2.0.0-alpha.2 in separate cache build-B02, preserving oldB01. Native process-session helper packaging filter added. No B02 build or readiness claim yet.
+
+## 2026-09-05T03:21:19.532331+00:00 — B02 package acceptance
+
+- Fresh complete current suite:142passed,0failed,0skipped in10.39s under Electron44 Node mode; typecheck passed. Prior full run139passed/2failed retained as reproduced helper-classification defect, now fixed with preflight-before-PTY regression. No parent process kill concealed the original failure.
+- B02 alpha.2 built at /Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B02/mac-arm64/Akorith Next.app; app.asar SHA2563908e4f447bd8270cb73a33c87e58bba7b77d80bb22572ede7654e5ec10b575c. App deep/strict and both native helpers signature verification pass. Ad-hoc, not notarized. B01 and original app/data preserved.
+- Real packaged journey launched against fresh synthetic user data. Native two-turn continuation, CAS UI recovery, normal Quit/immediate draft reopen are pending actual result. Current suite proves code behavior; not blanket product readiness.
+
+## 2026-09-05T03:28:34.049010+00:00 — packaged findings and B03 preparation
+
+- B02 actual Astra2turns bothcompleted withnative session andUTF8file preserved. Actualfilelink failed becauseproject canonical/private/var root rejected equivalent/var path. Sourcefix recognizes onlyaliases ofexactworkspace root thenchecksallremainingsegments;48hosttestspass includingaliasCAS/escape/danglinglinkcases.
+- B02 normal Quitmenu andactualCmdQviaCUA succeeded;exactPIDs52975/53034absent,storedconversation/draft/nativeIDreopened. These2quitchecksusedreopeneddatafrompriorrealruns; B03freshrealturn+nativeQuit andlivePTY/browser/preview Quit arestillpending. Observationwindowincludesoperatorwait,notshutdownlatency. EarlierCDPMetaQtimeoutisharnesslimitation,notnativeQuitfailure.
+- P27attachmentopenroutescurrentlyunderrepairinrenderer;readonlyimagepreviewmustuseexistingtaskmediaauthoritywithoutworkspaceeditingfallback. Scopeauditdocs/current-product-gap-audit.md recordsfullplugin/automation/goal/agent/remotegaps.
+- NewB03alpha.3willincludealias+attachmentfixes. Protocol3performanceharnessreadybutnotrun;no3runorblanketreplacementclaim.
+
+## 2026-09-05T03:32:21.979525+00:00 — current B03
+
+- Current full suite152passed/0failed/0skipped in10.44s, tscpassed. B03alpha.3 signed app/nativehelpers deep strictverificationpass; asar628810d2e637b940d178a79896fd83915dd47167eaaa9206a56790703438cddb, CDHash4b3f5fcf776b0af40b119816370bfadd5f96da1e.
+- Fresh B03realAstra2turns/resume/UTF8completed; actualCUA paste-newdraft thenimmediateCmdQ requestedafterthoseturns. Reopen/CAS/hostacceptanceharnessrunning.
+- Readonlylegacyaggregate1project/25sessions/97messages; noactualmigration.21legacyrunningactivities and timed_out wouldbe falselymappedcompleted; reviewmustfixbeforeimport. Usercontentnotprinted.
+
+## 2026-09-05T03:42:22.113926+00:00 — B03 real journeys passed; B04 fidelity work begun
+
+B03 core journey and six-turn connected workflow passed on the frozen identified package. Actual CUA immediate draft/CmdQ/reopen and Quit with live PTY/preview were exercised. OpenCode second native turn now stays completed after cleanup. Browser form completed via actual Astra host tools. Evidence in B03/journey-1 and B03/connected-1. Three fresh protocol-3 performance runs started with the matching Electron readonly SQLite reader after a preserved no-launch CLI preflight failure. Root and host are writing B04 migration fidelity changes; no new build/tests/models run concurrently with measurements. B03 no longer includes newest source edits. Actual legacy import and installation remain pending.
+
+## 2026-09-05T03:48:42.155291+00:00 — Three B03 performance runs passed
+
+Protocol3 same package/harness/protocol hashes; three fresh1000task/10000message fixtures,120s each. Input p95 30.7/31.2/31.4ms; switch p95 158.8/144.6/133.7ms. No JS errors/forced cleanup. Synthetic2min scope, no competitor/leak claim. Comparison: /Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/performance-v3-series-2/comparison.json. B04 root19focused tests passed. B03 UI queue/Stop confirmed332ms and shell/sleep absence;95s deadline and pending native Quit underway.
+
+## 2026-09-05T03:50:29.976064+00:00 — B03 Stop and native pending Quit passed
+
+Actual Astra terminal_execute fixture, edited/reordered/removed UIqueue, Stop332ms, zero lease/queue/active, confirmed shell/sleep absence and no late write through original95s deadline. Actual OpenCode MCP files_read approval left unanswered; root CUA selected exactB03app, observed approval card, pressed nativeCmdQ. Main69564 and9observed descendants absent. Reopened69904 retains history/nativeID andinterrupted status with no pending replay. Finalownedcleanup succeeded/no forcedkill. Evidence /Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-05/B03/cancellation-1/cancellation.json. B04 migration20 andreceipt5focused tests passed; still not packaged/imported.
+
+## 2026-09-05T03:52:03.130171+00:00 — Performance series comparability corrected
+
+All3B03individual runs passed, but root identified its concurrent Store attribution edit affected subsequent seed payloads: run1has0attributedmessages,run2/3have10000. The frozen B03 renderer ignores the new field; nevertheless strict same-input comparison is withdrawn andG03reopened. Earlier “three comparable” entries are superseded by this correction. FinalB04will preseed all3fromsamefrozenStore, recordseed/storehashes, thenrun.
