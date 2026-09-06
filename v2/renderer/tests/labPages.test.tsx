@@ -5,7 +5,7 @@ import type { AppSnapshot } from '../../shared/contracts'
 import type { ResearchDetail } from '../../main/research-types'
 import type { BenchmarkRecord, BenchmarkVariant } from '../../main/benchmark-types'
 import { ResearchStudyDetail, researchFormDefaults } from '../src/pages/ResearchPage'
-import { BenchmarkComparison, benchmarkRunUnsupported, benchmarkMethodInput, benchmarkMethodSelection, benchmarkInitialVariants } from '../src/pages/BenchmarkPage'
+import { BenchmarkComparison, benchmarkRunUnsupported, benchmarkMethodInput, benchmarkMethodSelection, benchmarkInitialVariants, benchmarkTokenLabel } from '../src/pages/BenchmarkPage'
 
 const snapshot = { projects: [{ id: 'project', name: 'Fixture project', path: '/fixture', createdAt: 1 }] } as AppSnapshot
 const noop = () => {}
@@ -97,4 +97,25 @@ test('new lab forms default only to available actual models and a still-valid cu
   assert.deepEqual(benchmarkInitialVariants(none).map(item => item.choice), ['', ''])
   const one = { ...actual, providers: [{ ...actual.providers[1], models: [actual.providers[1].models[0]] }] }
   assert.deepEqual(benchmarkInitialVariants(one).map(item => item.choice), ['codex:m1', ''])
+})
+
+test('reported token components survive a missing total without inventing a sum', () => {
+  const usage = { ...variant.usage, inputTokens: 12952, outputTokens: 629, estimated: true }
+  assert.equal(benchmarkTokenLabel(usage), `${(12952).toLocaleString()} input · 629 output est.`)
+  const html = renderBenchmark({ ...benchmark, variants: [{ ...variant, usage }, benchmark.variants[1]] })
+  assert.ok(html.includes(`${(12952).toLocaleString()} input · 629 output est.`))
+  assert.ok(!html.includes((13581).toLocaleString()))
+  assert.equal(benchmarkTokenLabel({ ...usage, inputTokens: null }), 'Unknown input · 629 output est.')
+  assert.equal(benchmarkTokenLabel({ ...usage, inputTokens: 0, outputTokens: null }), '0 input · unknown output est.')
+  assert.equal(benchmarkTokenLabel({ ...usage, inputTokens: null, outputTokens: null }), 'Not recorded')
+  assert.equal(benchmarkTokenLabel({ ...usage, totalTokens: 0 }), '0 est.')
+})
+
+test('native comparison places artifacts before formatted output and provenance', () => {
+  const html = renderBenchmark({ ...benchmark, variants: [{ ...variant, output: '**Task** completed with `code`.' }, benchmark.variants[1]] })
+  assert.ok(html.indexOf('<h3>Artifacts</h3>') < html.indexOf('<h3>Output</h3>'))
+  assert.ok(html.indexOf('<h3>Output</h3>') < html.indexOf('Execution evidence'))
+  assert.match(html, /<strong>Task<\/strong>/)
+  assert.match(html, /<code>code<\/code>/)
+  assert.doesNotMatch(html, /\*\*Task\*\*/)
 })

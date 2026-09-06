@@ -1,2 +1,2 @@
 #!/bin/zsh
-open -n --env 'AKORITH_USER_DATA=/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B05/live-data' -a '/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B09/mac-arm64/Akorith Next.app'
+open -n --env 'AKORITH_USER_DATA=/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B05/live-data' -a '/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B12/mac-arm64/Akorith Next.app'
