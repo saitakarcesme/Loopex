@@ -124,3 +124,10 @@ Research now means autoresearch hypothesis/baseline/isolated measured experiment
 - Benchmark actual Codexmini and MiMo text run: both expected result,4.27s/14.70s; costs/tokens available only as reported. Isolated sequential fixtures, portableHTML, clean shutdown. Actual browser recording still in progress.
 - Public official InAppBrowser video was played; outlinecontrols/embeddedbrowser layout observed. Exact animation timing/easing remains unmeasured.
 - Native CUA snapshots can lag actions and some click/focus paths require another observation. No passing UI flow inferred from attempted click.
+
+## B12 final UI step and independent opinion
+Source d884f78 alpha12,315/315 tests and TypeScript passed; strict deep signature verified. Actual native comparison reads12952input/629output, keeps missing data unknown, renders Markdown, shows videos before output. Both actual videos played then paused17.6136/17.6132seconds. Human note persisted through page unmount/reopen. Native QA profile closed; updated launcher reopened B05/live-data with prior projects/plugins preserved. No old source/assets transferred in this step.
+
+Actual browser recording evidence is same MiMo model twice, second cancelled; it verifies recording/comparison plumbing, not two different successful visual model outcomes. Different Codexmini/MiMo text comparisons completed. Research integer-only baseline133867→2297 retained; no fresh B12 research run, no broad numeric correctness claim.
+
+12 narrow functional acceptance items bound to source/receipt hashes;89 remaining. Native Stop hook not proven loaded/trusted; tested Git pre-push guard is distinct. Independent read-only critic finds exact UI parity, native method restrictions and runtime early-stop guarantee incomplete, plus Research stops study on failed experiment. Opinion recorded without product edits or dispatched fixes. Current app is alpha, not full Codex replacement.

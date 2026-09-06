@@ -163,3 +163,9 @@ Every row states a review criterion, evidence already available, and remaining c
 ## Delivery safeguards
 
 The runtime Stop hook configuration exists, but runtime trust/execution has not been proven. Do not describe it as active enforcement. The configured Git pre-push guard has actually been tested to fail; that is a separate mechanism. Exact motion parity, final B11 UI coverage, unrestricted native-provider tool enforcement, GPU research, and frame-accurate recordings remain outside proven acceptance. No automatic percentage, padded checklist, or line-count proxy is used.
+
+## Final B12 observation addendum
+
+Source d884f78, alpha12. This supersedes earlier final-package pending notes only for the following observations: native token fallback12,952input/629output; missing values unchanged; Markdown output; media above output; both actual videos played and paused17.6136/17.6132s; human assessment saved and persisted after page unmount/reopen. Evidence native-B12-paused-videos.txt, native-B12-benchmark.png, native-B12-assessment-reopened.txt under B10. B11 background power interruption is historical; B12 foreground playback passed without disabling power protections. No native seeking or precise animation equivalence claim.
+
+New task and installed Plugins captured in native-B12-new-task.png/native-B12-plugins.png after normal Quit of QA profile and updated launcher reopening B05/live-data.315/315 tests and typecheck passed.12 functional IDs were verified within explicit bounds in acceptance.json;89 remain open. Historical Research evidence was bound through reviewed unchanged evaluator/worktree logic plus current tests, not relabeled as a new execution. See functional-review-B12.md and source-receipt-B12.json.

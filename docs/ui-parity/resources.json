@@ -29,16 +29,52 @@
       "resource": "Reference-motion Chrome tab 834533575",
       "method": "CUA tab.close by reference reviewer",
       "verified": true
+    },
+    {
+      "resource": "B10 initial PID93873",
+      "method": "native Quit",
+      "verified": true
+    },
+    {
+      "resource": "B10-final application",
+      "method": "native Quit before B11",
+      "verified": true
+    },
+    {
+      "resource": "B11 PID19372",
+      "method": "native Quit; ps verified absent",
+      "verified": true
+    },
+    {
+      "resource": "B12 native-benchmark QA profile",
+      "method": "native Quit; main absent before main-profile launch",
+      "verified": true
+    },
+    {
+      "resource": "Real benchmark/provider/browser harnesses",
+      "method": "owner cleanup receipts confirm engine/provider/host/ffmpeg/server stopped",
+      "verified": true
+    },
+    {
+      "resource": "Chrome tabs834533579,834533565,834533568,834533585",
+      "method": "CUA tab.close after owned reference/fixture/export work",
+      "verified": true
+    },
+    {
+      "resource": "HTTP/range servers29465,95485,29072",
+      "method": "owned process sessions stopped",
+      "verified": true
     }
   ],
   "retained": [
     {
-      "resource": "B10 alpha10 native application PID 93873",
-      "reason": "current packaged UI acceptance; isolated B05/live-data profile"
-    },
-    {
-      "resource": "Real benchmark Electron harness",
-      "reason": "bounded provider-driven browser recording acceptance; owner plugin_bootstrap cleans at completion"
+      "resource": {
+        "pid": 30584,
+        "command": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B12/mac-arm64/Akorith Next.app/Contents/MacOS/Akorith Next"
+      },
+      "reason": "Only current B12 application and its normal child processes; B05/live-data working profile, no active task or video playback"
     }
-  ]
+  ],
+  "updatedAt": "2026-09-06T15:55:55.565964+00:00",
+  "userApps": "Personal browser tabs and unrelated user applications left intact."
 }

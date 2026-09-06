@@ -9,3 +9,5 @@ Resmî Codex statik referansı 6 Eylül browser ile görüldü: başlık üstü/
 Hook: proje .codex/hooks.json ve kabul scripti hazırlandı. Runtime trust/gerçek Stop event henüz doğrulanmadı; etkinmiş gibi sunulamaz. Aynı denetim ayrıca manuel/teslim komutu olarak çalışır. Kullanıcı interrupt engellenmez. İlerlemeyen otomasyon kurulmaz.
 
 Kaynak yönetimi: B04 normal Quit doğrulandı; eski Akorith CmdQ; 22959 service-desk ve 24398 inventory demo süreçlerine SIGTERM. Aktif B09 karşılaştırma için şimdilik açık. Referans sekmesi iş bitince kapatılacak.
+
+Son durum B12: eski B09/B10/B11 test uygulamaları, tamamlanan referans/fixture/export sekmeleri ve geçici sunucular kapalı. Yalnız son B12 çalışma profili açık; resources.json güncel. Yerel launcher B12’ye yönlendirildi. Ayrı bağımsız inceleme yalnız görüş verdi; INDEPENDENT-CRITIQUE.md içinde ve bu görüşten ürün aksiyonu üretilmedi.

@@ -447,30 +447,122 @@
     {
       "id": "RESEARCH-004",
       "requirement": "fixed evaluator protocol",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/result.json",
+          "sha256": "50562c3ff819e0236c759f83b25a359686afdb00b0b70d22bf250c410aa673f4"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/receipt.json",
+          "sha256": "5d977d85cafc7a2e594e1a977bfaf0aaf5ab6588f9400a1d02f1c4d875037131"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/independent-source-review.json",
+          "sha256": "adb34ad7b5a59dd94006760c7b96efff72362a817ccef980cb8035267077eaac"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Reviewed unchanged functional behavior; historical actual integer fixture plus current regression suite. No new B12 Research run."
     },
     {
       "id": "RESEARCH-005",
       "requirement": "baseline run",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/result.json",
+          "sha256": "50562c3ff819e0236c759f83b25a359686afdb00b0b70d22bf250c410aa673f4"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/receipt.json",
+          "sha256": "5d977d85cafc7a2e594e1a977bfaf0aaf5ab6588f9400a1d02f1c4d875037131"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/independent-source-review.json",
+          "sha256": "adb34ad7b5a59dd94006760c7b96efff72362a817ccef980cb8035267077eaac"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Reviewed unchanged functional behavior; historical actual integer fixture plus current regression suite. No new B12 Research run."
     },
     {
       "id": "RESEARCH-006",
       "requirement": "isolated candidate",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/result.json",
+          "sha256": "50562c3ff819e0236c759f83b25a359686afdb00b0b70d22bf250c410aa673f4"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/receipt.json",
+          "sha256": "5d977d85cafc7a2e594e1a977bfaf0aaf5ab6588f9400a1d02f1c4d875037131"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/independent-source-review.json",
+          "sha256": "adb34ad7b5a59dd94006760c7b96efff72362a817ccef980cb8035267077eaac"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Reviewed unchanged functional behavior; historical actual integer fixture plus current regression suite. No new B12 Research run."
     },
     {
       "id": "RESEARCH-007",
       "requirement": "host measured evidence",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/result.json",
+          "sha256": "50562c3ff819e0236c759f83b25a359686afdb00b0b70d22bf250c410aa673f4"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/receipt.json",
+          "sha256": "5d977d85cafc7a2e594e1a977bfaf0aaf5ab6588f9400a1d02f1c4d875037131"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/independent-source-review.json",
+          "sha256": "adb34ad7b5a59dd94006760c7b96efff72362a817ccef980cb8035267077eaac"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Reviewed unchanged functional behavior; historical actual integer fixture plus current regression suite. No new B12 Research run."
     },
     {
       "id": "RESEARCH-008",
@@ -482,9 +574,32 @@
     {
       "id": "RESEARCH-009",
       "requirement": "bounded iteration count",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/result.json",
+          "sha256": "50562c3ff819e0236c759f83b25a359686afdb00b0b70d22bf250c410aa673f4"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/receipt.json",
+          "sha256": "5d977d85cafc7a2e594e1a977bfaf0aaf5ab6588f9400a1d02f1c4d875037131"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/research-live/run-towyCz/independent-source-review.json",
+          "sha256": "adb34ad7b5a59dd94006760c7b96efff72362a817ccef980cb8035267077eaac"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Reviewed unchanged functional behavior; historical actual integer fixture plus current regression suite. No new B12 Research run."
     },
     {
       "id": "RESEARCH-010",
@@ -545,44 +660,182 @@
     {
       "id": "BENCHMARK-006",
       "requirement": "real duration",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-007",
       "requirement": "reported tokens",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-008",
       "requirement": "reported cost",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-009",
       "requirement": "missing data state",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-010",
       "requirement": "side by side output",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-011",
       "requirement": "video synchronization",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "BENCHMARK-012",
@@ -608,9 +861,32 @@
     {
       "id": "BENCHMARK-015",
       "requirement": "human quality judgement",
-      "status": "pending",
+      "status": "verified",
       "reference": "user requirement; motion timing needs observed reference",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/functional-review-B12.md",
+          "sha256": "dcb7b068d4b0a76fc4b66ad6165d090513fafbcb71cea6ec16f4741089b8652a"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+          "sha256": "14620ea8f69d6108f0643a16f3bf0fc56f10b33d6992e7a693c04902b19de3e6"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-paused-videos.txt",
+          "sha256": "209ab3b61e5f80dae4cdb5eb23b48977c02da561275aa910af34e135c07aeb5c"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-benchmark.png",
+          "sha256": "89838cff8fccb91e948a885482e80201747b8ce394e6688bf7e022aa973483cb"
+        },
+        {
+          "path": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/native-B12-assessment-reopened.txt",
+          "sha256": "4721481bcbd87ed86eaf9a8e4150e1ebdcf956b7f5e47edbe1a6d32fb0eb1223"
+        }
+      ],
+      "sourceDigest": "78732d77d9dfc6cafb8500a71b78587396721ee053e35aaa9a0e6ab3299b4304",
+      "verificationScope": "Actual B12 native presentation/playback/assessment against preserved real engine records; sampled clips, no precise motion equivalence."
     },
     {
       "id": "MOTION-001",

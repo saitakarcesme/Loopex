@@ -1,71 +1,44 @@
 {
-  "schemaVersion": 3,
-  "updatedAt": "2026-09-06T14:53:49.817080+00:00",
-  "status": "B10_packaged_UI_and_real_provider_acceptance",
+  "schemaVersion": 4,
+  "updatedAt": "2026-09-06T15:55:55.565964+00:00",
+  "status": "alpha12_implemented_scope_reviewed_remaining_acceptance_open",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
   "branch": "rebuild/codex-interaction-parity",
-  "baselineCommit": "9dc779c",
-  "packageId": "B09",
-  "version": "2.0.0-alpha.9",
+  "sourceCommit": "d884f78c75af303b2bb00a500439a683d35733b8",
+  "packageId": "B12",
+  "version": "2.0.0-alpha.12",
+  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B12/mac-arm64/Akorith Next.app",
+  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10/source-receipt-B12.json",
+  "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B10",
   "installed": false,
   "pushed": false,
   "userDataMigrated": false,
   "readyForReplacement": false,
   "verification": {
-    "testsPassed": 275,
+    "testsPassed": 315,
     "testsFailed": 0,
     "typecheck": "passed",
-    "hiddenBrowserCapture": "actual Electron pixels and lifecycle assertions passed",
-    "packagedUI": {
-      "projectCreate": "passed, native parent picker and initial task",
-      "projectRename": "passed, folder preserved",
-      "fileMention": "passed keyboard selection, no accidental send, provider read copied snapshot",
-      "realProviderScreenshot": {
-        "turnId": "8bb886de-d180-4dd2-8377-140c1c382e99",
-        "provider": "opencode",
-        "model": "opencode/mimo-v2.5-free",
-        "status": "completed",
-        "width": 2200,
-        "height": 1600,
-        "workspacePanel": "closed"
-      },
-      "nativeQuit": "owned B09 process exited",
-      "reopen": "passed: Project acceptance retains original folder; completed attachment/screenshot turn and closed panel restored"
-    }
+    "codesign": "deep strict passed",
+    "native": "New task and Plugins visible; actual benchmark token/Markdown/video play+pause/assessment page-reopen verified",
+    "acceptanceVerified": 12,
+    "acceptancePending": 89
   },
-  "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09",
-  "historicalStateArchive": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/historical-state-before-B09.json",
   "completed": [
-    "Unified provider/model picker and navigation",
-    "Managed versioned skill/MCP plugins with actual V1/V2/disable turns",
-    "Two real native-provider-built projects and genuine regression fixes",
-    "Project creation and metadata rename",
-    "Project @file attachments",
-    "Hidden browser screenshot repair"
+    "New Codex-inspired desktop composition and separate lab/plugins pages",
+    "Real isolated host-evaluated Research baseline/candidate improvement",
+    "Actual two-provider text benchmark and real sampled browser recordings",
+    "Native and portable side-by-side video comparison with reported measurements",
+    "Source/evidence acceptance guard plus tested Git pre-push hook",
+    "Independent read-only opinion session recorded; no product changes actioned from it",
+    "Owned old applications/servers/tabs closed; latest launcher updated"
   ],
   "pending": [
-    "Package and visually verify new desktop composition, Research, Benchmark and Plugins",
-    "Real Research baseline/candidate evaluator flow",
-    "Real benchmark run and automatic browser recording/export",
-    "Reference motion/icon comparison evidence",
-    "Actual hook trust/runtime verification",
-    "Independent opinion-only critique after implementation"
+    "Measured reference-equivalent icons/motion/prompt interaction acceptance",
+    "Controlled restricted method comparison for native subscription providers",
+    "Native Stop hook trust/load/event proof",
+    "Research failure-continuation behavior (independent opinion, not actioned)",
+    "Remaining full acceptance matrix; no replacement-readiness claim"
   ],
-  "automationPolicy": "No recurring continuation automation or retry loop.",
-  "sourceCommit": "02eb7b5",
-  "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/build-B09/mac-arm64/Akorith Next.app",
-  "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B09/package-receipt.json",
-  "activeScope": "docs/ui-parity/acceptance.json",
-  "currentPackageIncludesChanges": true,
-  "unpackagedRefinements": [
-    "Disclosure exit completion filters height transition",
-    "Plugin version selection does not implicitly enable"
-  ],
-  "next": [
-    "Finish real browser benchmark recordings",
-    "Rebuild final UI refinements and verify native persisted results",
-    "Update evidence matrix without marking unmeasured motion parity verified",
-    "Independent opinion-only critique",
-    "Clean owned resources"
-  ]
+  "automationPolicy": "No recurring automation created or resumed. Independent critique did not dispatch fixes.",
+  "next": "Open UI acceptance remains explicit. Latest package available for review; exact reference/native hook evidence remains unavailable."
 }

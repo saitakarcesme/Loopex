@@ -1,6 +1,6 @@
 # UI ve ürün kabul listesi
 
-Her madde durum ve kanıtla izlenir. Görünüm ve davranış ayrı doğrulanır; referans hareket süresi henüz ölçülmedi.
+12 işlev maddesi belirtilen kanıt kapsamıyla doğrulandı;89 madde açık. Statik benzerlik, işlev ve birebir hareket eşdeğerliği aynı şey değildir. Ayrıntılar VERIFICATION-NOTES.md ve acceptance.json içinde.
 
 | Kimlik | Kontrol | Durum |
 |---|---|---|
@@ -67,12 +67,12 @@ Her madde durum ve kanıtla izlenir. Görünüm ve davranış ayrı doğrulanır
 | RESEARCH-001 | study creation | Bekliyor |
 | RESEARCH-002 | goal and hypothesis | Bekliyor |
 | RESEARCH-003 | metric direction | Bekliyor |
-| RESEARCH-004 | fixed evaluator protocol | Bekliyor |
-| RESEARCH-005 | baseline run | Bekliyor |
-| RESEARCH-006 | isolated candidate | Bekliyor |
-| RESEARCH-007 | host measured evidence | Bekliyor |
+| RESEARCH-004 | fixed evaluator protocol | İşlev doğrulandı (kapsamlı not) |
+| RESEARCH-005 | baseline run | İşlev doğrulandı (kapsamlı not) |
+| RESEARCH-006 | isolated candidate | İşlev doğrulandı (kapsamlı not) |
+| RESEARCH-007 | host measured evidence | İşlev doğrulandı (kapsamlı not) |
 | RESEARCH-008 | keep discard decision | Bekliyor |
-| RESEARCH-009 | bounded iteration count | Bekliyor |
+| RESEARCH-009 | bounded iteration count | İşlev doğrulandı (kapsamlı not) |
 | RESEARCH-010 | pause and resume | Bekliyor |
 | RESEARCH-011 | stop child processes | Bekliyor |
 | RESEARCH-012 | reopen history | Bekliyor |
@@ -81,16 +81,16 @@ Her madde durum ve kanıtla izlenir. Görünüm ve davranış ayrı doğrulanır
 | BENCHMARK-003 | model variants | Bekliyor |
 | BENCHMARK-004 | method variants | Bekliyor |
 | BENCHMARK-005 | method capability restrictions | Bekliyor |
-| BENCHMARK-006 | real duration | Bekliyor |
-| BENCHMARK-007 | reported tokens | Bekliyor |
-| BENCHMARK-008 | reported cost | Bekliyor |
-| BENCHMARK-009 | missing data state | Bekliyor |
-| BENCHMARK-010 | side by side output | Bekliyor |
-| BENCHMARK-011 | video synchronization | Bekliyor |
+| BENCHMARK-006 | real duration | İşlev doğrulandı (kapsamlı not) |
+| BENCHMARK-007 | reported tokens | İşlev doğrulandı (kapsamlı not) |
+| BENCHMARK-008 | reported cost | İşlev doğrulandı (kapsamlı not) |
+| BENCHMARK-009 | missing data state | İşlev doğrulandı (kapsamlı not) |
+| BENCHMARK-010 | side by side output | İşlev doğrulandı (kapsamlı not) |
+| BENCHMARK-011 | video synchronization | İşlev doğrulandı (kapsamlı not) |
 | BENCHMARK-012 | playback seeking | Bekliyor |
 | BENCHMARK-013 | artifact association | Bekliyor |
 | BENCHMARK-014 | export results page | Bekliyor |
-| BENCHMARK-015 | human quality judgement | Bekliyor |
+| BENCHMARK-015 | human quality judgement | İşlev doğrulandı (kapsamlı not) |
 | MOTION-001 | sidebar enter | Bekliyor |
 | MOTION-002 | sidebar exit | Bekliyor |
 | MOTION-003 | right panel enter | Bekliyor |
