@@ -151,3 +151,5 @@ Product/package/window/settings titles now use Akorith, and the macOS package is
 Validation: typecheck passed; all 338 tests passed; production build and macOS packaging passed; codesign --verify --deep --strict passed. The newly packaged app launched via LaunchServices using disposable user data, displayed title Akorith and the composer, and reported 2.0.0-alpha.14. The owned smoke-test process was closed.
 
 The pre-existing full UI acceptance gate still reports incomplete evidence; this source promotion is user-authorized and is not a full replacement-readiness claim. No acceptance items were marked verified to enable promotion. Public release automation remains the legacy workflow and was not run by this branch push.
+
+Push verification: GitHub default branch `main` resolved to `7d4b2bfafb9c1f2574c3977caf48b7e13f62949e`. GitHub GraphQL contributionCalendar reported 18 contributions on 2026-09-06 and one on 2026-09-07 immediately after the promotion push.

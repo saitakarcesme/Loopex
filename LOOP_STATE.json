@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
-  "updatedAt": "2026-09-07T10:58:57.344899+00:00",
-  "status": "main_promotion_verified_pending_push_full_acceptance_open",
+  "updatedAt": "2026-09-07T10:59:33.353387+00:00",
+  "status": "main_promotion_pushed_full_acceptance_open",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
   "branch": "main",
   "sourceCommit": "922fc5c",
@@ -11,7 +11,7 @@
   "packageReceipt": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B14/final-package-receipt.json",
   "evidenceDirectory": "/Users/ibrahimsaitakarcesme/Library/Application Support/Akorith Next Development/recovery-2026-09-06/B14",
   "installed": false,
-  "pushed": false,
+  "pushed": true,
   "userDataMigrated": false,
   "readyForReplacement": false,
   "verification": {
@@ -61,7 +61,8 @@
     "codesign": "deep strict passed",
     "nativeSmoke": "LaunchServices, isolated data, title Akorith, composer visible, version 2.0.0-alpha.14; owned process closed",
     "deliveryGate": "incomplete prior full UI acceptance; not a readiness claim",
-    "push": "pending",
-    "installed": false
+    "push": "verified on GitHub main: 7d4b2bfafb9c1f2574c3977caf48b7e13f62949e",
+    "installed": false,
+    "githubSeptember6Contributions": 18
   }
 }
