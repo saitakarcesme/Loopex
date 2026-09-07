@@ -140,3 +140,14 @@ B13 final source61c04dc alpha13:325/325tests,typecheck,deepstrictsignaturepassed
 B14 in progress: actual fullscreen event state, folder disclosure transitions, consistent outline controls, compact provider catalogs/custom permission-effort popovers, progressive actual transcript, persistent local profile, reversible history clear/restore.337tests pass; package/native flow still pending. No legacy source transferred.
 
 B14 final922fc5c:338tests/typecheck/signaturepassed. Native fullscreen control shift and reverse, custommenu keyboard+focus, no searchring, outsideclick focus, actualAstra4readfiles/116717reportedtokens with folded actions, localprofile name/color save/reopen, reversible clear/restore and finalactionfocus verified. Final13archived+1emptytask. Native drag still unverified; exactmotion and computerpermissions/Claudeauth remain open. Gateblocked, no nativeStophookproof, noautomation/push. B13/defaultprofiletestclosed;onlyB14leftopen. Evidence/receiptB14.
+
+
+## 7 September 2026 — promote V2 to main
+
+The user explicitly authorized promoting Akorith Next to the main Akorith application and pushing main to GitHub. All 18 existing 6 September commits through cb47b0e are retained unchanged, including their original author and committer dates. The promotion itself is a new 7 September commit.
+
+Product/package/window/settings titles now use Akorith, and the macOS package is Akorith.app. V2 retains its existing bundle ID and Akorith Next data directory. No installed app or real user database was replaced.
+
+Validation: typecheck passed; all 338 tests passed; production build and macOS packaging passed; codesign --verify --deep --strict passed. The newly packaged app launched via LaunchServices using disposable user data, displayed title Akorith and the composer, and reported 2.0.0-alpha.14. The owned smoke-test process was closed.
+
+The pre-existing full UI acceptance gate still reports incomplete evidence; this source promotion is user-authorized and is not a full replacement-readiness claim. No acceptance items were marked verified to enable promotion. Public release automation remains the legacy workflow and was not run by this branch push.

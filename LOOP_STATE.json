@@ -1,9 +1,9 @@
 {
   "schemaVersion": 4,
-  "updatedAt": "2026-09-06T17:26:10.221549+00:00",
-  "status": "B14_requested_UI_profile_corrections_verified_full_replacement_open",
+  "updatedAt": "2026-09-07T10:58:57.344899+00:00",
+  "status": "main_promotion_verified_pending_push_full_acceptance_open",
   "repository": "/Users/ibrahimsaitakarcesme/Developer/AkorithNext",
-  "branch": "rebuild/codex-interaction-parity",
+  "branch": "main",
   "sourceCommit": "922fc5c",
   "packageId": "B14",
   "version": "2.0.0-alpha.14",
@@ -46,5 +46,22 @@
     "Computer permissions and Claude authentication need user-controlled setup",
     "Full replacement acceptance remains open"
   ],
-  "currentPackageIncludesChanges": true
+  "currentPackageIncludesChanges": false,
+  "mainPromotion": {
+    "authorizedOn": "2026-09-07",
+    "baseCommit": "cb47b0e",
+    "preservedSeptember6Commits": 18,
+    "productName": "Akorith",
+    "packagedApp": "/Users/ibrahimsaitakarcesme/Library/Caches/AkorithNext/main-promotion-2026-09-07/mac-arm64/Akorith.app",
+    "typecheck": "passed",
+    "testsPassed": 338,
+    "testsFailed": 0,
+    "build": "passed",
+    "packaging": "passed",
+    "codesign": "deep strict passed",
+    "nativeSmoke": "LaunchServices, isolated data, title Akorith, composer visible, version 2.0.0-alpha.14; owned process closed",
+    "deliveryGate": "incomplete prior full UI acceptance; not a readiness claim",
+    "push": "pending",
+    "installed": false
+  }
 }

@@ -1,8 +1,8 @@
-# Akorith Next
+# Akorith
 
-A focused desktop workspace for Codex, Claude Code, OpenCode and local Ollama models. The new implementation is in `v2/` on `rebuild/workspace-v2`; the previous implementation remains available in the repository history and old source tree.
+A focused desktop workspace for Codex, Claude Code, OpenCode and local Ollama models. The main application (formerly Akorith Next) is in `v2/` on `main`; the previous implementation remains available in the repository history and old source tree.
 
-This build is being verified on an Apple Silicon Mac with 8 GiB RAM. The original `/Applications/Akorith.app` and its data are separate from Akorith Next. Current verification evidence and outstanding issues are in [FINDINGS.md](FINDINGS.md) and [the acceptance matrix](docs/rebuild-2026-09-04/ACCEPTANCE_MATRIX.md). A feature's presence in the UI is not a certification for every provider or every Mac app.
+This build is being verified on an Apple Silicon Mac with 8 GiB RAM. Packages are now named `Akorith.app`. Promoting the source to `main` does not install or replace an existing application. Current verification evidence and outstanding issues are in [FINDINGS.md](FINDINGS.md) and [the acceptance matrix](docs/rebuild-2026-09-04/ACCEPTANCE_MATRIX.md). A feature's presence in the UI is not a certification for every provider or every Mac app.
 
 ## Run and build
 
@@ -62,7 +62,7 @@ macOS computer tools use actual Accessibility and Screen Recording permissions. 
 
 ## Data and migration
 
-Akorith Next uses `~/Library/Application Support/Akorith Next`. The previous Akorith uses its own directory and remains unchanged. Settings → Import history takes a consistent SQLite backup, then copies conversations, available attachments, timestamps, activity and usage into the new store. Imports are idempotent. A complete original database backup is retained; continuing imported work starts a new native provider session with its preserved history.
+Akorith retains the V2 data directory `~/Library/Application Support/Akorith Next` and bundle ID `com.akorith.workspace.v2` to preserve existing Next history and application identity. The previous Akorith uses its own directory and remains unchanged. Settings → Import history takes a consistent SQLite backup, then copies conversations, available attachments, timestamps, activity and usage into the new store. Imports are idempotent. A complete original database backup is retained; continuing imported work starts a new native provider session with its preserved history.
 
 For test runs only, `AKORITH_USER_DATA` selects a separate data directory. Do not point it at Codex's or the old Akorith's internal databases.
 

@@ -3,8 +3,8 @@
 The user explicitly authorized a new implementation, overnight autonomous work and parallel agents on rebuild/workspace-v2. The approved design is in docs/rebuild-2026-09-04/. Historical phase rules are archived in docs/history/AGENTS-before-v2.md and do not govern V2.
 
 - New implementation lives in v2/. Keep old source available; do not import its renderer or start its schedulers.
-- Keep /Applications/Akorith.app and its user data unchanged. V2 uses com.akorith.workspace.v2, product Akorith Next, separate userData. Never print secrets or read credential files directly.
-- Local commits only. No push, release publication, external messages or purchases.
+- Keep /Applications/Akorith.app and its user data unchanged. The main application uses com.akorith.workspace.v2, product Akorith, and the existing Akorith Next userData directory. Never print secrets or read credential files directly.
+- On 7 September 2026 the user authorized promoting V2 to main and pushing it to GitHub, preserving the existing 6 September commit dates. This source promotion does not certify full UI acceptance. Further pushes require user authorization. No release publication, external messages or purchases.
 - Typed IPC only. Renderer has no Node/filesystem/process/credential access. Remote web contents have no privileged preload.
 - Runtime events and real tool outcomes are authoritative. No fake progress, invented capability or successful test claims.
 - Provider sessions, task/turn/request/tool IDs stay scoped. Preserve partial output on interruption.

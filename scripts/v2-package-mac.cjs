@@ -11,7 +11,7 @@ const args = ['--mac', '--dir', '--config', 'electron-builder.v2.json', `--confi
 const result = spawnSync(executable, args, { stdio: 'inherit', env: process.env })
 if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status || 1)
-const app = path.join(output, 'mac-arm64', 'Akorith Next.app')
+const app = path.join(output, 'mac-arm64', 'Akorith.app')
 mkdirSync('dist-v2', { recursive: true })
 writeFileSync('dist-v2/build-location.json', JSON.stringify({ app, output, builtAt: new Date().toISOString() }, null, 2) + '\n')
 console.log(`Packaged application: ${app}`)

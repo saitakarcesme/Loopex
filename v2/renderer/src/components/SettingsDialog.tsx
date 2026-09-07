@@ -38,7 +38,7 @@ export function SettingsDialog({
             </button>
           ))}
           <div className="settings-version">
-            Akorith Next
+            Akorith
             <br />
             <span>{props.snapshot.version}</span>
           </div>

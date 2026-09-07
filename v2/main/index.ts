@@ -54,7 +54,8 @@ import type {
   ProviderId,
 } from "../shared/contracts";
 
-app.setName("Akorith Next");
+app.setName("Akorith");
+// Keep the existing V2 data directory when changing the public product name.
 const userData =
   process.env.AKORITH_USER_DATA || join(app.getPath("appData"), "Akorith Next");
 app.setPath("userData", userData);
@@ -653,7 +654,7 @@ async function command(name: string, payload: unknown) {
 }
 async function createWindow() {
   window = new BrowserWindow({
-    title: "Akorith Next",
+    title: "Akorith",
     width: 1440,
     height: 920,
     minWidth: 760,
@@ -798,7 +799,7 @@ app
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
         {
-          label: "Akorith Next",
+          label: "Akorith",
           submenu: [
             { role: "about" },
             { type: "separator" },
